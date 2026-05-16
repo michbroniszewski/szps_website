@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Aktualności — Wydział Sędziowski ŚZPS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Strona główna</a></li>
+        <li class="breadcrumb-item active">Aktualności</li>
+      </ol>
+    </nav>
+    <h1 class="page-title"><i class="bi bi-newspaper me-2"></i>Aktualności</h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- Filters sidebar -->
+    <div class="col-lg-3">
+      <div class="filter-card sticky-top" style="top: 1rem;">
+        <h6 class="filter-card__title">Kategorie</h6>
+        <ul class="filter-card__list">
+          <li>
+            <a href="{% url 'news:list' %}"
+               class="filter-card__item {% if not active_category %}active{% endif %}">
+              <i class="bi bi-grid me-2"></i>Wszystkie
+            </a>
+          </li>
+          {% for cat in categories %}
+          <li>
+            <a href="?kategoria={{ cat.slug }}"
+               class="filter-card__item {% if active_category.pk == cat.pk %}active{% endif %}">
+              <i class="bi bi-tag me-2"></i>{{ cat.name }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Posts -->
+    <div class="col-lg-9">
+      {% if active_category %}
+      <div class="mb-3">
+        <span class="badge bg-primary fs-6 fw-normal px-3 py-2">
+          <i class="bi bi-funnel me-1"></i>{{ active_category.name }}
+          <a href="{% url 'news:list' %}" class="text-white ms-2" title="Wyczyść filtr">
+            <i class="bi bi-x-lg"></i>
+          </a>
+        </span>
+      </div>
+      {% endif %}
+
+      {% if page_obj %}
+      <div class="row g-4">
+        {% for post in page_obj %}
+        <div class="col-12">
+          <article class="news-list-item">
+            {% if post.image %}
+            <div class="news-list-item__image">
+              <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+            </div>
+            {% endif %}
+            <div class="news-list-item__body">
+              <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                {% if post.is_pinned %}
+                <span class="badge bg-warning text-dark">
+                  <i class="bi bi-pin-angle me-1"></i>Wyróżnione
+                </span>
+                {% endif %}
+                {% if post.category %}
+                <span class="badge bg-primary-subtle text-primary-emphasis">{{ post.category.name }}</span>
+                {% endif %}
+                <time class="text-muted small">
+                  <i class="bi bi-calendar3 me-1"></i>{{ post.published_at|date:"d.m.Y" }}
+                </time>
+              </div>
+              <h2 class="news-list-item__title">
+                <a href="{% url 'news:detail' post.slug %}">{{ post.title }}</a>
+              </h2>
+              {% if post.summary %}
+              <p class="news-list-item__summary">{{ post.summary }}</p>
+              {% endif %}
+              <a href="{% url 'news:detail' post.slug %}" class="btn btn-outline-primary btn-sm mt-2">
+                Czytaj więcej <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <nav class="mt-5" aria-label="Strony aktualności">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?strona={{ page_obj.previous_page_number }}{% if active_category %}&kategoria={{ active_category.slug }}{% endif %}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+          <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?strona={{ num }}{% if active_category %}&kategoria={{ active_category.slug }}{% endif %}">{{ num }}</a>
+          </li>
+          {% endfor %}
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?strona={{ page_obj.next_page_number }}{% if active_category %}&kategoria={{ active_category.slug }}{% endif %}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <i class="bi bi-newspaper"></i>
+        <p>Brak aktualności w tej kategorii.</p>
+        <a href="{% url 'news:list' %}" class="btn btn-outline-primary">Pokaż wszystkie</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

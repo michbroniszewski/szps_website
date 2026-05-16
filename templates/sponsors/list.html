@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Sponsorzy — Wydział Sędziowski ŚZPS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Strona główna</a></li>
+        <li class="breadcrumb-item active">Sponsorzy</li>
+      </ol>
+    </nav>
+    <h1 class="page-title"><i class="bi bi-award me-2"></i>Sponsorzy</h1>
+    <p class="page-subtitle">Dziękujemy naszym sponsorom za wsparcie działalności Wydziału Sędziowskiego ŚZPS.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if sponsors_by_tier %}
+    {% for tier_label, sponsors in sponsors_by_tier.items %}
+    <section class="mb-5">
+      <div class="sponsor-tier-header mb-4">
+        <h2 class="sponsor-tier-title">
+          {% if tier_label == "Złoty" %}<i class="bi bi-trophy-fill text-warning me-2"></i>
+          {% elif tier_label == "Srebrny" %}<i class="bi bi-trophy-fill text-secondary me-2"></i>
+          {% elif tier_label == "Brązowy" %}<i class="bi bi-trophy-fill text-bronze me-2"></i>
+          {% else %}<i class="bi bi-handshake me-2"></i>
+          {% endif %}
+          Sponsor {{ tier_label }}
+        </h2>
+      </div>
+      <div class="row g-4">
+        {% for sponsor in sponsors %}
+        <div class="col-sm-6 col-lg-4 {% if tier_label == 'Złoty' %}col-lg-3{% endif %}">
+          <div class="sponsor-card sponsor-card--{{ sponsor.tier }} h-100">
+            {% if sponsor.logo %}
+            <div class="sponsor-card__logo">
+              <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" loading="lazy">
+            </div>
+            {% else %}
+            <div class="sponsor-card__logo sponsor-card__logo--placeholder">
+              <i class="bi bi-building"></i>
+            </div>
+            {% endif %}
+            <div class="sponsor-card__body">
+              <h3 class="sponsor-card__name">{{ sponsor.name }}</h3>
+              {% if sponsor.description %}
+              <p class="sponsor-card__desc">{{ sponsor.description }}</p>
+              {% endif %}
+              {% if sponsor.website_url %}
+              <a href="{{ sponsor.website_url }}" target="_blank" rel="noopener"
+                 class="btn btn-outline-primary btn-sm mt-auto">
+                <i class="bi bi-globe me-1"></i>Strona sponsora
+                <i class="bi bi-box-arrow-up-right ms-1"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-award"></i>
+    <p>Brak informacji o sponsorach.</p>
+  </div>
+  {% endif %}
+
+  <!-- CTA -->
+  <div class="sponsor-cta mt-5">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h4 class="fw-bold mb-1">Chcesz zostać sponsorem?</h4>
+        <p class="text-muted mb-0">
+          Skontaktuj się z nami, aby dowiedzieć się więcej o możliwościach współpracy.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <a href="{% url 'contact:contact' %}" class="btn btn-primary btn-lg">
+          <i class="bi bi-envelope me-2"></i>Napisz do nas
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

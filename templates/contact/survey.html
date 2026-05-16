@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}{{ survey.title }} — Wydział Sędziowski ŚZPS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Strona główna</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'contact:contact' %}">Kontakt</a></li>
+        <li class="breadcrumb-item active">Ankieta</li>
+      </ol>
+    </nav>
+    <h1 class="page-title"><i class="bi bi-bar-chart me-2"></i>Ankieta</h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="content-card">
+        <h2 class="content-card__title">{{ survey.title }}</h2>
+        {% if survey.description %}
+        <p class="text-muted mb-4">{{ survey.description }}</p>
+        {% endif %}
+        {% if survey.closes_at %}
+        <div class="alert alert-info mb-4">
+          <i class="bi bi-clock me-2"></i>Ankieta aktywna do: {{ survey.closes_at|date:"d.m.Y H:i" }}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="mb-4">
+            <label class="form-label fw-medium" for="{{ form.email.id_for_label }}">
+              {{ form.email.label }}
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}
+            <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          {% for field in form %}
+          {% if field.name != "email" %}
+          <div class="survey-question mb-4">
+            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
+              {{ field.label }}
+              {% if field.field.required %}<span class="text-danger ms-1">*</span>{% endif %}
+            </label>
+            {% if field.field.widget.input_type == "radio" %}
+            <div class="ps-2">
+              {% for choice in field %}
+              <div class="form-check mb-2">
+                {{ choice.tag }}
+                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                  {{ choice.choice_label }}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            {{ field }}
+            {% endif %}
+            {% if field.errors %}
+            <div class="invalid-feedback d-block">{{ field.errors.0 }}</div>
+            {% endif %}
+          </div>
+          {% endif %}
+          {% endfor %}
+
+          <div class="d-flex gap-3 mt-4">
+            <button type="submit" class="btn btn-primary btn-lg px-5">
+              <i class="bi bi-send me-2"></i>Wyślij odpowiedź
+            </button>
+            <a href="{% url 'contact:contact' %}" class="btn btn-outline-secondary btn-lg">
+              Anuluj
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ post.title }} — Wydział Sędziowski ŚZPS{% endblock %}
+{% block meta_description %}{{ post.summary }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/article.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Strona główna</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'news:list' %}">Aktualności</a></li>
+        <li class="breadcrumb-item active">{{ post.title|truncatechars:50 }}</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <article class="article">
+        <header class="article__header mb-4">
+          <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+            {% if post.is_pinned %}
+            <span class="badge bg-warning text-dark">
+              <i class="bi bi-pin-angle me-1"></i>Wyróżnione
+            </span>
+            {% endif %}
+            {% if post.category %}
+            <a href="{% url 'news:list' %}?kategoria={{ post.category.slug }}"
+               class="badge bg-primary text-decoration-none">
+              {{ post.category.name }}
+            </a>
+            {% endif %}
+            <time class="text-muted small" datetime="{{ post.published_at|date:'Y-m-d' }}">
+              <i class="bi bi-calendar3 me-1"></i>
+              {{ post.published_at|date:"d F Y" }}
+            </time>
+          </div>
+          <h1 class="article__title">{{ post.title }}</h1>
+          {% if post.summary %}
+          <p class="article__lead">{{ post.summary }}</p>
+          {% endif %}
+        </header>
+
+        {% if post.image %}
+        <figure class="article__figure mb-4">
+          <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid rounded-3 w-100">
+        </figure>
+        {% endif %}
+
+        <div class="article__content">
+          {{ post.content|safe }}
+        </div>
+
+        <footer class="article__footer mt-5 pt-4 border-top">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="text-muted small">
+              <i class="bi bi-clock-history me-1"></i>
+              Ostatnia aktualizacja: {{ post.updated_at|date:"d.m.Y H:i" }}
+            </div>
+            <a href="{% url 'news:list' %}" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-arrow-left me-1"></i>Powrót do aktualności
+            </a>
+          </div>
+        </footer>
+      </article>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      {% if related %}
+      <div class="sidebar-card">
+        <h5 class="sidebar-card__title">
+          <i class="bi bi-link-45deg me-1"></i>Podobne artykuły
+        </h5>
+        <ul class="list-unstyled">
+          {% for r in related %}
+          <li class="sidebar-related-item">
+            <a href="{% url 'news:detail' r.slug %}" class="text-decoration-none">
+              <span class="fw-medium">{{ r.title }}</span>
+              <br>
+              <small class="text-muted">{{ r.published_at|date:"d.m.Y" }}</small>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="sidebar-card mt-3">
+        <h5 class="sidebar-card__title">
+          <i class="bi bi-calendar2-check me-1"></i>System obsad
+        </h5>
+        <p class="text-muted small">Sprawdź aktualne obsady sędziowskie.</p>
+        <a href="{{ STAFFING_SYSTEM_URL }}" target="_blank" rel="noopener"
+           class="btn btn-primary btn-sm w-100">
+          Otwórz system <i class="bi bi-box-arrow-up-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

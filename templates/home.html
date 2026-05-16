@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Wydział Sędziowski ŚZPS — Strona główna{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero-section">
+  <div class="hero-overlay"></div>
+  <div class="container position-relative py-5">
+    <div class="row align-items-center min-vh-hero">
+      <div class="col-lg-7">
+        <div class="hero-badge mb-3">
+          <i class="bi bi-shield-check me-2"></i>Wydział Sędziowski
+        </div>
+        <h1 class="hero-title">Śląski Związek<br>Piłki Siatkowej</h1>
+        <p class="hero-subtitle">
+          Oficjalny portal Wydziału Sędziowskiego ŚZPS. Aktualności, dokumenty,
+          system obsad sędziowskich i informacje o sponsorach.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <a href="{{ STAFFING_SYSTEM_URL }}" target="_blank" rel="noopener"
+             class="btn btn-warning btn-lg fw-semibold px-4">
+            <i class="bi bi-calendar2-check me-2"></i>System obsad
+            <i class="bi bi-box-arrow-up-right ms-2 small"></i>
+          </a>
+          <a href="{% url 'news:list' %}" class="btn btn-outline-light btn-lg px-4">
+            <i class="bi bi-newspaper me-2"></i>Aktualności
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick actions -->
+<section class="py-4 bg-light border-bottom">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <a href="{{ STAFFING_SYSTEM_URL }}" target="_blank" rel="noopener" class="quick-action-card text-decoration-none">
+          <i class="bi bi-calendar2-check text-primary"></i>
+          <span>System obsad</span>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'documents:list' %}" class="quick-action-card text-decoration-none">
+          <i class="bi bi-folder2-open text-success"></i>
+          <span>Dokumenty</span>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'contact:contact' %}" class="quick-action-card text-decoration-none">
+          <i class="bi bi-chat-dots text-warning"></i>
+          <span>Kontakt i ankiety</span>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'sponsors:list' %}" class="quick-action-card text-decoration-none">
+          <i class="bi bi-award text-danger"></i>
+          <span>Sponsorzy</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pinned posts -->
+{% if pinned %}
+<section class="py-5">
+  <div class="container">
+    <div class="section-header mb-4">
+      <span class="section-badge"><i class="bi bi-pin-angle me-1"></i>Wyróżnione</span>
+      <h2 class="section-title">Ważne komunikaty</h2>
+    </div>
+    <div class="row g-4">
+      {% for post in pinned %}
+      <div class="col-lg-4">
+        <article class="news-card news-card--pinned h-100">
+          {% if post.image %}
+          <div class="news-card__image">
+            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+            <span class="news-card__badge"><i class="bi bi-pin-angle me-1"></i>Wyróżnione</span>
+          </div>
+          {% else %}
+          <div class="news-card__image news-card__image--placeholder">
+            <i class="bi bi-newspaper"></i>
+            <span class="news-card__badge"><i class="bi bi-pin-angle me-1"></i>Wyróżnione</span>
+          </div>
+          {% endif %}
+          <div class="news-card__body">
+            {% if post.category %}
+            <span class="news-card__category">{{ post.category.name }}</span>
+            {% endif %}
+            <h3 class="news-card__title">
+              <a href="{% url 'news:detail' post.slug %}">{{ post.title }}</a>
+            </h3>
+            {% if post.summary %}
+            <p class="news-card__summary">{{ post.summary }}</p>
+            {% endif %}
+            <div class="news-card__footer">
+              <time class="news-card__date">
+                <i class="bi bi-calendar3 me-1"></i>
+                {{ post.published_at|date:"d.m.Y" }}
+              </time>
+              <a href="{% url 'news:detail' post.slug %}" class="news-card__link">
+                Czytaj <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Latest news -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="section-header mb-4 d-flex justify-content-between align-items-end flex-wrap gap-2">
+      <div>
+        <span class="section-badge"><i class="bi bi-clock me-1"></i>Najnowsze</span>
+        <h2 class="section-title mb-0">Aktualności</h2>
+      </div>
+      <a href="{% url 'news:list' %}" class="btn btn-outline-primary">
+        Wszystkie aktualności <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+
+    {% if latest %}
+    <div class="row g-3">
+      {% for post in latest %}
+      <div class="col-md-6 col-xl-4">
+        <article class="news-card h-100">
+          {% if post.image %}
+          <div class="news-card__image news-card__image--sm">
+            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+          </div>
+          {% endif %}
+          <div class="news-card__body">
+            {% if post.category %}
+            <span class="news-card__category">{{ post.category.name }}</span>
+            {% endif %}
+            <h3 class="news-card__title news-card__title--sm">
+              <a href="{% url 'news:detail' post.slug %}">{{ post.title }}</a>
+            </h3>
+            <div class="news-card__footer">
+              <time class="news-card__date">
+                <i class="bi bi-calendar3 me-1"></i>
+                {{ post.published_at|date:"d.m.Y" }}
+              </time>
+              <a href="{% url 'news:detail' post.slug %}" class="news-card__link">
+                Czytaj <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-newspaper"></i>
+      <p>Brak aktualności do wyświetlenia.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
