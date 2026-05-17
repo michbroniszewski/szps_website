@@ -18,7 +18,7 @@
   <div class="header-inner">
     <a class="site-logo" href="{% url 'home' %}">
       {% if logo_exists %}
-        <img src="{% static 'images/logo.png' %}" alt="Logo ŚZPS" class="logo-img">
+        <img src="{{ logo_url }}" alt="Logo ŚZPS" class="logo-img">
       {% else %}
         <svg class="logo-icon" viewBox="0 0 40 46" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M20 2L38 10V24C38 34 30 42 20 44C10 42 2 34 2 24V10L20 2Z" stroke="currentColor" stroke-width="2.5" fill="none"/>
