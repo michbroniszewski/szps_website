@@ -11,8 +11,8 @@ class DocumentCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ["title", "category", "extension", "uploaded_at", "is_active"]
-    list_filter = ["is_active", "category"]
+    list_display = ["title", "category", "extension", "uploaded_at", "is_active", "is_featured"]
+    list_filter = ["is_active", "is_featured", "category"]
     search_fields = ["title", "description"]
-    list_editable = ["is_active"]
+    list_editable = ["is_active", "is_featured"]
     date_hierarchy = "uploaded_at"

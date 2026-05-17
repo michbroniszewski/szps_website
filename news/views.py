@@ -1,12 +1,18 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from .models import NewsPost, NewsCategory
+from documents.models import Document
 
 
 def home(request):
     pinned = NewsPost.objects.filter(is_published=True, is_pinned=True)[:3]
     latest = NewsPost.objects.filter(is_published=True, is_pinned=False)[:6]
-    return render(request, "home.html", {"pinned": pinned, "latest": latest})
+    featured_docs = Document.objects.filter(is_active=True, is_featured=True)[:6]
+    return render(request, "home.html", {
+        "pinned": pinned,
+        "latest": latest,
+        "featured_docs": featured_docs,
+    })
 
 
 def news_list(request):

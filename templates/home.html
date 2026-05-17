@@ -141,6 +141,28 @@
   </div>
 </section>
 
+<!-- ── FEATURED DOCUMENTS ── -->
+{% if featured_docs %}
+<section class="section section--dark">
+  <div class="container">
+    <header class="section-header section-header--row">
+      <div>
+        <span class="section-header__tag">Do pobrania</span>
+        <h2 class="section-header__title">Ważne dokumenty</h2>
+      </div>
+      <a href="{% url 'documents:list' %}" class="btn btn--outline btn--outline-light">
+        Wszystkie dokumenty →
+      </a>
+    </header>
+    <div class="doc-grid doc-grid--dark">
+      {% for doc in featured_docs %}
+      {% include "documents/_doc_card.html" with doc=doc dark=True %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <!-- ── CTA BANNER ── -->
 <section class="cta-banner">
   <div class="container">

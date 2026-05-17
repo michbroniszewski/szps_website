@@ -26,6 +26,7 @@ class Document(models.Model):
     uploaded_at = models.DateTimeField("Data dodania", auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField("Aktywny", default=True)
+    is_featured = models.BooleanField("Wyróżniony (strona główna)", default=False)
 
     class Meta:
         verbose_name = "Dokument"

@@ -1,0 +1,30 @@
+<div class="doc-card">
+  <div class="doc-card__type doc-card__type--{{ doc.extension|lower }}">
+    {% with ext=doc.extension %}
+    {% if ext == "PDF" %}PDF
+    {% elif ext == "DOC" or ext == "DOCX" %}DOC
+    {% elif ext == "XLS" or ext == "XLSX" %}XLS
+    {% elif ext == "ZIP" or ext == "RAR" %}ZIP
+    {% else %}{{ ext }}
+    {% endif %}
+    {% endwith %}
+  </div>
+  <div class="doc-card__body">
+    <h3 class="doc-card__title">{{ doc.title }}</h3>
+    {% if doc.description %}
+    <p class="doc-card__desc">{{ doc.description|truncatechars:90 }}</p>
+    {% endif %}
+    <div class="doc-card__meta">
+      {% if doc.category %}<span class="tag">{{ doc.category.name }}</span>{% endif %}
+      <time>{{ doc.uploaded_at|date:"d.m.Y" }}</time>
+    </div>
+  </div>
+  <a href="{{ doc.file.url }}" class="doc-card__download" download>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Pobierz
+  </a>
+</div>

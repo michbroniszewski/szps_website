@@ -19,70 +19,82 @@
 <section class="section section--light">
   <div class="container">
 
-    <!-- Search + filter bar -->
+    <!-- Pasek wyszukiwania i filtrów -->
     <div class="search-bar">
       <form method="get" class="search-bar__form">
         {% if active_category %}
         <input type="hidden" name="kategoria" value="{{ active_category.slug }}">
         {% endif %}
-        <input type="text" name="q" value="{{ query }}" placeholder="Szukaj dokumentów..." class="search-bar__input">
+        <input type="text" name="q" value="{{ query }}"
+               placeholder="Szukaj dokumentów..." class="search-bar__input">
         <button type="submit" class="btn btn--primary">Szukaj</button>
-        {% if query %}<a href="?{% if active_category %}kategoria={{ active_category.slug }}{% endif %}" class="btn btn--ghost">Wyczyść</a>{% endif %}
+        {% if query or active_category %}
+        <a href="{% url 'documents:list' %}" class="btn btn--ghost btn--dark">Wyczyść</a>
+        {% endif %}
       </form>
+      {% if categories %}
       <div class="search-bar__filters">
         <a href="{% url 'documents:list' %}{% if query %}?q={{ query }}{% endif %}"
-           class="filter-pill {% if not active_category %}is-active{% endif %}">Wszystkie</a>
+           class="filter-pill {% if not active_category and not query %}is-active{% endif %}">
+          Wszystkie
+        </a>
         {% for cat in categories %}
         <a href="?kategoria={{ cat.slug }}{% if query %}&q={{ query }}{% endif %}"
-           class="filter-pill {% if active_category.pk == cat.pk %}is-active{% endif %}">{{ cat.name }}</a>
+           class="filter-pill {% if active_category.pk == cat.pk %}is-active{% endif %}">
+          {{ cat.name }}
+        </a>
         {% endfor %}
       </div>
+      {% endif %}
     </div>
 
     {% if query %}
     <p class="search-result-info">
-      Wyniki dla <strong>"{{ query }}"</strong> — {{ documents.count }} dokument(ów)
+      Wyniki dla <strong>"{{ query }}"</strong>
+      {% if active_category %}w kategorii <strong>{{ active_category.name }}</strong>{% endif %}
+      — {{ documents.count }} dokument(ów)
     </p>
     {% endif %}
 
-    {% if documents %}
-    <div class="doc-grid">
-      {% for doc in documents %}
-      <div class="doc-card">
-        <div class="doc-card__type doc-card__type--{{ doc.extension|lower }}">
-          {% with ext=doc.extension %}
-          {% if ext == "PDF" %}PDF
-          {% elif ext == "DOC" or ext == "DOCX" %}DOC
-          {% elif ext == "XLS" or ext == "XLSX" %}XLS
-          {% elif ext == "ZIP" or ext == "RAR" %}ZIP
-          {% else %}{{ ext }}
-          {% endif %}
-          {% endwith %}
-        </div>
-        <div class="doc-card__body">
-          <h3 class="doc-card__title">{{ doc.title }}</h3>
-          {% if doc.description %}
-          <p class="doc-card__desc">{{ doc.description|truncatechars:90 }}</p>
-          {% endif %}
-          <div class="doc-card__meta">
-            {% if doc.category %}<span class="tag">{{ doc.category.name }}</span>{% endif %}
-            <time>{{ doc.uploaded_at|date:"d.m.Y" }}</time>
-          </div>
-        </div>
-        <a href="{{ doc.file.url }}" class="doc-card__download" download>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Pobierz
-        </a>
+    <!-- Widok płaski (szukanie / filtr kategorii) -->
+    {% if not grouped %}
+      {% if documents %}
+      <div class="doc-grid">
+        {% for doc in documents %}
+        {% include "documents/_doc_card.html" with doc=doc %}
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-state">
-      <p>Brak dokumentów{% if query %} pasujących do wyszukiwania{% endif %}.</p>
-      {% if query or active_category %}
-      <a href="{% url 'documents:list' %}" class="btn btn--outline">Pokaż wszystkie</a>
+      {% else %}
+      <div class="empty-state">
+        <p>Brak dokumentów{% if query %} pasujących do wyszukiwania{% endif %}.</p>
+        <a href="{% url 'documents:list' %}" class="btn btn--outline">Pokaż wszystkie</a>
+      </div>
       {% endif %}
-    </div>
+
+    <!-- Widok pogrupowany po kategoriach -->
+    {% else %}
+      {% if grouped_documents %}
+        {% for group in grouped_documents %}
+        <section class="doc-category-section">
+          <h2 class="doc-category-title">
+            {% if group.category %}
+              {{ group.category.name }}
+            {% else %}
+              Pozostałe dokumenty
+            {% endif %}
+          </h2>
+          <div class="doc-grid">
+            {% for doc in group.documents %}
+            {% include "documents/_doc_card.html" with doc=doc %}
+            {% endfor %}
+          </div>
+        </section>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state">
+        <p>Brak dokumentów. Administrator jeszcze nie dodał żadnych plików.</p>
+      </div>
+      {% endif %}
     {% endif %}
 
   </div>
