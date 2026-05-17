@@ -4,44 +4,33 @@
 {% block title %}{{ post.title }} — Wydział Sędziowski ŚZPS{% endblock %}
 {% block meta_description %}{{ post.summary }}{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/article.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="page-header">
+
+<div class="page-hero page-hero--sm">
   <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'home' %}">Strona główna</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'news:list' %}">Aktualności</a></li>
-        <li class="breadcrumb-item active">{{ post.title|truncatechars:50 }}</li>
-      </ol>
+    <nav class="breadcrumb">
+      <a href="{% url 'home' %}">Strona główna</a>
+      <span>/</span>
+      <a href="{% url 'news:list' %}">Aktualności</a>
+      <span>/</span>
+      <span>{{ post.title|truncatechars:40 }}</span>
     </nav>
   </div>
 </div>
 
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
+<section class="section section--light">
+  <div class="container">
+    <div class="article-layout">
+
+      <!-- Article -->
       <article class="article">
-        <header class="article__header mb-4">
-          <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-            {% if post.is_pinned %}
-            <span class="badge bg-warning text-dark">
-              <i class="bi bi-pin-angle me-1"></i>Wyróżnione
-            </span>
-            {% endif %}
+        <header class="article__header">
+          <div class="article__meta">
+            {% if post.is_pinned %}<span class="tag tag--accent">Wyróżnione</span>{% endif %}
             {% if post.category %}
-            <a href="{% url 'news:list' %}?kategoria={{ post.category.slug }}"
-               class="badge bg-primary text-decoration-none">
-              {{ post.category.name }}
-            </a>
+            <a href="{% url 'news:list' %}?kategoria={{ post.category.slug %}" class="tag">{{ post.category.name }}</a>
             {% endif %}
-            <time class="text-muted small" datetime="{{ post.published_at|date:'Y-m-d' }}">
-              <i class="bi bi-calendar3 me-1"></i>
-              {{ post.published_at|date:"d F Y" }}
-            </time>
+            <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
           </div>
           <h1 class="article__title">{{ post.title }}</h1>
           {% if post.summary %}
@@ -50,61 +39,47 @@
         </header>
 
         {% if post.image %}
-        <figure class="article__figure mb-4">
-          <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid rounded-3 w-100">
+        <figure class="article__figure">
+          <img src="{{ post.image.url }}" alt="{{ post.title }}">
         </figure>
         {% endif %}
 
-        <div class="article__content">
+        <div class="article__body">
           {{ post.content|safe }}
         </div>
 
-        <footer class="article__footer mt-5 pt-4 border-top">
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div class="text-muted small">
-              <i class="bi bi-clock-history me-1"></i>
-              Ostatnia aktualizacja: {{ post.updated_at|date:"d.m.Y H:i" }}
-            </div>
-            <a href="{% url 'news:list' %}" class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-arrow-left me-1"></i>Powrót do aktualności
-            </a>
-          </div>
+        <footer class="article__footer">
+          <span class="article__updated">Aktualizacja: {{ post.updated_at|date:"d.m.Y" }}</span>
+          <a href="{% url 'news:list' %}" class="link-arrow link-arrow--back">← Powrót do aktualności</a>
         </footer>
       </article>
-    </div>
 
-    <!-- Sidebar -->
-    <div class="col-lg-4">
-      {% if related %}
-      <div class="sidebar-card">
-        <h5 class="sidebar-card__title">
-          <i class="bi bi-link-45deg me-1"></i>Podobne artykuły
-        </h5>
-        <ul class="list-unstyled">
-          {% for r in related %}
-          <li class="sidebar-related-item">
-            <a href="{% url 'news:detail' r.slug %}" class="text-decoration-none">
-              <span class="fw-medium">{{ r.title }}</span>
-              <br>
-              <small class="text-muted">{{ r.published_at|date:"d.m.Y" }}</small>
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      {% endif %}
+      <!-- Sidebar -->
+      <aside class="article-sidebar">
+        {% if related %}
+        <div class="sidebar-block">
+          <h3 class="sidebar-block__title">Podobne artykuły</h3>
+          <ul class="related-list">
+            {% for r in related %}
+            <li class="related-list__item">
+              <a href="{% url 'news:detail' r.slug %}">{{ r.title }}</a>
+              <time>{{ r.published_at|date:"d.m.Y" }}</time>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
 
-      <div class="sidebar-card mt-3">
-        <h5 class="sidebar-card__title">
-          <i class="bi bi-calendar2-check me-1"></i>System obsad
-        </h5>
-        <p class="text-muted small">Sprawdź aktualne obsady sędziowskie.</p>
-        <a href="{{ STAFFING_SYSTEM_URL }}" target="_blank" rel="noopener"
-           class="btn btn-primary btn-sm w-100">
-          Otwórz system <i class="bi bi-box-arrow-up-right ms-1"></i>
-        </a>
-      </div>
+        <div class="sidebar-block sidebar-block--accent">
+          <h3 class="sidebar-block__title">System obsad</h3>
+          <p>Sprawdź aktualne obsady sędziowskie.</p>
+          <a href="{{ STAFFING_SYSTEM_URL }}" class="btn btn--primary btn--sm" target="_blank" rel="noopener">
+            Otwórz system ↗
+          </a>
+        </div>
+      </aside>
+
     </div>
   </div>
-</div>
+</section>
 {% endblock %}

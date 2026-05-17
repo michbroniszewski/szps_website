@@ -3,114 +3,88 @@
 {% block title %}Dokumenty — Wydział Sędziowski ŚZPS{% endblock %}
 
 {% block content %}
-<div class="page-header">
+
+<div class="page-hero page-hero--sm">
   <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'home' %}">Strona główna</a></li>
-        <li class="breadcrumb-item active">Dokumenty</li>
-      </ol>
+    <nav class="breadcrumb">
+      <a href="{% url 'home' %}">Strona główna</a>
+      <span>/</span>
+      <span>Dokumenty</span>
     </nav>
-    <h1 class="page-title"><i class="bi bi-folder me-2"></i>Dokumenty</h1>
-    <p class="page-subtitle">Archiwum dokumentów, przepisów i regulaminów Wydziału Sędziowskiego ŚZPS.</p>
+    <h1 class="page-hero__title">Dokumenty</h1>
+    <p class="page-hero__sub">Archiwum przepisów, regulaminów i materiałów Wydziału Sędziowskiego.</p>
   </div>
 </div>
 
-<div class="container py-5">
-  <!-- Search and filters -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-6">
-      <form method="get" class="d-flex gap-2">
+<section class="section section--light">
+  <div class="container">
+
+    <!-- Search + filter bar -->
+    <div class="search-bar">
+      <form method="get" class="search-bar__form">
         {% if active_category %}
         <input type="hidden" name="kategoria" value="{{ active_category.slug }}">
         {% endif %}
-        <div class="input-group">
-          <span class="input-group-text bg-white">
-            <i class="bi bi-search text-muted"></i>
-          </span>
-          <input type="text" name="q" value="{{ query }}" class="form-control border-start-0"
-                 placeholder="Szukaj dokumentów...">
-          <button type="submit" class="btn btn-primary">Szukaj</button>
-          {% if query %}
-          <a href="?{% if active_category %}kategoria={{ active_category.slug }}{% endif %}"
-             class="btn btn-outline-secondary">
-            <i class="bi bi-x-lg"></i>
-          </a>
-          {% endif %}
-        </div>
+        <input type="text" name="q" value="{{ query }}" placeholder="Szukaj dokumentów..." class="search-bar__input">
+        <button type="submit" class="btn btn--primary">Szukaj</button>
+        {% if query %}<a href="?{% if active_category %}kategoria={{ active_category.slug }}{% endif %}" class="btn btn--ghost">Wyczyść</a>{% endif %}
       </form>
-    </div>
-    <div class="col-md-6">
-      <div class="d-flex gap-2 flex-wrap">
+      <div class="search-bar__filters">
         <a href="{% url 'documents:list' %}{% if query %}?q={{ query }}{% endif %}"
-           class="btn btn-sm {% if not active_category %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-          Wszystkie
-        </a>
+           class="filter-pill {% if not active_category %}is-active{% endif %}">Wszystkie</a>
         {% for cat in categories %}
         <a href="?kategoria={{ cat.slug }}{% if query %}&q={{ query }}{% endif %}"
-           class="btn btn-sm {% if active_category.pk == cat.pk %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-          {{ cat.name }}
-        </a>
+           class="filter-pill {% if active_category.pk == cat.pk %}is-active{% endif %}">{{ cat.name }}</a>
         {% endfor %}
       </div>
     </div>
-  </div>
 
-  {% if query %}
-  <div class="alert alert-info mb-4">
-    <i class="bi bi-search me-2"></i>
-    Wyniki wyszukiwania dla: <strong>"{{ query }}"</strong>
-    — znaleziono <strong>{{ documents.count }}</strong> dokument(ów).
-  </div>
-  {% endif %}
+    {% if query %}
+    <p class="search-result-info">
+      Wyniki dla <strong>"{{ query }}"</strong> — {{ documents.count }} dokument(ów)
+    </p>
+    {% endif %}
 
-  {% if documents %}
-  <div class="row g-3">
-    {% for doc in documents %}
-    <div class="col-md-6 col-xl-4">
-      <div class="doc-card h-100">
-        <div class="doc-card__icon doc-ext-{{ doc.extension|lower }}">
+    {% if documents %}
+    <div class="doc-grid">
+      {% for doc in documents %}
+      <div class="doc-card">
+        <div class="doc-card__type doc-card__type--{{ doc.extension|lower }}">
           {% with ext=doc.extension %}
-          {% if ext == "PDF" %}<i class="bi bi-file-earmark-pdf"></i>
-          {% elif ext == "DOC" or ext == "DOCX" %}<i class="bi bi-file-earmark-word"></i>
-          {% elif ext == "XLS" or ext == "XLSX" %}<i class="bi bi-file-earmark-excel"></i>
-          {% elif ext == "ZIP" or ext == "RAR" %}<i class="bi bi-file-earmark-zip"></i>
-          {% else %}<i class="bi bi-file-earmark"></i>
+          {% if ext == "PDF" %}PDF
+          {% elif ext == "DOC" or ext == "DOCX" %}DOC
+          {% elif ext == "XLS" or ext == "XLSX" %}XLS
+          {% elif ext == "ZIP" or ext == "RAR" %}ZIP
+          {% else %}{{ ext }}
           {% endif %}
           {% endwith %}
-          <span class="doc-card__ext">{{ doc.extension }}</span>
         </div>
         <div class="doc-card__body">
           <h3 class="doc-card__title">{{ doc.title }}</h3>
           {% if doc.description %}
-          <p class="doc-card__desc">{{ doc.description|truncatechars:100 }}</p>
+          <p class="doc-card__desc">{{ doc.description|truncatechars:90 }}</p>
           {% endif %}
           <div class="doc-card__meta">
-            {% if doc.category %}
-            <span class="badge bg-light text-dark">{{ doc.category.name }}</span>
-            {% endif %}
-            <time class="text-muted small ms-auto">
-              {{ doc.uploaded_at|date:"d.m.Y" }}
-            </time>
+            {% if doc.category %}<span class="tag">{{ doc.category.name }}</span>{% endif %}
+            <time>{{ doc.uploaded_at|date:"d.m.Y" }}</time>
           </div>
         </div>
-        <div class="doc-card__footer">
-          <a href="{{ doc.file.url }}" class="btn btn-primary btn-sm w-100" download>
-            <i class="bi bi-download me-2"></i>Pobierz
-          </a>
-        </div>
+        <a href="{{ doc.file.url }}" class="doc-card__download" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Pobierz
+        </a>
       </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state">
-    <i class="bi bi-folder2-open"></i>
-    <p>Brak dokumentów{% if query %} pasujących do wyszukiwania{% endif %}.</p>
-    {% if query or active_category %}
-    <a href="{% url 'documents:list' %}" class="btn btn-outline-primary">Pokaż wszystkie dokumenty</a>
+    {% else %}
+    <div class="empty-state">
+      <p>Brak dokumentów{% if query %} pasujących do wyszukiwania{% endif %}.</p>
+      {% if query or active_category %}
+      <a href="{% url 'documents:list' %}" class="btn btn--outline">Pokaż wszystkie</a>
+      {% endif %}
+    </div>
     {% endif %}
+
   </div>
-  {% endif %}
-</div>
+</section>
 {% endblock %}

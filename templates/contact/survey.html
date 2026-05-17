@@ -3,84 +3,70 @@
 {% block title %}{{ survey.title }} — Wydział Sędziowski ŚZPS{% endblock %}
 
 {% block content %}
-<div class="page-header">
+
+<div class="page-hero page-hero--sm">
   <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'home' %}">Strona główna</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'contact:contact' %}">Kontakt</a></li>
-        <li class="breadcrumb-item active">Ankieta</li>
-      </ol>
+    <nav class="breadcrumb">
+      <a href="{% url 'home' %}">Strona główna</a>
+      <span>/</span>
+      <a href="{% url 'contact:contact' %}">Kontakt</a>
+      <span>/</span>
+      <span>Ankieta</span>
     </nav>
-    <h1 class="page-title"><i class="bi bi-bar-chart me-2"></i>Ankieta</h1>
+    <h1 class="page-hero__title">Ankieta</h1>
   </div>
 </div>
 
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-7">
-      <div class="content-card">
-        <h2 class="content-card__title">{{ survey.title }}</h2>
-        {% if survey.description %}
-        <p class="text-muted mb-4">{{ survey.description }}</p>
-        {% endif %}
-        {% if survey.closes_at %}
-        <div class="alert alert-info mb-4">
-          <i class="bi bi-clock me-2"></i>Ankieta aktywna do: {{ survey.closes_at|date:"d.m.Y H:i" }}
+<section class="section section--light">
+  <div class="container container--narrow">
+    <div class="survey-wrap">
+      <h2 class="block-title">{{ survey.title }}</h2>
+      {% if survey.description %}
+      <p class="survey-desc">{{ survey.description }}</p>
+      {% endif %}
+      {% if survey.closes_at %}
+      <div class="survey-deadline">Ankieta aktywna do: {{ survey.closes_at|date:"d.m.Y H:i" }}</div>
+      {% endif %}
+
+      <form method="post" novalidate class="survey-form">
+        {% csrf_token %}
+
+        <div class="form-field">
+          <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+          {{ form.email }}
+          {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
+        </div>
+
+        {% for field in form %}
+        {% if field.name != "email" %}
+        <div class="form-field survey-question">
+          <label class="survey-question__label">
+            {{ field.label }}
+            {% if field.field.required %}<span class="required">*</span>{% endif %}
+          </label>
+          {% if field.field.widget.input_type == "radio" %}
+          <div class="radio-group">
+            {% for choice in field %}
+            <label class="radio-option">
+              {{ choice.tag }}
+              <span>{{ choice.choice_label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          {{ field }}
+          {% endif %}
+          {% if field.errors %}<p class="field-error">{{ field.errors.0 }}</p>{% endif %}
         </div>
         {% endif %}
+        {% endfor %}
 
-        <form method="post" novalidate>
-          {% csrf_token %}
-          <div class="mb-4">
-            <label class="form-label fw-medium" for="{{ form.email.id_for_label }}">
-              {{ form.email.label }}
-            </label>
-            {{ form.email }}
-            {% if form.email.errors %}
-            <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
-            {% endif %}
-          </div>
-
-          {% for field in form %}
-          {% if field.name != "email" %}
-          <div class="survey-question mb-4">
-            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
-              {{ field.label }}
-              {% if field.field.required %}<span class="text-danger ms-1">*</span>{% endif %}
-            </label>
-            {% if field.field.widget.input_type == "radio" %}
-            <div class="ps-2">
-              {% for choice in field %}
-              <div class="form-check mb-2">
-                {{ choice.tag }}
-                <label class="form-check-label" for="{{ choice.id_for_label }}">
-                  {{ choice.choice_label }}
-                </label>
-              </div>
-              {% endfor %}
-            </div>
-            {% else %}
-            {{ field }}
-            {% endif %}
-            {% if field.errors %}
-            <div class="invalid-feedback d-block">{{ field.errors.0 }}</div>
-            {% endif %}
-          </div>
-          {% endif %}
-          {% endfor %}
-
-          <div class="d-flex gap-3 mt-4">
-            <button type="submit" class="btn btn-primary btn-lg px-5">
-              <i class="bi bi-send me-2"></i>Wyślij odpowiedź
-            </button>
-            <a href="{% url 'contact:contact' %}" class="btn btn-outline-secondary btn-lg">
-              Anuluj
-            </a>
-          </div>
-        </form>
-      </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary btn--wide">Wyślij odpowiedź →</button>
+          <a href="{% url 'contact:contact' %}" class="btn btn--ghost">Anuluj</a>
+        </div>
+      </form>
     </div>
   </div>
-</div>
+</section>
 {% endblock %}

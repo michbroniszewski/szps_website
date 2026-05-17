@@ -3,141 +3,93 @@
 {% block title %}Kontakt — Wydział Sędziowski ŚZPS{% endblock %}
 
 {% block content %}
-<div class="page-header">
+
+<div class="page-hero page-hero--sm">
   <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'home' %}">Strona główna</a></li>
-        <li class="breadcrumb-item active">Kontakt</li>
-      </ol>
+    <nav class="breadcrumb">
+      <a href="{% url 'home' %}">Strona główna</a>
+      <span>/</span>
+      <span>Kontakt</span>
     </nav>
-    <h1 class="page-title"><i class="bi bi-chat-dots me-2"></i>Kontakt</h1>
+    <h1 class="page-hero__title">Kontakt</h1>
   </div>
 </div>
 
-<div class="container py-5">
-  <div class="row g-5">
-    <!-- Contact form -->
-    <div class="col-lg-7">
-      <div class="content-card">
-        <h2 class="content-card__title">
-          <i class="bi bi-envelope me-2 text-primary"></i>Wyślij wiadomość
-        </h2>
-        <p class="text-muted mb-4">
-          Wypełnij formularz, a my skontaktujemy się z Tobą tak szybko, jak to możliwe.
-        </p>
-        <form method="post" novalidate>
+<section class="section section--light">
+  <div class="container">
+    <div class="contact-layout">
+
+      <!-- Form -->
+      <div class="contact-form-wrap">
+        <h2 class="block-title">Wyślij wiadomość</h2>
+        <form method="post" novalidate class="contact-form">
           {% csrf_token %}
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label fw-medium" for="{{ form.name.id_for_label }}">
-                {{ form.name.label }} <span class="text-danger">*</span>
-              </label>
+          <div class="form-row form-row--2">
+            <div class="form-field">
+              <label for="{{ form.name.id_for_label }}">{{ form.name.label }} <span>*</span></label>
               {{ form.name }}
-              {% if form.name.errors %}
-              <div class="invalid-feedback d-block">{{ form.name.errors.0 }}</div>
-              {% endif %}
+              {% if form.name.errors %}<p class="field-error">{{ form.name.errors.0 }}</p>{% endif %}
             </div>
-            <div class="col-md-6">
-              <label class="form-label fw-medium" for="{{ form.email.id_for_label }}">
-                {{ form.email.label }} <span class="text-danger">*</span>
-              </label>
+            <div class="form-field">
+              <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span>*</span></label>
               {{ form.email }}
-              {% if form.email.errors %}
-              <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
-              {% endif %}
-            </div>
-            <div class="col-12">
-              <label class="form-label fw-medium" for="{{ form.subject.id_for_label }}">
-                {{ form.subject.label }} <span class="text-danger">*</span>
-              </label>
-              {{ form.subject }}
-              {% if form.subject.errors %}
-              <div class="invalid-feedback d-block">{{ form.subject.errors.0 }}</div>
-              {% endif %}
-            </div>
-            <div class="col-12">
-              <label class="form-label fw-medium" for="{{ form.message.id_for_label }}">
-                {{ form.message.label }} <span class="text-danger">*</span>
-              </label>
-              {{ form.message }}
-              {% if form.message.errors %}
-              <div class="invalid-feedback d-block">{{ form.message.errors.0 }}</div>
-              {% endif %}
-            </div>
-            <div class="col-12">
-              <button type="submit" class="btn btn-primary btn-lg px-5">
-                <i class="bi bi-send me-2"></i>Wyślij wiadomość
-              </button>
+              {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
             </div>
           </div>
+          <div class="form-field">
+            <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }} <span>*</span></label>
+            {{ form.subject }}
+            {% if form.subject.errors %}<p class="field-error">{{ form.subject.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="form-field">
+            <label for="{{ form.message.id_for_label }}">{{ form.message.label }} <span>*</span></label>
+            {{ form.message }}
+            {% if form.message.errors %}<p class="field-error">{{ form.message.errors.0 }}</p>{% endif %}
+          </div>
+          <button type="submit" class="btn btn--primary btn--wide">Wyślij wiadomość →</button>
         </form>
       </div>
-    </div>
 
-    <!-- Sidebar -->
-    <div class="col-lg-5">
-      <div class="content-card mb-3">
-        <h5 class="content-card__title">
-          <i class="bi bi-info-circle me-2 text-primary"></i>Informacje
-        </h5>
-        <ul class="list-unstyled contact-info-list">
-          <li>
-            <i class="bi bi-geo-alt text-primary"></i>
-            <div>
-              <strong>Adres</strong>
-              <span>Śląsk, Polska</span>
-            </div>
-          </li>
-          <li>
-            <i class="bi bi-envelope text-primary"></i>
-            <div>
-              <strong>Kontakt</strong>
-              <span>Formularz kontaktowy</span>
-            </div>
-          </li>
-          <li>
-            <i class="bi bi-calendar2-check text-primary"></i>
-            <div>
-              <strong>System obsad</strong>
-              <a href="{{ STAFFING_SYSTEM_URL }}" target="_blank" rel="noopener">
-                Przejdź do systemu <i class="bi bi-box-arrow-up-right ms-1"></i>
+      <!-- Info + surveys -->
+      <div class="contact-info-wrap">
+        <div class="info-block">
+          <h3 class="info-block__title">Informacje</h3>
+          <dl class="info-list">
+            <dt>Lokalizacja</dt>
+            <dd>Śląsk, Polska</dd>
+            <dt>System obsad</dt>
+            <dd>
+              <a href="{{ STAFFING_SYSTEM_URL }}" target="_blank" rel="noopener" class="link-arrow">
+                Przejdź do systemu →
               </a>
-            </div>
-          </li>
-        </ul>
-      </div>
+            </dd>
+          </dl>
+        </div>
 
-      <!-- Active surveys -->
-      {% if surveys %}
-      <div class="content-card">
-        <h5 class="content-card__title">
-          <i class="bi bi-bar-chart me-2 text-primary"></i>Aktywne ankiety
-        </h5>
-        <p class="text-muted small mb-3">Weź udział w naszych ankietach!</p>
-        <ul class="list-unstyled">
-          {% for survey in surveys %}
-          <li class="survey-list-item">
-            <div>
-              <strong>{{ survey.title }}</strong>
+        {% if surveys %}
+        <div class="info-block info-block--accent">
+          <h3 class="info-block__title">Aktywne ankiety</h3>
+          <ul class="survey-list">
+            {% for survey in surveys %}
+            <li class="survey-item">
+              <span class="survey-item__title">{{ survey.title }}</span>
               {% if survey.description %}
-              <p class="text-muted small mb-1">{{ survey.description|truncatechars:80 }}</p>
+              <span class="survey-item__desc">{{ survey.description|truncatechars:70 }}</span>
               {% endif %}
               {% if survey.closes_at %}
-              <small class="text-muted">
-                <i class="bi bi-clock me-1"></i>Do: {{ survey.closes_at|date:"d.m.Y H:i" }}
-              </small>
+              <span class="survey-item__deadline">Do: {{ survey.closes_at|date:"d.m.Y H:i" }}</span>
               {% endif %}
-            </div>
-            <a href="{% url 'contact:survey' survey.pk %}" class="btn btn-outline-primary btn-sm mt-2 w-100">
-              <i class="bi bi-pencil-square me-1"></i>Wypełnij ankietę
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
+              <a href="{% url 'contact:survey' survey.pk %}" class="btn btn--outline btn--sm">
+                Wypełnij ankietę →
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
       </div>
-      {% endif %}
+
     </div>
   </div>
-</div>
+</section>
 {% endblock %}

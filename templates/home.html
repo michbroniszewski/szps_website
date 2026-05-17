@@ -1,171 +1,159 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Wydział Sędziowski ŚZPS — Strona główna{% endblock %}
+{% block title %}Wydział Sędziowski ŚZPS{% endblock %}
 
 {% block content %}
-<!-- Hero -->
-<section class="hero-section">
-  <div class="hero-overlay"></div>
-  <div class="container position-relative py-5">
-    <div class="row align-items-center min-vh-hero">
-      <div class="col-lg-7">
-        <div class="hero-badge mb-3">
-          <i class="bi bi-shield-check me-2"></i>Wydział Sędziowski
-        </div>
-        <h1 class="hero-title">Śląski Związek<br>Piłki Siatkowej</h1>
-        <p class="hero-subtitle">
-          Oficjalny portal Wydziału Sędziowskiego ŚZPS. Aktualności, dokumenty,
-          system obsad sędziowskich i informacje o sponsorach.
-        </p>
-        <div class="d-flex flex-wrap gap-3 mt-4">
-          <a href="{{ STAFFING_SYSTEM_URL }}" target="_blank" rel="noopener"
-             class="btn btn-warning btn-lg fw-semibold px-4">
-            <i class="bi bi-calendar2-check me-2"></i>System obsad
-            <i class="bi bi-box-arrow-up-right ms-2 small"></i>
-          </a>
-          <a href="{% url 'news:list' %}" class="btn btn-outline-light btn-lg px-4">
-            <i class="bi bi-newspaper me-2"></i>Aktualności
-          </a>
-        </div>
-      </div>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero__bg">
+    <div class="hero__overlay"></div>
+  </div>
+  <div class="container hero__inner">
+    <p class="hero__eyebrow">Śląski Związek Piłki Siatkowej</p>
+    <h1 class="hero__title">Wydział<br>Sędziowski</h1>
+    <p class="hero__lead">Aktualności, dokumenty i system obsad<br>dla sędziów piłki siatkowej na Śląsku.</p>
+    <div class="hero__actions">
+      <a href="{{ STAFFING_SYSTEM_URL }}" class="btn btn--primary" target="_blank" rel="noopener">
+        System obsad ↗
+      </a>
+      <a href="{% url 'news:list' %}" class="btn btn--ghost">Aktualności</a>
     </div>
+  </div>
+  <div class="hero__scroll-hint">
+    <span>Przewiń</span>
+    <svg width="16" height="24" viewBox="0 0 16 24"><path d="M8 2v20M2 16l6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
   </div>
 </section>
 
-<!-- Quick actions -->
-<section class="py-4 bg-light border-bottom">
+<!-- ── QUICK LINKS ── -->
+<section class="quick-links">
   <div class="container">
-    <div class="row g-3">
-      <div class="col-6 col-md-3">
-        <a href="{{ STAFFING_SYSTEM_URL }}" target="_blank" rel="noopener" class="quick-action-card text-decoration-none">
-          <i class="bi bi-calendar2-check text-primary"></i>
-          <span>System obsad</span>
-        </a>
-      </div>
-      <div class="col-6 col-md-3">
-        <a href="{% url 'documents:list' %}" class="quick-action-card text-decoration-none">
-          <i class="bi bi-folder2-open text-success"></i>
-          <span>Dokumenty</span>
-        </a>
-      </div>
-      <div class="col-6 col-md-3">
-        <a href="{% url 'contact:contact' %}" class="quick-action-card text-decoration-none">
-          <i class="bi bi-chat-dots text-warning"></i>
-          <span>Kontakt i ankiety</span>
-        </a>
-      </div>
-      <div class="col-6 col-md-3">
-        <a href="{% url 'sponsors:list' %}" class="quick-action-card text-decoration-none">
-          <i class="bi bi-award text-danger"></i>
-          <span>Sponsorzy</span>
-        </a>
-      </div>
+    <div class="quick-links__grid">
+      <a href="{{ STAFFING_SYSTEM_URL }}" class="quick-link" target="_blank" rel="noopener">
+        <span class="quick-link__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </span>
+        <span class="quick-link__label">System obsad</span>
+        <span class="quick-link__arrow">→</span>
+      </a>
+      <a href="{% url 'documents:list' %}" class="quick-link">
+        <span class="quick-link__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        </span>
+        <span class="quick-link__label">Dokumenty</span>
+        <span class="quick-link__arrow">→</span>
+      </a>
+      <a href="{% url 'contact:contact' %}" class="quick-link">
+        <span class="quick-link__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </span>
+        <span class="quick-link__label">Kontakt i ankiety</span>
+        <span class="quick-link__arrow">→</span>
+      </a>
+      <a href="{% url 'sponsors:list' %}" class="quick-link">
+        <span class="quick-link__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </span>
+        <span class="quick-link__label">Sponsorzy</span>
+        <span class="quick-link__arrow">→</span>
+      </a>
     </div>
   </div>
 </section>
 
-<!-- Pinned posts -->
+<!-- ── PINNED NEWS ── -->
 {% if pinned %}
-<section class="py-5">
+<section class="section section--dark">
   <div class="container">
-    <div class="section-header mb-4">
-      <span class="section-badge"><i class="bi bi-pin-angle me-1"></i>Wyróżnione</span>
-      <h2 class="section-title">Ważne komunikaty</h2>
-    </div>
-    <div class="row g-4">
+    <header class="section-header">
+      <span class="section-header__tag">Wyróżnione</span>
+      <h2 class="section-header__title">Ważne komunikaty</h2>
+    </header>
+    <div class="cards-grid cards-grid--3">
       {% for post in pinned %}
-      <div class="col-lg-4">
-        <article class="news-card news-card--pinned h-100">
-          {% if post.image %}
-          <div class="news-card__image">
-            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
-            <span class="news-card__badge"><i class="bi bi-pin-angle me-1"></i>Wyróżnione</span>
+      <article class="card card--dark">
+        {% if post.image %}
+        <div class="card__image">
+          <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+          <span class="card__pin-badge">Wyróżnione</span>
+        </div>
+        {% else %}
+        <div class="card__image card__image--placeholder">
+          <span class="card__pin-badge">Wyróżnione</span>
+        </div>
+        {% endif %}
+        <div class="card__body">
+          {% if post.category %}<span class="card__category">{{ post.category.name }}</span>{% endif %}
+          <h3 class="card__title"><a href="{% url 'news:detail' post.slug %}">{{ post.title }}</a></h3>
+          {% if post.summary %}<p class="card__excerpt">{{ post.summary|truncatechars:120 }}</p>{% endif %}
+          <div class="card__footer">
+            <time class="card__date">{{ post.published_at|date:"d.m.Y" }}</time>
+            <a href="{% url 'news:detail' post.slug %}" class="card__read-more">Czytaj →</a>
           </div>
-          {% else %}
-          <div class="news-card__image news-card__image--placeholder">
-            <i class="bi bi-newspaper"></i>
-            <span class="news-card__badge"><i class="bi bi-pin-angle me-1"></i>Wyróżnione</span>
-          </div>
-          {% endif %}
-          <div class="news-card__body">
-            {% if post.category %}
-            <span class="news-card__category">{{ post.category.name }}</span>
-            {% endif %}
-            <h3 class="news-card__title">
-              <a href="{% url 'news:detail' post.slug %}">{{ post.title }}</a>
-            </h3>
-            {% if post.summary %}
-            <p class="news-card__summary">{{ post.summary }}</p>
-            {% endif %}
-            <div class="news-card__footer">
-              <time class="news-card__date">
-                <i class="bi bi-calendar3 me-1"></i>
-                {{ post.published_at|date:"d.m.Y" }}
-              </time>
-              <a href="{% url 'news:detail' post.slug %}" class="news-card__link">
-                Czytaj <i class="bi bi-arrow-right ms-1"></i>
-              </a>
-            </div>
-          </div>
-        </article>
-      </div>
+        </div>
+      </article>
       {% endfor %}
     </div>
   </div>
 </section>
 {% endif %}
 
-<!-- Latest news -->
-<section class="py-5 bg-light">
+<!-- ── LATEST NEWS ── -->
+<section class="section section--light">
   <div class="container">
-    <div class="section-header mb-4 d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <header class="section-header section-header--row">
       <div>
-        <span class="section-badge"><i class="bi bi-clock me-1"></i>Najnowsze</span>
-        <h2 class="section-title mb-0">Aktualności</h2>
+        <span class="section-header__tag">Najnowsze</span>
+        <h2 class="section-header__title">Aktualności</h2>
       </div>
-      <a href="{% url 'news:list' %}" class="btn btn-outline-primary">
-        Wszystkie aktualności <i class="bi bi-arrow-right ms-1"></i>
-      </a>
-    </div>
+      <a href="{% url 'news:list' %}" class="btn btn--outline">Wszystkie aktualności →</a>
+    </header>
 
     {% if latest %}
-    <div class="row g-3">
+    <div class="cards-grid cards-grid--3">
       {% for post in latest %}
-      <div class="col-md-6 col-xl-4">
-        <article class="news-card h-100">
-          {% if post.image %}
-          <div class="news-card__image news-card__image--sm">
-            <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+      <article class="card">
+        {% if post.image %}
+        <div class="card__image card__image--sm">
+          <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+        </div>
+        {% else %}
+        <div class="card__image card__image--sm card__image--placeholder"></div>
+        {% endif %}
+        <div class="card__body">
+          {% if post.category %}<span class="card__category">{{ post.category.name }}</span>{% endif %}
+          <h3 class="card__title card__title--sm">
+            <a href="{% url 'news:detail' post.slug %}">{{ post.title }}</a>
+          </h3>
+          <div class="card__footer">
+            <time class="card__date">{{ post.published_at|date:"d.m.Y" }}</time>
+            <a href="{% url 'news:detail' post.slug %}" class="card__read-more">Czytaj →</a>
           </div>
-          {% endif %}
-          <div class="news-card__body">
-            {% if post.category %}
-            <span class="news-card__category">{{ post.category.name }}</span>
-            {% endif %}
-            <h3 class="news-card__title news-card__title--sm">
-              <a href="{% url 'news:detail' post.slug %}">{{ post.title }}</a>
-            </h3>
-            <div class="news-card__footer">
-              <time class="news-card__date">
-                <i class="bi bi-calendar3 me-1"></i>
-                {{ post.published_at|date:"d.m.Y" }}
-              </time>
-              <a href="{% url 'news:detail' post.slug %}" class="news-card__link">
-                Czytaj <i class="bi bi-arrow-right ms-1"></i>
-              </a>
-            </div>
-          </div>
-        </article>
-      </div>
+        </div>
+      </article>
       {% endfor %}
     </div>
     {% else %}
-    <div class="empty-state">
-      <i class="bi bi-newspaper"></i>
-      <p>Brak aktualności do wyświetlenia.</p>
-    </div>
+    <p class="empty-note">Brak aktualności. Zaglądaj tutaj wkrótce.</p>
     {% endif %}
   </div>
 </section>
+
+<!-- ── CTA BANNER ── -->
+<section class="cta-banner">
+  <div class="container">
+    <div class="cta-banner__inner">
+      <div>
+        <h2 class="cta-banner__title">Sprawdź system obsad</h2>
+        <p class="cta-banner__sub">Aktualne przydziały sędziowskie na mecze ligowe.</p>
+      </div>
+      <a href="{{ STAFFING_SYSTEM_URL }}" class="btn btn--primary" target="_blank" rel="noopener">
+        Przejdź do systemu ↗
+      </a>
+    </div>
+  </div>
+</section>
+
 {% endblock %}
