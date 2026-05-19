@@ -478,7 +478,7 @@ ul, ol { list-style: none; }
 
 .quick-links__grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .quick-link {
