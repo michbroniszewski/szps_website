@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
     "django_ckeditor_5",
     "news",
     "documents",
@@ -150,3 +151,5 @@ CKEDITOR_5_CONFIGS = {
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 STAFFING_SYSTEM_URL = os.environ.get("STAFFING_SYSTEM_URL", "https://system.szps.pl")
+
+SITE_URL = os.environ.get("SITE_URL", "https://sedziowie.szps.pl")

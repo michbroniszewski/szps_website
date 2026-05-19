@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Wydział Sędziowski ŚZPS{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}Wydział Sędziowski Śląskiego Związku Piłki Siatkowej{% endblock %}">
+  <link rel="canonical" href="{{ CANONICAL_URL }}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}Wydział Sędziowski ŚZPS{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Wydział Sędziowski Śląskiego Związku Piłki Siatkowej{% endblock %}">
+  <meta property="og:url" content="{{ CANONICAL_URL }}">
+  <meta property="og:site_name" content="Wydział Sędziowski ŚZPS">
+  {% if logo_exists %}<meta property="og:image" content="{{ SITE_URL }}{{ logo_url }}">{% endif %}
+  {% block og_extra %}{% endblock %}
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   {% load static %}

@@ -4,10 +4,13 @@ from pathlib import Path
 
 def site_settings(request):
     logo_url = _find_logo()
+    site_url = getattr(settings, "SITE_URL", "").rstrip("/")
     return {
         "STAFFING_SYSTEM_URL": getattr(settings, "STAFFING_SYSTEM_URL", "#"),
         "logo_exists": bool(logo_url),
         "logo_url": logo_url,
+        "SITE_URL": site_url,
+        "CANONICAL_URL": site_url + request.path,
     }
 
 
