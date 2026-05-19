@@ -18,6 +18,7 @@ urlpatterns = [
     path("dokumenty/", include("documents.urls", namespace="documents")),
     path("sponsorzy/", include("sponsors.urls", namespace="sponsors")),
     path("kontakt/", include("contact.urls", namespace="contact")),
+    path("ankiety/", include("contact.urls_surveys", namespace="surveys")),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
     path("", include("news.urls_home")),
