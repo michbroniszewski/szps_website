@@ -8,18 +8,22 @@
 <!-- ── HERO ── -->
 <section class="hero">
   <div class="hero__bg">
-    <img src="{% static 'images/sedziowie_grupowe.jpg' %}" alt="" class="hero__bg-img" aria-hidden="true">
     <div class="hero__overlay"></div>
   </div>
   <div class="container hero__inner">
-    <p class="hero__eyebrow">Śląski Związek Piłki Siatkowej</p>
-    <h1 class="hero__title">Wydział<br>Sędziowski</h1>
-    <p class="hero__lead">Aktualności oraz dokumenty<br>dla sędziów piłki siatkowej na Śląsku.</p>
-    <div class="hero__actions">
-      <a href="{{ STAFFING_SYSTEM_URL }}" class="btn btn--primary" target="_blank" rel="noopener">
-        System obsad ↗
-      </a>
-      <a href="{% url 'news:list' %}" class="btn btn--ghost">Aktualności</a>
+    <div class="hero__text">
+      <p class="hero__eyebrow">Śląski Związek Piłki Siatkowej</p>
+      <h1 class="hero__title">Wydział<br>Sędziowski</h1>
+      <p class="hero__lead">Aktualności oraz dokumenty<br>dla sędziów piłki siatkowej na Śląsku.</p>
+      <div class="hero__actions">
+        <a href="{{ STAFFING_SYSTEM_URL }}" class="btn btn--primary" target="_blank" rel="noopener">
+          System obsad ↗
+        </a>
+        <a href="{% url 'news:list' %}" class="btn btn--ghost">Aktualności</a>
+      </div>
+    </div>
+    <div class="hero__photo">
+      <img src="{% static 'images/sedziowie_grupowe.jpg' %}" alt="Sędziowie ŚZPS" class="hero__photo-img">
     </div>
   </div>
   <div class="hero__scroll-hint">
