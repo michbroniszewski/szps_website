@@ -75,10 +75,10 @@
       {% for post in pinned %}
       <article class="card card--dark">
         {% if post.image %}
-        <div class="card__image">
+        <a href="{% url 'news:detail' post.slug %}" class="card__image">
           <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
           <span class="card__pin-badge">Wyróżnione</span>
-        </div>
+        </a>
         {% else %}
         <div class="card__image card__image--placeholder">
           <span class="card__pin-badge">Wyróżnione</span>
@@ -116,9 +116,9 @@
       {% for post in latest %}
       <article class="card">
         {% if post.image %}
-        <div class="card__image card__image--sm">
+        <a href="{% url 'news:detail' post.slug %}" class="card__image card__image--sm">
           <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
-        </div>
+        </a>
         {% else %}
         <div class="card__image card__image--sm card__image--placeholder"></div>
         {% endif %}

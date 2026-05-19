@@ -48,7 +48,6 @@
 
     <nav class="main-nav" id="main-nav">
       <ul class="nav-list">
-        <li><a href="{% url 'home' %}" class="nav-item {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}">Strona główna</a></li>
         <li><a href="{% url 'news:list' %}" class="nav-item {% if 'news' in request.resolver_match.namespace %}is-active{% endif %}">Aktualności</a></li>
         <li><a href="{{ STAFFING_SYSTEM_URL }}" class="nav-item nav-item--accent" target="_blank" rel="noopener">
           System obsad ↗
