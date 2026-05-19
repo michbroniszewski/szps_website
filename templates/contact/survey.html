@@ -9,9 +9,9 @@
     <nav class="breadcrumb">
       <a href="{% url 'home' %}">Strona główna</a>
       <span>/</span>
-      <a href="{% url 'contact:contact' %}">Kontakt</a>
+      <a href="{% url 'surveys:list' %}">Ankiety</a>
       <span>/</span>
-      <span>Ankieta</span>
+      <span>{{ survey.title|truncatechars:40 }}</span>
     </nav>
     <h1 class="page-hero__title">Ankieta</h1>
   </div>
@@ -63,7 +63,7 @@
 
         <div class="form-actions">
           <button type="submit" class="btn btn--primary btn--wide">Wyślij odpowiedź →</button>
-          <a href="{% url 'contact:contact' %}" class="btn btn--ghost">Anuluj</a>
+          <a href="{% url 'surveys:list' %}" class="btn btn--ghost">Anuluj</a>
         </div>
       </form>
     </div>

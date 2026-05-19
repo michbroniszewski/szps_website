@@ -14,15 +14,19 @@ def contact(request):
             return redirect("contact:contact")
     else:
         form = ContactForm()
+    return render(request, "contact/contact.html", {"form": form})
+
+
+def surveys_list(request):
     active_surveys = Survey.objects.filter(is_active=True)
-    return render(request, "contact/contact.html", {"form": form, "surveys": active_surveys})
+    return render(request, "contact/surveys.html", {"surveys": active_surveys})
 
 
 def survey_detail(request, pk):
     survey = get_object_or_404(Survey, pk=pk, is_active=True)
     if survey.closes_at and survey.closes_at < timezone.now():
         messages.error(request, "Ta ankieta jest już zamknięta.")
-        return redirect("contact:contact")
+        return redirect("surveys:list")
 
     if request.method == "POST":
         form = SurveyResponseForm(survey, request.POST)
@@ -45,7 +49,7 @@ def survey_detail(request, pk):
                     except (Choice.DoesNotExist, ValueError):
                         pass
             messages.success(request, "Dziękujemy za wypełnienie ankiety!")
-            return redirect("contact:survey_done")
+            return redirect("surveys:done")
     else:
         form = SurveyResponseForm(survey)
 

@@ -384,23 +384,23 @@ ul, ol { list-style: none; }
 .hero__inner {
   position: relative;
   z-index: 2;
-  padding: 6rem 0 7rem;
+  padding: 3rem 0 8rem;
   max-width: 640px;
 }
 
 .hero__eyebrow {
   font-family: var(--font-heading);
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   font-weight: 500;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--clr-accent);
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .hero__title {
   font-family: var(--font-heading);
-  font-size: clamp(3.5rem, 8vw, 7rem);
+  font-size: clamp(2.6rem, 5.5vw, 5rem);
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -1599,6 +1599,62 @@ ul, ol { list-style: none; }
 
 .success-screen__text { color: var(--clr-text-muted); font-size: 1.05rem; line-height: 1.7; margin-bottom: 2.5rem; }
 .success-screen__actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+/* ============================================================
+   SURVEY CARDS (strona /ankiety/)
+   ============================================================ */
+.survey-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.survey-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  background: var(--clr-white);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.survey-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-color: var(--clr-accent);
+}
+
+.survey-card__title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--clr-text);
+  margin-bottom: 0.4rem;
+}
+
+.survey-card__desc {
+  font-size: 0.9rem;
+  color: var(--clr-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.survey-card__deadline {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--clr-text-muted);
+  margin: 0;
+}
+
+.empty-state__sub {
+  font-size: 0.9rem;
+  color: var(--clr-text-muted);
+  margin-top: 0.5rem;
+}
 
 /* ============================================================
    EMPTY STATE

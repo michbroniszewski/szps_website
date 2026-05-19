@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Ankiety i zgłoszenia — Wydział Sędziowski ŚZPS{% endblock %}
+{% block meta_description %}Aktywne ankiety i formularze zgłoszeń Wydziału Sędziowskiego ŚZPS.{% endblock %}
+
+{% block content %}
+
+<div class="page-hero page-hero--sm">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="{% url 'home' %}">Strona główna</a>
+      <span>/</span>
+      <span>Ankiety i zgłoszenia</span>
+    </nav>
+    <h1 class="page-hero__title">Ankiety i zgłoszenia</h1>
+  </div>
+</div>
+
+<section class="section section--light">
+  <div class="container container--narrow">
+
+    {% if surveys %}
+    <div class="survey-cards">
+      {% for survey in surveys %}
+      <div class="survey-card">
+        <div class="survey-card__body">
+          <h2 class="survey-card__title">{{ survey.title }}</h2>
+          {% if survey.description %}
+          <p class="survey-card__desc">{{ survey.description }}</p>
+          {% endif %}
+          {% if survey.closes_at %}
+          <p class="survey-card__deadline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Aktywna do: {{ survey.closes_at|date:"d.m.Y H:i" }}
+          </p>
+          {% endif %}
+        </div>
+        <a href="{% url 'surveys:detail' survey.pk %}" class="btn btn--primary">
+          Wypełnij →
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" width="56" height="56">
+        <rect x="12" y="8" width="40" height="48" rx="4"/>
+        <path d="M22 22h20M22 30h20M22 38h12"/>
+      </svg>
+      <p>Brak aktywnych ankiet.</p>
+      <p class="empty-state__sub">Zaglądaj tutaj wkrótce — pojawiać się będą ankiety i formularze zgłoszeń.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

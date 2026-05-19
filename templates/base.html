@@ -54,6 +54,7 @@
         </a></li>
         <li><a href="{% url 'documents:list' %}" class="nav-item {% if 'documents' in request.resolver_match.namespace %}is-active{% endif %}">Dokumenty</a></li>
         <li><a href="{% url 'sponsors:list' %}" class="nav-item {% if 'sponsors' in request.resolver_match.namespace %}is-active{% endif %}">Sponsorzy</a></li>
+        <li><a href="{% url 'surveys:list' %}" class="nav-item {% if 'surveys' in request.resolver_match.namespace %}is-active{% endif %}">Ankiety</a></li>
         <li><a href="{% url 'contact:contact' %}" class="nav-item {% if 'contact' in request.resolver_match.namespace %}is-active{% endif %}">Kontakt</a></li>
       </ul>
     </nav>

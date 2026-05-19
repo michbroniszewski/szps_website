@@ -66,27 +66,15 @@
           </dl>
         </div>
 
-        {% if surveys %}
         <div class="info-block info-block--accent">
-          <h3 class="info-block__title">Aktywne ankiety</h3>
-          <ul class="survey-list">
-            {% for survey in surveys %}
-            <li class="survey-item">
-              <span class="survey-item__title">{{ survey.title }}</span>
-              {% if survey.description %}
-              <span class="survey-item__desc">{{ survey.description|truncatechars:70 }}</span>
-              {% endif %}
-              {% if survey.closes_at %}
-              <span class="survey-item__deadline">Do: {{ survey.closes_at|date:"d.m.Y H:i" }}</span>
-              {% endif %}
-              <a href="{% url 'contact:survey' survey.pk %}" class="btn btn--outline btn--sm">
-                Wypełnij ankietę →
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
+          <h3 class="info-block__title">Ankiety i zgłoszenia</h3>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.7);margin-bottom:1rem;">
+            Wypełnij dostępne ankiety lub złóż zgłoszenie.
+          </p>
+          <a href="{% url 'surveys:list' %}" class="btn btn--outline btn--sm btn--outline-light">
+            Przejdź do ankiet →
+          </a>
         </div>
-        {% endif %}
       </div>
 
     </div>
