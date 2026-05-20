@@ -1,5 +1,6 @@
 from django.conf import settings
 from pathlib import Path
+from functools import lru_cache
 
 
 def site_settings(request):
@@ -14,12 +15,12 @@ def site_settings(request):
     }
 
 
+@lru_cache(maxsize=1)
 def _find_logo():
+    # Cached after the first call — restart server to pick up a new logo file
     images_dir = Path(settings.BASE_DIR) / "static" / "images"
     for ext in ("png", "svg", "jpg", "jpeg", "webp"):
         for name in (f"logo.{ext}", f"szps.{ext}", f"herb.{ext}"):
-            candidate = images_dir / name
-            if candidate.exists():
+            if (images_dir / name).exists():
                 return f"/static/images/{name}"
     return None
-

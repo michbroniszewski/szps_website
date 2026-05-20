@@ -1,7 +1,7 @@
 # Dokumentacja projektu — Wydział Sędziowski ŚZPS
 
 > Zwięzły przewodnik po kodzie dla programisty uczącego się Django.
-> Wersja: maj 2026 | Django 5.2 | Python 3.11
+> Wersja: maj 2026 | Django 5.2 | Python 3.11+
 
 ---
 
@@ -21,7 +21,8 @@
 8. [Panel administracyjny](#8-panel-administracyjny)
 9. [Mapa zależności](#9-mapa-zależności)
 10. [Jak dodać nową funkcję](#10-jak-dodać-nową-funkcję)
-11. [Przydatne linki do dokumentacji](#11-przydatne-linki-do-dokumentacji)
+11. [Optymalizacje i wzorce wydajnościowe](#11-optymalizacje-i-wzorce-wydajnościowe)
+12. [Przydatne linki do dokumentacji](#12-przydatne-linki-do-dokumentacji)
 
 ---
 
@@ -188,6 +189,15 @@ STAFFING_SYSTEM_URL = os.environ.get("STAFFING_SYSTEM_URL", "#")
 # Adres zewnętrznego systemu obsad — ustawiany przez zmienną środowiskową
 ```
 
+```python
+EMAIL_BACKEND = os.environ.get(
+    "DJANGO_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+# Domyślnie logi w konsoli. W produkcji ustaw np.:
+#   DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+```
+
 📖 [Pełna lista ustawień Django](https://docs.djangoproject.com/en/5.2/ref/settings/)
 
 ---
@@ -257,26 +267,41 @@ slug (unique)          title
 
 ```python
 def home(request):
-    # Pobiera max 3 wyróżnione posty i 6 najnowszych zwykłych
-    # Renderuje templates/home.html
-    pinned = NewsPost.objects.filter(is_published=True, is_pinned=True)[:3]
-    latest = NewsPost.objects.filter(is_published=True, is_pinned=False)[:6]
+    # Pobiera max 3 wyróżnione posty i 6 najnowszych zwykłych.
+    # select_related("category") pobiera kategorię razem z postem (JOIN),
+    # zamiast wykonywać osobne zapytanie dla każdego posta z szablonu.
+    pinned = (
+        NewsPost.objects.filter(is_published=True, is_pinned=True)
+        .select_related("category")[:3]
+    )
+    latest = (
+        NewsPost.objects.filter(is_published=True, is_pinned=False)
+        .select_related("category")[:6]
+    )
 ```
 
 ```python
 def news_list(request):
-    # Obsługuje filtrowanie przez ?kategoria=slug i paginację przez ?strona=2
-    # QuerySet jest "leniwy" — zapytanie do bazy dopiero przy renderowaniu
+    # Obsługuje filtrowanie przez ?kategoria=slug i paginację przez ?strona=2.
+    # QuerySet jest "leniwy" — zapytanie do bazy dopiero przy renderowaniu.
+    posts = NewsPost.objects.filter(is_published=True).select_related("category")
     paginator = Paginator(posts, 10)        # 10 postów na stronę
     page = paginator.get_page(request.GET.get("strona"))
 ```
 
 ```python
 def news_detail(request, slug):
-    # get_object_or_404 → zwraca post lub odpowiedź HTTP 404
-    # Pobiera max 3 powiązane posty (ta sama kategoria, bez siebie)
-    post = get_object_or_404(NewsPost, slug=slug, is_published=True)
-    related = NewsPost.objects.filter(...).exclude(pk=post.pk)[:3]
+    # get_object_or_404 → zwraca post lub odpowiedź HTTP 404.
+    # select_related przekazany bezpośrednio do get_object_or_404 przez queryset.
+    post = get_object_or_404(
+        NewsPost.objects.select_related("category"),
+        slug=slug, is_published=True
+    )
+    related = (
+        NewsPost.objects.filter(is_published=True, category=post.category)
+        .exclude(pk=post.pk)
+        .select_related("category")[:3]
+    )
 ```
 
 📖 [QuerySet API](https://docs.djangoproject.com/en/5.2/ref/models/querysets/) | [Paginator](https://docs.djangoproject.com/en/5.2/topics/pagination/) | [get_object_or_404](https://docs.djangoproject.com/en/5.2/topics/http/shortcuts/#get-object-or-404)
@@ -318,8 +343,10 @@ Metoda: Document.extension()
 
 ```python
 def document_list(request):
-    # Wyszukiwanie pełnotekstowe w tytule i opisie
-    documents = documents.filter(
+    # Wyszukiwanie pełnotekstowe w tytule i opisie.
+    # select_related("category") eliminuje N+1 przy iteracji w szablonie.
+    base_qs = Document.objects.filter(is_active=True).select_related("category")
+    base_qs = base_qs.filter(
         Q(title__icontains=query) | Q(description__icontains=query)
     )
 ```
@@ -328,6 +355,19 @@ def document_list(request):
 Bez `Q` można tylko AND: `.filter(title=..., description=...)` | [doc](https://docs.djangoproject.com/en/5.2/topics/db/queries/#complex-lookups-with-q-objects)
 
 `icontains` — wyszukiwanie bez uwzględnienia wielkości liter (`i` = case-insensitive).
+
+W widoku domyślnym (grupowanie po kategoriach) wszystkie dokumenty pobierane są jednym zapytaniem, a podział na kategorie następuje w Pythonie — zamiast wykonywać osobne `filter()` dla każdej kategorii w pętli:
+
+```python
+# Jeden SELECT na wszystkie dokumenty
+all_docs = list(base_qs)
+# Grupowanie w Pythonie — bez dodatkowych zapytań do bazy
+grouped = []
+for cat in categories:
+    docs = [d for d in all_docs if d.category_id == cat.pk]
+    if docs:
+        grouped.append({"category": cat, "documents": docs})
+```
 
 ---
 
@@ -347,13 +387,16 @@ class Sponsor(models.Model):
 
 ```python
 def sponsor_list(request):
+    # Jeden SELECT na wszystkich sponsorów; grupowanie w Pythonie.
+    # Poprzednie podejście wykonywało osobne zapytanie dla każdego tieru.
+    all_sponsors = list(Sponsor.objects.filter(is_active=True))
     sponsors_by_tier = {}
     for tier_key, tier_label in Sponsor.TIER_CHOICES:
-        qs = Sponsor.objects.filter(tier=tier_key, is_active=True)
-        if qs.exists():
-            sponsors_by_tier[tier_label] = qs
-    # Efekt: {"Złoty": <QuerySet>, "Srebrny": <QuerySet>}
-    # Szablon iteruje po parach klucz-wartość
+        group = [s for s in all_sponsors if s.tier == tier_key]
+        if group:
+            sponsors_by_tier[tier_label] = group
+    # Efekt: {"Złoty": [...], "Srebrny": [...]}
+    # Kolejność tierów zgodna z TIER_CHOICES
 ```
 
 ---
@@ -442,15 +485,30 @@ def contact(request):
 
 ```python
 def survey_detail(request, pk):
+    # prefetch_related pobiera pytania i ich opcje w 2 dodatkowych zapytaniach,
+    # zamiast N zapytań (po jednym dla każdego pytania) przy budowie formularza.
+    survey = get_object_or_404(
+        Survey.objects.prefetch_related("questions__choices"),
+        pk=pk, is_active=True
+    )
     if survey.closes_at and survey.closes_at < timezone.now():
         # Sprawdza czy ankieta nie wygasła
-    
+        ...
+
     # Zapis odpowiedzi: najpierw SurveyResponse (nagłówek),
-    # potem Answer dla każdego pytania osobno
+    # potem wszystkie Answer naraz przez bulk_create (1 INSERT zamiast N).
     resp = SurveyResponse.objects.create(survey=survey, ...)
+    answers = []
     for question in survey.questions.all():
-        Answer.objects.create(response=resp, question=question, ...)
+        answers.append(Answer(response=resp, question=question, ...))
+    Answer.objects.bulk_create(answers)
 ```
+
+**`prefetch_related`** vs **`select_related`**:
+- `select_related` — relacje ForeignKey/OneToOne, używa SQL JOIN, pobiera w jednym zapytaniu
+- `prefetch_related` — relacje wstecz (reverse FK) i M2M, używa osobnych SELECT + łączy w Pythonie
+
+**`bulk_create`** — wstawia listę obiektów jednym `INSERT ... VALUES (...), (...), (...)` zamiast N osobnych `INSERT`. | [doc](https://docs.djangoproject.com/en/5.2/ref/models/querysets/#bulk-create)
 
 ---
 
@@ -501,10 +559,32 @@ Każdy szablon dziecko definiuje bloki:
 
 ```python
 def site_settings(request):
-    return {"STAFFING_SYSTEM_URL": settings.STAFFING_SYSTEM_URL}
+    logo_url = _find_logo()
+    site_url = getattr(settings, "SITE_URL", "").rstrip("/")
+    return {
+        "STAFFING_SYSTEM_URL": getattr(settings, "STAFFING_SYSTEM_URL", "#"),
+        "logo_exists": bool(logo_url),
+        "logo_url": logo_url,
+        "SITE_URL": site_url,
+        "CANONICAL_URL": site_url + request.path,
+    }
 ```
 
 Funkcja zwracająca słownik — jej klucze są dostępne w **każdym** szablonie automatycznie (nie trzeba przekazywać z widoku). Zarejestrowana w `settings.py` → `TEMPLATES.OPTIONS.context_processors`. | [doc](https://docs.djangoproject.com/en/5.2/ref/templates/api/#writing-your-own-context-processors)
+
+```python
+@lru_cache(maxsize=1)
+def _find_logo():
+    # Cached after the first call — restart server to pick up a new logo file
+    images_dir = Path(settings.BASE_DIR) / "static" / "images"
+    for ext in ("png", "svg", "jpg", "jpeg", "webp"):
+        for name in (f"logo.{ext}", f"szps.{ext}", f"herb.{ext}"):
+            if (images_dir / name).exists():
+                return f"/static/images/{name}"
+    return None
+```
+
+`_find_logo` jest dekorowana przez `@lru_cache(maxsize=1)` — skanuje system plików tylko przy pierwszym wywołaniu, a wynik pamięta na cały czas działania procesu serwera. Bez cache'u każde żądanie HTTP wykonywałoby kilkanaście wywołań `Path.exists()`. | [doc](https://docs.python.org/3/library/functools.html#functools.lru_cache)
 
 ---
 
@@ -693,7 +773,58 @@ ContactMessage  (niezależny)
 
 ---
 
-## 11. Przydatne linki do dokumentacji
+## 11. Optymalizacje i wzorce wydajnościowe
+
+### Problem N+1
+
+N+1 to klasyczny błąd ORM: pętla wykonuje jedno dodatkowe zapytanie do bazy **dla każdego** elementu listy. Przykład:
+
+```python
+# ŹLE — każde post.category w szablonie → osobny SELECT
+posts = NewsPost.objects.filter(is_published=True)
+
+# DOBRZE — JOIN pobiera kategorie razem z postami, 1 zapytanie
+posts = NewsPost.objects.filter(is_published=True).select_related("category")
+```
+
+| Wzorzec | Kiedy używać | Efekt |
+|---|---|---|
+| `select_related("fk_field")` | ForeignKey, OneToOne | SQL JOIN — 1 zapytanie |
+| `prefetch_related("reverse_fk")` | reverse FK, ManyToMany | 2 zapytania + Python join |
+| `list(qs)` + Python grouping | grupowanie po kolumnie | 1 SELECT zamiast N |
+| `bulk_create(objects)` | wiele INSERT-ów naraz | 1 INSERT zamiast N |
+
+### Cachowanie w procesie (`lru_cache`)
+
+Dla danych, które nie zmieniają się w trakcie działania serwera (np. ścieżka do logo), używamy `@lru_cache` z biblioteki standardowej:
+
+```python
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def _find_logo():
+    # Skanuje dysk tylko raz — wynik jest zapamiętany do restartu serwera
+    ...
+```
+
+Uwaga: `lru_cache` pamięta wynik dla danego zestawu argumentów. Zrestartuj serwer po zmianie pliku logo.
+
+### Zmienne środowiskowe
+
+Wszystkie wartości zależne od środowiska (klucz tajny, adresy e-mail, hosty) pobierane są przez `os.environ.get()`:
+
+```python
+EMAIL_BACKEND = os.environ.get(
+    "DJANGO_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+```
+
+Plik `.env.example` zawiera pełną listę zmiennych z przykładowymi wartościami — skopiuj go do `.env` i uzupełnij przed uruchomieniem.
+
+---
+
+## 12. Przydatne linki do dokumentacji
 
 ### Django
 

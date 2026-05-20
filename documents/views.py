@@ -6,7 +6,7 @@ from .models import Document, DocumentCategory
 def document_list(request):
     query = request.GET.get("q", "")
     category_slug = request.GET.get("kategoria", "")
-    base_qs = Document.objects.filter(is_active=True)
+    base_qs = Document.objects.filter(is_active=True).select_related("category")
     categories = DocumentCategory.objects.all()
     active_category = None
 
@@ -32,15 +32,17 @@ def document_list(request):
             "grouped": False,
         })
 
-    # Widok domyślny — dokumenty pogrupowane po kategoriach
+    # Widok domyślny — dokumenty pogrupowane po kategoriach.
+    # Jeden SELECT na całość; grupowanie w Pythonie zamiast N zapytań w pętli.
+    all_docs = list(base_qs)
     grouped = []
     for cat in categories:
-        docs = base_qs.filter(category=cat)
-        if docs.exists():
+        docs = [d for d in all_docs if d.category_id == cat.pk]
+        if docs:
             grouped.append({"category": cat, "documents": docs})
 
-    uncategorized = base_qs.filter(category__isnull=True)
-    if uncategorized.exists():
+    uncategorized = [d for d in all_docs if d.category_id is None]
+    if uncategorized:
         grouped.append({"category": None, "documents": uncategorized})
 
     return render(request, "documents/list.html", {

@@ -5,9 +5,18 @@ from documents.models import Document
 
 
 def home(request):
-    pinned = NewsPost.objects.filter(is_published=True, is_pinned=True)[:3]
-    latest = NewsPost.objects.filter(is_published=True, is_pinned=False)[:6]
-    featured_docs = Document.objects.filter(is_active=True, is_featured=True)[:6]
+    pinned = (
+        NewsPost.objects.filter(is_published=True, is_pinned=True)
+        .select_related("category")[:3]
+    )
+    latest = (
+        NewsPost.objects.filter(is_published=True, is_pinned=False)
+        .select_related("category")[:6]
+    )
+    featured_docs = (
+        Document.objects.filter(is_active=True, is_featured=True)
+        .select_related("category")[:6]
+    )
     return render(request, "home.html", {
         "pinned": pinned,
         "latest": latest,
@@ -17,7 +26,7 @@ def home(request):
 
 def news_list(request):
     category_slug = request.GET.get("kategoria")
-    posts = NewsPost.objects.filter(is_published=True)
+    posts = NewsPost.objects.filter(is_published=True).select_related("category")
     categories = NewsCategory.objects.all()
     active_category = None
     if category_slug:
@@ -33,6 +42,14 @@ def news_list(request):
 
 
 def news_detail(request, slug):
-    post = get_object_or_404(NewsPost, slug=slug, is_published=True)
-    related = NewsPost.objects.filter(is_published=True, category=post.category).exclude(pk=post.pk)[:3]
+    post = get_object_or_404(
+        NewsPost.objects.select_related("category"),
+        slug=slug,
+        is_published=True,
+    )
+    related = (
+        NewsPost.objects.filter(is_published=True, category=post.category)
+        .exclude(pk=post.pk)
+        .select_related("category")[:3]
+    )
     return render(request, "news/detail.html", {"post": post, "related": related})

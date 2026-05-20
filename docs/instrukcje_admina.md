@@ -126,6 +126,54 @@ Kategorię przypisujesz do dokumentu w polu **„Kategoria"** podczas dodawania 
 
 ---
 
+---
+
+## 3. Jak wyróżnić dokument na stronie głównej
+
+W panelu admina wejdź w **„Dokumenty"** i otwórz wybrany dokument (lub utwórz nowy).
+
+Zaznacz pole **„Wyróżniony (strona główna)"** — dokument pojawi się w sekcji „Ważne dokumenty" na stronie głównej (maksymalnie 6 wyróżnionych dokumentów jest wyświetlanych).
+
+Odznacz to pole, żeby usunąć dokument z sekcji na stronie głównej, nie usuwając go z archiwum.
+
+---
+
+## 4. Jak dodać i zarządzać ankietą
+
+### Krok 1 — Utwórz ankietę
+
+W panelu admina wejdź w **„Ankiety"** (sekcja Contact) i kliknij **„Dodaj ankietę +"**.
+
+| Pole | Co wpisać |
+|---|---|
+| **Tytuł** | Nagłówek ankiety widoczny dla respondentów |
+| **Opis** | Krótkie wprowadzenie (opcjonalnie) |
+| **Aktywna** | ☑ zaznacz, żeby ankieta była widoczna pod `/ankiety/` |
+| **Zamknięcie** | Data i godzina automatycznego zamknięcia (opcjonalnie) |
+
+### Krok 2 — Dodaj pytania
+
+W tym samym formularzu, poniżej danych ankiety, pojawi się sekcja **„Pytania"**. Kliknij **„Dodaj kolejny Pytanie"**.
+
+| Pole | Co oznacza |
+|---|---|
+| **Pytanie** | Treść pytania |
+| **Typ pytania** | Odpowiedź tekstowa / Wybór spośród opcji / Tak–Nie |
+| **Kolejność** | Liczba — decyduje o kolejności wyświetlania (0 = pierwsze) |
+| **Wymagane** | ☑ respondent musi odpowiedzieć na to pytanie |
+
+Dla pytań typu **„Wybór spośród opcji"** — po zapisaniu ankiety otwórz pytanie osobno i dodaj opcje odpowiedzi w sekcji **„Opcje odpowiedzi"**.
+
+### Krok 3 — Przeglądaj odpowiedzi
+
+W panelu admina wejdź w **„Odpowiedzi na ankiety"**. Widok pokazuje każde przesłane wypełnienie z datą i e-mailem respondenta (jeśli podał).
+
+### Jak zamknąć ankietę przed terminem
+
+Odznacz pole **„Aktywna"** na liście ankiet i kliknij „Zapisz". Ankieta znika z listy publicznej, odpowiedzi zostają w bazie.
+
+---
+
 ## Szybki podgląd — gdzie co widać na stronie
 
 | Co dodajesz | Gdzie pojawia się na stronie |
@@ -134,3 +182,6 @@ Kategorię przypisujesz do dokumentu w polu **„Kategoria"** podczas dodawania 
 | Post z **„Przypięty" ☑** | Sekcja „Ważne komunikaty" na stronie głównej |
 | Dokument z **„Aktywny" ☑** | `/dokumenty/` — widoczny i możliwy do pobrania |
 | Dokument z **„Aktywny" ☐** | Ukryty — tylko w panelu admina |
+| Dokument z **„Wyróżniony" ☑** | Sekcja „Ważne dokumenty" na stronie głównej |
+| Ankieta z **„Aktywna" ☑** | `/ankiety/` — widoczna i możliwa do wypełnienia |
+| Ankieta z **„Aktywna" ☐** | Ukryta — tylko w panelu admina |

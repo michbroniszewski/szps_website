@@ -149,7 +149,10 @@ CKEDITOR_5_CONFIGS = {
     },
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = os.environ.get(
+    "DJANGO_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
 STAFFING_SYSTEM_URL = os.environ.get("STAFFING_SYSTEM_URL", "https://system.szps.pl")
 
 SITE_URL = os.environ.get("SITE_URL", "https://sedziowie.szps.pl")

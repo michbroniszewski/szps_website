@@ -23,7 +23,12 @@ def surveys_list(request):
 
 
 def survey_detail(request, pk):
-    survey = get_object_or_404(Survey, pk=pk, is_active=True)
+    # Prefetch questions and their choices to avoid N+1 in form building and answer saving
+    survey = get_object_or_404(
+        Survey.objects.prefetch_related("questions__choices"),
+        pk=pk,
+        is_active=True,
+    )
     if survey.closes_at and survey.closes_at < timezone.now():
         messages.error(request, "Ta ankieta jest już zamknięta.")
         return redirect("surveys:list")
@@ -35,19 +40,36 @@ def survey_detail(request, pk):
                 survey=survey,
                 respondent_email=form.cleaned_data.get("email", ""),
             )
+            # Collect all answers first, then insert in a single query
+            answers = []
+            choice_pks = []
+            questions_needing_choice = []
             for question in survey.questions.all():
                 field_name = f"question_{question.pk}"
                 value = form.cleaned_data.get(field_name, "")
-                if question.question_type == Question.TYPE_TEXT:
-                    Answer.objects.create(response=resp, question=question, text_answer=value)
-                elif question.question_type == Question.TYPE_YES_NO:
-                    Answer.objects.create(response=resp, question=question, text_answer=value)
+                if question.question_type in (Question.TYPE_TEXT, Question.TYPE_YES_NO):
+                    answers.append(
+                        Answer(response=resp, question=question, text_answer=value)
+                    )
                 elif question.question_type == Question.TYPE_CHOICE:
                     try:
-                        choice = Choice.objects.get(pk=int(value))
-                        Answer.objects.create(response=resp, question=question, choice_answer=choice)
-                    except (Choice.DoesNotExist, ValueError):
+                        choice_pks.append(int(value))
+                        questions_needing_choice.append(question)
+                    except (TypeError, ValueError):
                         pass
+
+            if choice_pks:
+                choices_by_pk = {
+                    c.pk: c for c in Choice.objects.filter(pk__in=choice_pks)
+                }
+                for question, pk_val in zip(questions_needing_choice, choice_pks):
+                    choice = choices_by_pk.get(pk_val)
+                    if choice:
+                        answers.append(
+                            Answer(response=resp, question=question, choice_answer=choice)
+                        )
+
+            Answer.objects.bulk_create(answers)
             messages.success(request, "Dziękujemy za wypełnienie ankiety!")
             return redirect("surveys:done")
     else:
