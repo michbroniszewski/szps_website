@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skład Wydziału Sędziowskiego — Śląscy Sędziowie ŚZPS</title>
+<meta name="description" content="Skład Wydziału Sędziowskiego Śląskiego Związku Piłki Siatkowej — prezydium, referenci oraz komisja egzaminacyjna.">
+<meta name="theme-color" content="#0B1822">
+<link rel="icon" type="image/png" href="assets/whistle.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Krytyczny styl loadera — inline, by nakladka była od pierwszej klatki (bez FOUC) */
+  #loader{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;background:radial-gradient(120% 120% at 50% 38%,#102634,#0B1822 70%);transition:opacity .5s ease,visibility .5s ease}
+  #loader.hidden{opacity:0;visibility:hidden}
+  #loader .li{position:relative;display:grid;place-items:center;width:158px;height:158px}
+  #loader .lr{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,255,255,.08);border-top-color:#E8A832;border-right-color:#5C9A30;border-bottom-color:#2FA6E0;animation:lspin 1s linear infinite}
+  #loader img{width:88px;height:auto;animation:lpulse 1.3s ease-in-out infinite;filter:drop-shadow(0 10px 22px rgba(0,0,0,.45))}
+  #loader .lt{position:absolute;bottom:-44px;left:50%;transform:translateX(-50%);white-space:nowrap;font:700 12px/1 'Archivo',system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+  @keyframes lspin{to{transform:rotate(360deg)}}
+  @keyframes lpulse{0%,100%{transform:scale(.9);opacity:.78}50%{transform:scale(1);opacity:1}}
+  @media (prefers-reduced-motion:reduce){#loader .lr,#loader img{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE LOADER ============ -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="li">
+    <div class="lr"></div>
+    <img src="assets/whistle.png" alt="">
+    <span class="lt">Śląscy Sędziowie</span>
+  </div>
+</div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" href="index.html" aria-label="Strona główna — Śląscy Sędziowie">
+      <img src="assets/whistle.png" alt="Logo Śląscy Sędziowie — gwizdek">
+      <span class="brand__txt">
+        <b>Śląscy Sędziowie</b>
+        <span>Wydział Sędziowski ŚZPS</span>
+      </span>
+    </a>
+    <nav class="nav__links" aria-label="Główna nawigacja">
+      <a href="index.html#aktualnosci">Aktualności</a>
+      <a href="index.html#dokumenty">Dokumenty</a>
+      <a href="sklad-wydzialu.html" style="opacity:1">Skład wydziału</a>
+      <a href="galeria.html">Galeria</a>
+      <a href="index.html#kontakt">Kontakt</a>
+    </nav>
+    <div class="nav__cta">
+      <a class="fb-btn" href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.9 3.78-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z"/></svg>
+      </a>
+      <a class="btn btn--gold" href="https://system.szps.pl/" target="_blank" rel="noopener">
+        System obsad
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+      </a>
+      <button class="nav__burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer">
+  <div class="drawer__panel">
+    <button class="drawer__close" id="drawerClose" aria-label="Zamknij">×</button>
+    <a href="index.html#aktualnosci">Aktualności</a>
+    <a href="index.html#dokumenty">Dokumenty</a>
+    <a href="sklad-wydzialu.html">Skład wydziału</a>
+    <a href="galeria.html">Galeria</a>
+    <a href="index.html#kontakt">Kontakt</a>
+    <a class="btn btn--gold" href="https://system.szps.pl/" target="_blank" rel="noopener">System obsad →</a>
+    <a class="btn btn--ghost" href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener">Facebook</a>
+  </div>
+</div>
+
+<!-- ============ SUB HERO ============ -->
+<section class="subhero" data-screen-label="Skład — nagłówek">
+  <div class="subhero__court"></div>
+  <div class="subhero__glow"></div>
+  <img class="subhero__whistle" src="assets/whistle.png" alt="">
+  <div class="wrap subhero__inner">
+    <div class="breadcrumb">
+      <a href="index.html">Strona główna</a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      <span>Skład wydziału</span>
+    </div>
+    <h1>Skład <span class="accent">wydziału</span></h1>
+    <p>Ludzie, którzy dbają o poziom sędziowania siatkówki na Śląsku — prezydium oraz członkowie komisji szkolenia, obsad i organizacyjnej.</p>
+  </div>
+</section>
+
+<!-- ============ SKŁAD WYDZIAŁU ============ -->
+<section class="section" data-screen-label="Skład wydziału">
+  <div class="wrap">
+    <div class="roster-head reveal"><h2>Członkowie wydziału</h2></div>
+    <div class="roster">
+
+      <article class="member reveal">
+        <div class="member__photo"><image-slot id="m1" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Marek Lagierski</div><div class="member__role">Przewodniczący WS</div></div>
+      </article>
+
+      <article class="member reveal d1">
+        <div class="member__photo"><image-slot id="m2" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Marek Krupski</div><div class="member__role">Zastępca Przewodniczącego WS</div></div>
+      </article>
+
+      <article class="member reveal d2">
+        <div class="member__photo"><image-slot id="m3" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Wojciech Targosz</div><div class="member__role">Sekretarz WS · Komisja Organizacyjna</div></div>
+      </article>
+
+      <article class="member reveal d3">
+        <div class="member__photo"><image-slot id="m4" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Michał Broniszewski</div><div class="member__role">Członek WS · Komisja Szkolenia</div></div>
+      </article>
+
+      <article class="member reveal">
+        <div class="member__photo"><image-slot id="m5" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Mariusz Fiutek</div><div class="member__role">Członek WS · Komisja Obsad</div></div>
+      </article>
+
+      <article class="member reveal d1">
+        <div class="member__photo"><image-slot id="m6" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Robert Nowicki</div><div class="member__role">Członek WS · Komisje Szkolenia i Obsad</div></div>
+      </article>
+
+      <article class="member reveal d2">
+        <div class="member__photo"><image-slot id="m7" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Piotr Paprzycki</div><div class="member__role">Członek WS · Komisja Obsad</div></div>
+      </article>
+
+      <article class="member reveal d3">
+        <div class="member__photo"><image-slot id="m8" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Katarzyna Sajdok-Iwańska</div><div class="member__role">Członek WS · Komisja Szkolenia</div></div>
+      </article>
+
+      <article class="member reveal">
+        <div class="member__photo"><image-slot id="m9" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Łukasz Szczepankiewicz</div><div class="member__role">Członek WS · Komisja Organizacyjna</div></div>
+      </article>
+
+      <article class="member reveal d1">
+        <div class="member__photo"><image-slot id="m10" shape="rect" placeholder="Zdjęcie"></image-slot></div>
+        <div class="member__rolebar"></div>
+        <div class="member__body"><div class="member__name">Włodzimierz Włodyka</div><div class="member__role">Członek WS · Komisja Organizacyjna</div></div>
+      </article>
+
+    </div>
+
+    <div class="reveal" style="margin-top:48px;text-align:center">
+      <a class="btn btn--dark" href="index.html#kontakt">
+        Masz pytanie do wydziału? Napisz do nas
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <img src="assets/logo-light.png" alt="Śląscy Sędziowie">
+        <p>Wydział Sędziowski Śląskiego Związku Piłki Siatkowej. Rozwijamy kadrę sędziowską i dbamy o najwyższy poziom prowadzenia spotkań.</p>
+        <div class="footer__social">
+          <a href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.9 3.78-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4>Serwis</h4>
+        <ul>
+          <li><a href="index.html#aktualnosci">Aktualności</a></li>
+          <li><a href="index.html#dokumenty">Dokumenty</a></li>
+          <li><a href="sklad-wydzialu.html">Skład wydziału</a></li>
+          <li><a href="galeria.html">Galeria</a></li>
+          <li><a href="index.html#sponsorzy">Partnerzy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Dla sędziego</h4>
+        <ul>
+          <li><a href="https://system.szps.pl/" target="_blank" rel="noopener">System obsad</a></li>
+          <li><a href="index.html#dokumenty">Przepisy gry</a></li>
+          <li><a href="index.html#dokumenty">Szkolenia</a></li>
+          <li><a href="index.html#kontakt">Kontakt</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <ul>
+          <li><a href="mailto:sedziowie@szps.pl">sedziowie@szps.pl</a></li>
+          <li><a href="index.html#kontakt">Formularz kontaktowy</a></li>
+          <li><a href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener">Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span id="year">2026</span> Wydział Sędziowski Śląskiego Związku Piłki Siatkowej. Wszelkie prawa zastrzeżone.</span>
+      <span>Śląscy Sędziowie · Piłka siatkowa</span>
+    </div>
+  </div>
+  <div class="stripe"></div>
+</footer>
+
+<script src="assets/image-slot.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
