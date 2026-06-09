@@ -1,0 +1,8 @@
+# robots.txt — Wydział Sędziowski ŚZPS
+# Zezwala wszystkim robotom na indeksowanie całego serwisu.
+
+User-agent: *
+Allow: /
+
+# Mapa strony — po deploymencie potwierdź, że adres odpowiada docelowej domenie
+Sitemap: https://szps.pl/sitemap.xml

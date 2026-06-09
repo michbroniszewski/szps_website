@@ -6,9 +6,31 @@
 <title>Galeria — Śląscy Sędziowie ŚZPS</title>
 <meta name="description" content="Galeria zdjęć Wydziału Sędziowskiego Śląskiego Związku Piłki Siatkowej — sędziowie w akcji, szkolenia i wydarzenia.">
 <meta name="theme-color" content="#0B1822">
+<link rel="canonical" href="https://szps.pl/galeria.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pl_PL">
+<meta property="og:site_name" content="Wydział Sędziowski ŚZPS">
+<meta property="og:url" content="https://szps.pl/galeria.html">
+<meta property="og:title" content="Galeria — Śląscy Sędziowie ŚZPS">
+<meta property="og:description" content="Galeria zdjęć Wydziału Sędziowskiego ŚZPS — sędziowie w akcji, szkolenia i wydarzenia.">
+<meta property="og:image" content="https://szps.pl/assets/logo.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="assets/whistle.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- ============================================================
+     Google Analytics 4 — AKTYWACJA PO DEPLOYMENCIE
+     Podmień G-XXXXXXXXXX na swój identyfikator i usuń znaczniki komentarza.
+============================================================ -->
+<!--
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+-->
 <link rel="stylesheet" href="styles.css">
 <style>
   /* Krytyczny styl loadera — inline, by nakladka była od pierwszej klatki (bez FOUC) */
@@ -171,5 +193,24 @@
 
 <script src="assets/image-slot.js"></script>
 <script src="script.js"></script>
+<script>
+/* Galeria: dodawanie/zmiana zdjęć dostępne wyłącznie dla administratora.
+   Poza środowiskiem edycyjnym kafelki są tylko do odczytu — blokujemy
+   przeciąganie i wybór pliku, a puste miejsca ukrywamy przed gośćmi. */
+(function(){
+  if (window.omelette && window.omelette.writeFile) return; // administrator
+  var slots = document.querySelectorAll('image-slot');
+  var sync = function(){
+    slots.forEach(function(s){
+      s.style.pointerEvents = 'none';
+      s.style.display = s.hasAttribute('data-filled') ? '' : 'none';
+    });
+  };
+  slots.forEach(function(s){
+    new MutationObserver(sync).observe(s, {attributes:true, attributeFilter:['data-filled']});
+  });
+  sync();
+})();
+</script>
 </body>
 </html>

@@ -92,6 +92,19 @@
 
       form.style.display = 'none';
       document.getElementById('formOk').classList.add('show');
+
+      /* ---- Wysyłka wiadomości (test) ---- */
+      // Adres odbiorcy testowego. Otwiera klienta poczty z wypełnioną treścią.
+      const RECIPIENT = 'michbroniszewski@gmail.com';
+      const subject = 'Formularz kontaktowy: ' + topic.value;
+      const body =
+        'Imię i nazwisko: ' + name.value.trim() + '\n' +
+        'E-mail: ' + email.value.trim() + '\n' +
+        'Temat: ' + topic.value + '\n\n' +
+        msg.value.trim();
+      window.location.href = 'mailto:' + RECIPIENT +
+        '?subject=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(body);
     });
   }
 
