@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Skład Wydziału Sędziowskiego — Śląscy Sędziowie ŚZPS{% endblock %}
+{% block meta_description %}Skład Wydziału Sędziowskiego Śląskiego Związku Piłki Siatkowej — prezydium, referenci oraz komisja egzaminacyjna.{% endblock %}
+{% block og_title %}Skład Wydziału Sędziowskiego — Śląscy Sędziowie ŚZPS{% endblock %}
+{% block og_description %}Prezydium, referenci oraz komisja egzaminacyjna Wydziału Sędziowskiego ŚZPS.{% endblock %}
+
+{% block content %}
+<!-- ============ SUB HERO ============ -->
+<section class="subhero" data-screen-label="Skład — nagłówek">
+  <div class="subhero__court"></div>
+  <div class="subhero__glow"></div>
+  <img class="subhero__whistle" src="{% static 'assets/whistle.png' %}" alt="">
+  <div class="wrap subhero__inner">
+    <div class="breadcrumb">
+      <a href="{% url 'pages:home' %}">Strona główna</a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      <span>Skład wydziału</span>
+    </div>
+    <h1>Skład <span class="accent">wydziału</span></h1>
+    <p></p>
+  </div>
+</section>
+
+<!-- ============ SKŁAD WYDZIAŁU ============ -->
+<section class="section" data-screen-label="Skład wydziału">
+  <div class="wrap">
+    <div class="roster-head reveal"><h2>Członkowie wydziału</h2></div>
+    <div class="roster">
+      {% for member in members %}
+      <article class="member reveal {% cycle '' 'd1' 'd2' 'd3' %}">
+        <div class="member__photo">
+          {% if member.photo %}
+            <img src="{{ member.photo.url }}" alt="{{ member.full_name }}">
+          {% else %}
+            <image-slot id="m{{ forloop.counter }}" shape="rect" placeholder="Zdjęcie"></image-slot>
+          {% endif %}
+        </div>
+        <div class="member__rolebar"></div>
+        <div class="member__body">
+          <div class="member__name">{{ member.full_name }}</div>
+          <div class="member__role">{{ member.role }}</div>
+        </div>
+      </article>
+      {% empty %}
+      <p>Brak członków wydziału. Dodaj w <a href="/admin/">panelu administracyjnym</a>.</p>
+      {% endfor %}
+    </div>
+
+    <div class="reveal" style="margin-top:48px;text-align:center">
+      <a class="btn btn--dark" href="{% url 'pages:home' %}#kontakt">
+        Masz pytanie do wydziału? Napisz do nas
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

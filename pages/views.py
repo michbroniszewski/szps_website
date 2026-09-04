@@ -4,8 +4,16 @@ from .models import Article, StaticPage
 
 
 def home(request):
-    articles = Article.objects.filter(is_published=True)[:5]
-    return render(request, "pages/home.html", {"articles": articles})
+    articles = Article.objects.filter(is_published=True)[:6]
+    return render(
+        request,
+        "pages/home.html",
+        {"articles": articles, "active_nav": "home"},
+    )
+
+
+def gallery(request):
+    return render(request, "pages/gallery.html", {"active_nav": "gallery"})
 
 
 def article_detail(request, slug):

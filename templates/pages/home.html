@@ -1,22 +1,281 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Strona główna — Wydział Sędziowski ŚZPS{% endblock %}
+{% block title %}Wydział Sędziowski ŚZPS — Śląscy Sędziowie Piłki Siatkowej{% endblock %}
+{% block og_title %}Wydział Sędziowski ŚZPS — Śląscy Sędziowie{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SportsOrganization",
+  "name":"Wydział Sędziowski Śląskiego Związku Piłki Siatkowej",
+  "sport":"Volleyball",
+  "url":"https://sedziowie.szps.pl/",
+  "logo":"https://sedziowie.szps.pl{% static 'assets/logo.png' %}",
+  "areaServed":{"@type":"AdministrativeArea","name":"województwo śląskie"},
+  "contactPoint":{"@type":"ContactPoint","email":"ws@szps.pl","contactType":"sprawy organizacyjne","availableLanguage":"Polish"},
+  "sameAs":["https://www.facebook.com/sedziowieszps","https://system.szps.pl/"]
+}
+</script>
+{% endblock %}
 
 {% block content %}
-<h1>Wydział Sędziowski ŚZPS</h1>
-<p>Szkielet Django działa. Docelowa strona zostanie przełożona na szablony w kolejnym kroku.</p>
+<!-- ============ HERO ============ -->
+<section class="hero" id="top" data-screen-label="Hero">
+  <div class="hero__court"></div>
+  <div class="hero__glow"></div>
+  <div class="hero__glow2"></div>
+  <img class="hero__whistle" src="{% static 'assets/whistle.png' %}" alt="">
+  <div class="wrap hero__inner">
+    <span class="hero__badge reveal">
+      <a class="hero__badge-org" href="https://szps.pl" target="_blank" rel="noopener">
+        <img src="{% static 'assets/slaska-ball.png' %}" class="hero__badge-logo" alt="Śląska Siatkówka">
+        Śląska Siatkówka
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+      </a>
+    </span>
+    <h1 class="reveal d1">Wydział<br><span class="accent">Sędziowski</span></h1>
+    <p class="hero__lead reveal d2"></p>
+    <div class="hero__cta reveal d3">
+      <a class="btn btn--gold" href="https://system.szps.pl/" target="_blank" rel="noopener">
+        Przejdź do systemu obsad
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="btn btn--ghost-light" href="#aktualnosci">Zobacz aktualności</a>
+    </div>
+  </div>
+  <a class="hero__scroll" href="#aktualnosci" aria-label="Przewiń w dół">Przewiń<span></span></a>
+</section>
 
-<h2>Aktualności</h2>
-{% if articles %}
-<ul>
-  {% for article in articles %}
-  <li>
-    <a href="{% url 'pages:article_detail' article.slug %}">{{ article.title }}</a>
-    <small>({{ article.published_at|date:"j E Y" }})</small>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>Brak aktualności. Dodaj pierwszą w <a href="/admin/">panelu administracyjnym</a>.</p>
-{% endif %}
+<!-- ============ AKTUALNOŚCI ============ -->
+<section class="section" id="aktualnosci" data-screen-label="Aktualności">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Na bieżąco</span>
+      <h2>Aktualności</h2>
+      <p>Najnowsze informacje i komunikaty wydziału</p>
+    </div>
+    <div class="news-grid">
+      {% for article in articles %}
+      <article class="news-card reveal {% cycle '' 'd1' 'd2' 'd3' %}">
+        <div class="news-card__media nm-{{ forloop.counter }}">
+          {% if article.badge_label %}
+          <span class="tag{% if article.badge_color %} tag--{{ article.badge_color }}{% endif %}">{{ article.badge_label }}</span>
+          {% endif %}
+          {% if article.glyph %}<span class="glyph">{{ article.glyph }}</span>{% endif %}
+        </div>
+        <div class="news-card__body">
+          <span class="news-card__date">{{ article.published_at|date:"j E Y" }}</span>
+          <h3>{{ article.title }}</h3>
+          <div>{{ article.body|safe }}</div>
+          {% if article.body_extended %}
+          <div class="news-card__full">{{ article.body_extended|safe }}</div>
+          <button class="news-card__more" type="button" aria-expanded="false">
+            <span class="news-card__more-show">Czytaj więcej</span>
+            <span class="news-card__more-hide">Zwiń</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          {% endif %}
+        </div>
+      </article>
+      {% empty %}
+      <p>Brak aktualności. Dodaj pierwszą w <a href="/admin/">panelu administracyjnym</a>.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============ DOKUMENTY ============ -->
+<section class="section section--soft" id="dokumenty" data-screen-label="Dokumenty">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Strefa sędziego</span>
+      <h2>Dokumenty</h2>
+      <p></p>
+    </div>
+    <div class="doc-group reveal">
+      <h3 class="doc-group__title">Przepisy gry</h3>
+      <div class="docs-grid">
+        <a class="doc-card" href="{% static 'dokumenty/przepisy-gry-2025-2028.pdf' %}" target="_blank" rel="noopener">
+          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11H4z"/><path d="M14 4v6h6"/><path d="M8 14h7M8 17h7"/></svg></span>
+          <div><h4>Przepisy gry 2025–2028</h4><p class="doc-card__meta"><span class="doc-card__pill">PL</span> Polska wersja przepisów · PDF</p></div>
+          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a class="doc-card" href="{% static 'dokumenty/official-volleyball-rules-2025-2028.pdf' %}" target="_blank" rel="noopener">
+          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11H4z"/><path d="M14 4v6h6"/><path d="M8 14h7M8 17h7"/></svg></span>
+          <div><h4>Official Volleyball Rules 2025–2028</h4><p class="doc-card__meta"><span class="doc-card__pill">EN</span> Oficjalne przepisy FIVB · PDF</p></div>
+          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="doc-group reveal">
+      <h3 class="doc-group__title">Wytyczne i instrukcje</h3>
+      <div class="docs-grid">
+        <a class="doc-card" href="{% static 'dokumenty/wytyczne-i-instrukcje-sedziowania-2025.pdf' %}" target="_blank" rel="noopener">
+          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 13l9 5 9-5"/></svg></span>
+          <div><h4>Wytyczne i instrukcje sędziowania 2025</h4><p class="doc-card__meta">Interpretacje przepisów i wskazówki praktyczne · PDF</p></div>
+          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="doc-group reveal">
+      <h3 class="doc-group__title">Materiały szkoleniowe</h3>
+      <div class="docs-grid">
+        <a class="doc-card" href="{% static 'dokumenty/prezentacja-maly-protokol.pdf' %}" target="_blank" rel="noopener">
+          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v12H3z"/><path d="M3 17l5 4M21 17l-5 4M10 11l4-2-4-2z"/></svg></span>
+          <div><h4>Mały protokół — prezentacja</h4><p class="doc-card__meta">Szkolenie z prowadzenia małego protokołu · PDF</p></div>
+          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="doc-group reveal">
+      <h3 class="doc-group__title">Komunikaty</h3>
+      <div class="docs-grid">
+        <a class="doc-card" href="{% static 'dokumenty/Komunikat_WS_270526.pdf' %}" target="_blank" rel="noopener">
+          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg></span>
+          <div><h4>Komunikat WS — 27.05.2026</h4><p class="doc-card__meta">Komunikat Wydziału Sędziowskiego · PDF</p></div>
+          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a class="doc-card" href="{% static 'dokumenty/komunikat-ws-2026-01-27.pdf' %}" target="_blank" rel="noopener">
+          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg></span>
+          <div><h4>Komunikat WS — 27.01.2026</h4><p class="doc-card__meta">Komunikat Wydziału Sędziowskiego · PDF</p></div>
+          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a class="doc-card" href="{% static 'dokumenty/komunikat-ws-2025-06-24.pdf' %}" target="_blank" rel="noopener">
+          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg></span>
+          <div><h4>Komunikat WS — 24.06.2025</h4><p class="doc-card__meta">Komunikat Wydziału Sędziowskiego · PDF</p></div>
+          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a class="doc-card" href="{% static 'dokumenty/komunikat-ws-2025-04-29.pdf' %}" target="_blank" rel="noopener">
+          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg></span>
+          <div><h4>Komunikat WS — 29.04.2025</h4><p class="doc-card__meta">Komunikat Wydziału Sędziowskiego · PDF</p></div>
+          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALERIA (zajawka) ============ -->
+<section class="section" id="galeria" data-screen-label="Galeria">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Z parkietu</span>
+      <h2>Galeria</h2>
+      <p></p>
+    </div>
+    <div class="gallery">
+      <image-slot id="g1" class="g-wide g-tall" shape="rounded" radius="16" placeholder="Zdjęcie 1 — przeciągnij tutaj"></image-slot>
+      <image-slot id="g2" shape="rounded" radius="16" placeholder="Zdjęcie 2"></image-slot>
+      <image-slot id="g3" shape="rounded" radius="16" placeholder="Zdjęcie 3"></image-slot>
+      <image-slot id="g4" shape="rounded" radius="16" placeholder="Zdjęcie 4"></image-slot>
+      <image-slot id="g5" shape="rounded" radius="16" placeholder="Zdjęcie 5"></image-slot>
+      <image-slot id="g6" class="g-wide" shape="rounded" radius="16" placeholder="Zdjęcie 6"></image-slot>
+    </div>
+    <div class="reveal" style="margin-top:36px;text-align:center">
+      <a class="btn btn--dark" href="{% url 'pages:gallery' %}">
+        Zobacz całą galerię
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPONSORZY ============ -->
+<section class="section section--soft" id="sponsorzy" data-screen-label="Partnerzy">
+  <div class="wrap">
+    <div class="section-head reveal" style="margin-left:auto;margin-right:auto;text-align:center">
+      <span class="eyebrow" style="margin:0 auto">Wspierają nas</span>
+      <h2>Partnerzy i sponsorzy</h2>
+      <p style="margin:0 auto">Dziękujemy firmom, które wspierają  Śląskich sędziów siatkówki.</p>
+    </div>
+    <div class="sponsors">
+      <div class="sponsor reveal">
+        <span class="sponsor__logo"><img src="{% static 'assets/martes-sport.png' %}" alt="Martes Sport"></span>
+        <div><div class="sponsor__name">Martes Sport</div><div class="sponsor__role">Sponsor</div></div>
+      </div>
+      <div class="sponsor reveal d1">
+        <span class="sponsor__logo"><img src="{% static 'assets/hydrokrak.png' %}" alt="HYDROKRAK"></span>
+        <div><div class="sponsor__name">HYDROKRAK</div><div class="sponsor__role">Sponsor</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ KONTAKT ============ -->
+<section class="section" id="kontakt" data-screen-label="Kontakt">
+  <div class="wrap contact-grid">
+    <div class="contact-info reveal">
+      <span class="eyebrow">Masz pytanie?</span>
+      <h2>Skontaktuj się z wydziałem</h2>
+      <p class="lead">Sprawy organizacyjne lub szkoleniowe - napisz do nas, a odpowiemy najszybciej, jak to możliwe.</p>
+
+      <div class="contact-row">
+        <span class="contact-row__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg></span>
+        <div><b>E-mail</b><span>ws@szps.pl</span></div>
+      </div>
+      <div class="contact-row">
+        <span class="contact-row__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></span>
+        <div><b>Siedziba</b><span>Śląski Związek Piłki Siatkowej, Katowice</span></div>
+      </div>
+
+      <a class="fb-cta" href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.9 3.78-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z"/></svg>
+        Znajdź nas na Facebooku
+      </a>
+    </div>
+
+    <div class="reveal d1">
+      <form class="form" id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="f-name">Imię i nazwisko <span class="req">*</span></label>
+            <input type="text" id="f-name" name="name" autocomplete="name" placeholder="Jan Kowalski">
+            <div class="err">Podaj imię i nazwisko.</div>
+          </div>
+          <div class="field">
+            <label for="f-email">Adres e-mail <span class="req">*</span></label>
+            <input type="email" id="f-email" name="email" autocomplete="email" placeholder="jan@przyklad.pl">
+            <div class="err">Podaj poprawny adres e-mail.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-topic">Temat <span class="req">*</span></label>
+          <select id="f-topic" name="topic">
+            <option value="">Wybierz temat…</option>
+            <option>Obsady i delegacje</option>
+            <option>Szkolenia i egzaminy</option>
+            <option>Sprawy organizacyjne</option>
+            <option>Współpraca / sponsoring</option>
+            <option>Inne</option>
+          </select>
+          <div class="err">Wybierz temat.</div>
+        </div>
+        <div class="field">
+          <label for="f-msg">Wiadomość <span class="req">*</span></label>
+          <textarea id="f-msg" name="message" placeholder="Treść wiadomości…"></textarea>
+          <div class="err">Wiadomość jest zbyt krótka (min. 10 znaków).</div>
+        </div>
+        <label class="consent">
+          <input type="checkbox" id="f-consent">
+          <span>Wyrażam zgodę na przetwarzanie moich danych w celu udzielenia odpowiedzi (RODO). <span class="req">*</span></span>
+        </label>
+        <button type="submit" class="btn btn--gold">
+          Wyślij wiadomość
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
+        </button>
+      </form>
+      <div class="form__ok" id="formOk">
+        <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h3>Dziękujemy!</h3>
+        <p>Otwieramy Twój program pocztowy z gotową wiadomością — wystarczy ją wysłać.</p>
+        <small>Wiadomość trafi na adres testowy: michbroniszewski@gmail.com</small>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

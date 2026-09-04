@@ -4,5 +4,4 @@
 User-agent: *
 Allow: /
 
-# Mapa strony — po deploymencie potwierdź, że adres odpowiada docelowej domenie
-Sitemap: https://szps.pl/sitemap.xml
+Sitemap: https://sedziowie.szps.pl/sitemap.xml

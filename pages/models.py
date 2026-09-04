@@ -6,10 +6,44 @@ from django.utils.text import slugify
 class Article(models.Model):
     """Aktualność / wpis na stronie głównej."""
 
+    class BadgeColor(models.TextChoices):
+        GOLD = "gold", "Złoty (awans, sukces)"
+        GREEN = "green", "Zielony (szkolenie)"
+        BLUE = "blue", "Niebieski (informacja)"
+        RED = "red", "Czerwony (ważne)"
+        NONE = "", "Bez etykiety"
+
     title = models.CharField("Tytuł", max_length=200)
     slug = models.SlugField("Slug (adres URL)", max_length=220, unique=True, blank=True)
     lead = models.CharField("Zajawka", max_length=300, blank=True)
-    body = models.TextField("Treść", help_text="Możesz używać HTML.")
+    body = models.TextField(
+        "Treść (widoczna od razu)",
+        help_text="Krótki wstęp widoczny bez klikania „Czytaj więcej”. HTML dozwolony.",
+    )
+    body_extended = models.TextField(
+        "Treść rozwijana",
+        blank=True,
+        help_text="Dalsza część artykułu pod przyciskiem „Czytaj więcej”. HTML dozwolony.",
+    )
+    badge_color = models.CharField(
+        "Kolor etykiety",
+        max_length=10,
+        choices=BadgeColor.choices,
+        default=BadgeColor.NONE,
+        blank=True,
+    )
+    badge_label = models.CharField(
+        "Tekst etykiety",
+        max_length=40,
+        blank=True,
+        help_text="np. „Awans”, „Szkolenie”. Puste = bez etykiety.",
+    )
+    glyph = models.CharField(
+        "Symbol na kaflu",
+        max_length=4,
+        blank=True,
+        help_text="Pojedynczy znak/emoji wyświetlany na tle kafla (np. ▲, ★, 🏐).",
+    )
     cover = models.ImageField("Obrazek", upload_to="articles/", blank=True)
     published_at = models.DateTimeField("Data publikacji", default=timezone.now)
     is_published = models.BooleanField("Opublikowana", default=True)

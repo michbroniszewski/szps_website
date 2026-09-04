@@ -1,12 +1,144 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Wydział Sędziowski ŚZPS{% endblock %}</title>
-{% block head_extra %}{% endblock %}
+<title>{% block title %}Wydział Sędziowski ŚZPS — Śląscy Sędziowie Piłki Siatkowej{% endblock %}</title>
+<meta name="description" content="{% block meta_description %}Oficjalny serwis Wydziału Sędziowskiego Śląskiego Związku Piłki Siatkowej. Aktualności, dokumenty, przepisy gry, system obsad sędziowskich, szkolenia i kontakt.{% endblock %}">
+<meta name="author" content="Wydział Sędziowski ŚZPS">
+<meta name="theme-color" content="#0B1822">
+<link rel="canonical" href="{% block canonical %}https://sedziowie.szps.pl{{ request.path }}{% endblock %}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pl_PL">
+<meta property="og:site_name" content="Wydział Sędziowski ŚZPS">
+<meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+<meta property="og:title" content="{% block og_title %}Wydział Sędziowski ŚZPS — Śląscy Sędziowie{% endblock %}">
+<meta property="og:description" content="{% block og_description %}Aktualności, dokumenty, system obsad i szkolenia sędziów piłki siatkowej na Śląsku.{% endblock %}">
+<meta property="og:image" content="{% block og_image %}https://sedziowie.szps.pl{% static 'assets/logo.png' %}{% endblock %}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="{% static 'assets/whistle.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="{% static 'styles.css' %}">
+<style>
+  /* Krytyczny styl loadera — inline, by nakladka była od pierwszej klatki (bez FOUC) */
+  #loader{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;background:radial-gradient(120% 120% at 50% 38%,#102634,#0B1822 70%);transition:opacity .5s ease,visibility .5s ease}
+  #loader.hidden{opacity:0;visibility:hidden}
+  #loader .li{position:relative;display:grid;place-items:center;width:158px;height:158px}
+  #loader .lr{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,255,255,.08);border-top-color:#E8A832;border-right-color:#5C9A30;border-bottom-color:#2FA6E0;animation:lspin 1s linear infinite}
+  #loader img{width:88px;height:auto;animation:lpulse 1.3s ease-in-out infinite;filter:drop-shadow(0 10px 22px rgba(0,0,0,.45))}
+  #loader .lt{position:absolute;bottom:-44px;left:50%;transform:translateX(-50%);white-space:nowrap;font:700 12px/1 'Archivo',system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+  @keyframes lspin{to{transform:rotate(360deg)}}
+  @keyframes lpulse{0%,100%{transform:scale(.9);opacity:.78}50%{transform:scale(1);opacity:1}}
+  @media (prefers-reduced-motion:reduce){#loader .lr,#loader img{animation:none}}
+</style>
+{% block extra_head %}{% endblock %}
 </head>
 <body>
+
+<!-- ============ PAGE LOADER ============ -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="li">
+    <div class="lr"></div>
+    <img src="{% static 'assets/whistle.png' %}" alt="">
+    <span class="lt">Śląscy Sędziowie</span>
+  </div>
+</div>
+
+<!-- ============ NAV ============ -->
+{% with active=active_nav|default:"" home_url=home_url|default:'/' %}
+<header class="nav" id="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" href="{% url 'pages:home' %}" aria-label="Strona główna — Śląscy Sędziowie">
+      <img src="{% static 'assets/whistle.png' %}" alt="Logo Śląscy Sędziowie — gwizdek">
+      <span class="brand__txt">
+        <b>Śląscy Sędziowie</b>
+        <span>Wydział Sędziowski ŚZPS</span>
+      </span>
+    </a>
+    <nav class="nav__links" aria-label="Główna nawigacja">
+      <a href="{% url 'pages:home' %}#aktualnosci">Aktualności</a>
+      <a href="{% url 'pages:home' %}#dokumenty">Dokumenty</a>
+      <a href="{% url 'board:list' %}"{% if active == 'board' %} style="opacity:1"{% endif %}>Skład wydziału</a>
+      <a href="{% url 'pages:gallery' %}"{% if active == 'gallery' %} style="opacity:1"{% endif %}>Galeria</a>
+      <a href="{% url 'pages:home' %}#kontakt">Kontakt</a>
+    </nav>
+    <div class="nav__cta">
+      <a class="fb-btn" href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.9 3.78-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z"/></svg>
+      </a>
+      {% block nav_cta_extra %}{% endblock %}
+      <button class="nav__burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- mobile drawer -->
+<div class="drawer" id="drawer">
+  <div class="drawer__panel">
+    <button class="drawer__close" id="drawerClose" aria-label="Zamknij">×</button>
+    <a href="{% url 'pages:home' %}#aktualnosci">Aktualności</a>
+    <a href="{% url 'pages:home' %}#dokumenty">Dokumenty</a>
+    <a href="{% url 'board:list' %}">Skład wydziału</a>
+    <a href="{% url 'pages:gallery' %}">Galeria</a>
+    <a href="{% url 'pages:home' %}#kontakt">Kontakt</a>
+    <a class="btn btn--gold" href="https://system.szps.pl/" target="_blank" rel="noopener">System obsad →</a>
+    <a class="btn btn--ghost" href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener">Facebook</a>
+  </div>
+</div>
+{% endwith %}
+
 {% block content %}{% endblock %}
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <img src="{% static 'assets/logo-light.png' %}" alt="Śląscy Sędziowie">
+        <p>Wydział Sędziowski Śląskiego Związku Piłki Siatkowej.</p>
+        <div class="footer__social">
+          <a href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.9 3.78-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4>Serwis</h4>
+        <ul>
+          <li><a href="{% url 'pages:home' %}#aktualnosci">Aktualności</a></li>
+          <li><a href="{% url 'pages:home' %}#dokumenty">Dokumenty</a></li>
+          <li><a href="{% url 'board:list' %}">Skład wydziału</a></li>
+          <li><a href="{% url 'pages:gallery' %}">Galeria</a></li>
+          <li><a href="{% url 'pages:home' %}#sponsorzy">Partnerzy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Dla sędziego</h4>
+        <ul>
+          <li><a href="https://system.szps.pl/" target="_blank" rel="noopener">System obsad</a></li>
+          <li><a href="{% url 'pages:home' %}#dokumenty">Dokumenty</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <ul>
+          <li><a href="mailto:ws@szps.pl">ws@szps.pl</a></li>
+          <li><a href="{% url 'pages:home' %}#kontakt">Formularz kontaktowy</a></li>
+          <li><a href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener">Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span id="year">{% now "Y" %}</span> Wydział Sędziowski Śląskiego Związku Piłki Siatkowej. Wszelkie prawa zastrzeżone.</span>
+      <span>Śląscy Sędziowie · Piłka siatkowa</span>
+    </div>
+  </div>
+  <div class="stripe"></div>
+</footer>
+
+<script src="{% static 'assets/image-slot.js' %}"></script>
+<script src="{% static 'script.js' %}"></script>
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>
