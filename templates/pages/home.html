@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Strona główna — Wydział Sędziowski ŚZPS{% endblock %}
+
+{% block content %}
+<h1>Wydział Sędziowski ŚZPS</h1>
+<p>Szkielet Django działa. Docelowa strona zostanie przełożona na szablony w kolejnym kroku.</p>
+
+<h2>Aktualności</h2>
+{% if articles %}
+<ul>
+  {% for article in articles %}
+  <li>
+    <a href="{% url 'pages:article_detail' article.slug %}">{{ article.title }}</a>
+    <small>({{ article.published_at|date:"j E Y" }})</small>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>Brak aktualności. Dodaj pierwszą w <a href="/admin/">panelu administracyjnym</a>.</p>
+{% endif %}
+{% endblock %}
