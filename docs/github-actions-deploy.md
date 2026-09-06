@@ -18,8 +18,18 @@ Co robi:
    statycznych powstają w GitHubie, nie na serwerze.
 4. Aktualizuje `tmp/restart.txt` datą deployu i skrótem SHA — po wgraniu
    Passenger widzi zmienioną datę i przeładowuje aplikację.
-5. Wgrywa **tylko zmienione pliki** przez FTPS (śledzone przez plik
-   `.ftp-deploy-sync-state.json` na serwerze).
+5. Wgrywa **tylko nowsze pliki** przez FTPS używając `lftp mirror
+   --only-newer` (porównanie mtime).
+
+## Dlaczego lftp a nie „gotowa akcja"?
+
+Popularne akcje typu `SamKirkland/FTP-Deploy-Action` używają biblioteki
+`basic-ftp` z Node. Serwer ProFTPD na mydevil wymaga **reuse'a session
+ID TLS** między kanałem kontrolnym a danych — `basic-ftp` tego nie robi
+i deploy pada z komunikatem `tlsv1 alert decode error (SSL alert 50)`
+na kanale danych. `lftp` obsługuje to natywnie (opcja
+`ssl:use-tls-session-cache yes`) i jest standardem dla FTPS na
+Linuxie.
 
 ## Konfiguracja jednorazowa
 
@@ -99,9 +109,14 @@ wymagają `mydevil-setup.sh` u admina.
 **„530 Login incorrect"** — złe dane w sekretach. Sprawdź `MYDEVIL_FTP_USER`
 i `MYDEVIL_FTP_PASSWORD` w Settings → Secrets.
 
-**„550 Failed to change directory"** — zła ścieżka `server-dir` w workflow.
-Sprawdź czy `./domains/sedziowie.szps.pl/public_python/` odpowiada temu,
+**„550 Failed to change directory"** — zła ścieżka `REMOTE_DIR` w workflow.
+Sprawdź czy `/domains/sedziowie.szps.pl/public_python` odpowiada temu,
 co widzisz po zalogowaniu przez FTP.
+
+**„tlsv1 alert decode error" / SSL alert 50** — to problem starych akcji
+opartych o Node/basic-ftp; workflow używa lftp i **nie powinno się
+zdarzyć**. Jeśli zobaczysz to mimo wszystko — komenda lftp
+prawdopodobnie została podmieniona; przywróć wariant z tego repo.
 
 **Strona po deployu wygląda jak przed** — Passenger nie zauważył restartu.
 Sprawdź czy `tmp/restart.txt` faktycznie wylądował (przez FTP zobacz datę).
