@@ -53,42 +53,63 @@ jobs:
           mkdir -p tmp
           date -u +"%Y-%m-%dT%H:%M:%SZ deploy=${{ github.sha }}" > tmp/restart.txt
 
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # Poświadczenia przez `-u user,pass`, skrypt lftp przez
+      # `-e "source ..."`. Nie ma konfliktu z URL (błąd „conflict with
+      # other `open' options" dotyczy tylko `-c/-f/-v/-h`). Skrypt
+      # zawiera same komendy — open dzieje się automatycznie przez URL
+      # z argumentu.
+      #
+      # Sanity-check przed uruchomieniem — łapie sytuację, gdy sekret
+      # nie został dodany albo dodany pod inną nazwą (długość zamiast
+      # samej wartości, więc secret nie wycieka do logu).
       - name: Deploy via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ vars.MYDEVIL_FTP_HOST || 's70.mydevil.net' }}
-          protocol: ftps
-          port: 21
-          username: ${{ secrets.MYDEVIL_FTP_USER }}
-          password: ${{ secrets.MYDEVIL_FTP_PASSWORD }}
-          # Katalog docelowy — ścieżka względna do korzenia konta FTP
-          # (`f1448_sedziowie` ma korzeń na poziomie ~/).
-          server-dir: ./domains/sedziowie.szps.pl/public_python/
-          local-dir: ./
-          # Śledzenie inkrementalne — akcja wgrywa tylko pliki które się
-          # zmieniły od ostatniego deployu (stan w .ftp-deploy-sync-state.json).
-          state-name: .ftp-deploy-sync-state.json
-          # Log jednym slajdem — bez debug spamu w Actions.
-          log-level: standard
-          # Pliki i katalogi pomijane. Chronią .env i public/media na serwerze
-          # przed nadpisaniem / skasowaniem przez akcję.
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            **/.venv/**
-            **/venv/**
-            **/__pycache__/**
-            **/*.pyc
-            **/db.sqlite3
-            **/db.sqlite3-journal
-            **/.env
-            **/.env.*
-            **/public/media/**
-            **/uploads/**
-            **/screenshots/**
-            **/z_orig.png
-            **/.thumbnail
-            **/node_modules/**
-            **/docs/**
-            **/.DS_Store
+        env:
+          MYDEVIL_FTP_HOST: ${{ vars.MYDEVIL_FTP_HOST || 's70.mydevil.net' }}
+          MYDEVIL_FTP_USER: ${{ secrets.MYDEVIL_FTP_USER }}
+          MYDEVIL_FTP_PASSWORD: ${{ secrets.MYDEVIL_FTP_PASSWORD }}
+          REMOTE_DIR: /domains/sedziowie.szps.pl/public_python
+        run: |
+          if [ -z "${MYDEVIL_FTP_USER}" ] || [ -z "${MYDEVIL_FTP_PASSWORD}" ]; then
+            echo "ERROR: brak sekretów MYDEVIL_FTP_USER / MYDEVIL_FTP_PASSWORD."
+            echo "       user length: ${#MYDEVIL_FTP_USER}, password length: ${#MYDEVIL_FTP_PASSWORD}"
+            echo "       Dodaj je w Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "Credentials present: host=${MYDEVIL_FTP_HOST}, user=${#MYDEVIL_FTP_USER}ch, password=${#MYDEVIL_FTP_PASSWORD}ch"
+
+          # Skrypt lftp:
+          # 1. mirror --reverse pcha całe repo do __REMOTE_DIR__, ALE
+          #    pomija katalog tmp/ — dzięki temu tmp/restart.txt nie
+          #    trafi na serwer w losowym momencie (Passenger nie
+          #    zrestartuje się na w połowie wgranej wersji).
+          # 2. put -O wgrywa tmp/restart.txt jako ostatnią czynność —
+          #    Passenger widzi nową mtime dopiero gdy reszta jest już
+          #    na miejscu.
+          # `--only-newer` celowo nie używamy: blokowałoby propagację
+          # `git revert` (serwer miałby „nowszy" plik).
+          cat > /tmp/deploy.lftp <<'LFTP_SCRIPT'
+          set ssl:verify-certificate no
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ftp:ssl-allow yes
+          set ftp:passive-mode true
+          set net:timeout 30
+          set net:max-retries 3
+          set net:reconnect-interval-base 5
+          set mirror:parallel-transfer-count 4
+          mirror --reverse --verbose --exclude-glob .git/ --exclude-glob .github/ --exclude-glob .venv/ --exclude-glob venv/ --exclude-glob __pycache__/ --exclude-glob '*.pyc' --exclude-glob db.sqlite3 --exclude-glob db.sqlite3-journal --exclude-glob .env --exclude-glob '.env.*' --exclude public/media/ --exclude-glob tmp/ --exclude-glob uploads/ --exclude-glob screenshots/ --exclude-glob z_orig.png --exclude-glob .thumbnail --exclude-glob node_modules/ --exclude-glob docs/ --exclude-glob .DS_Store --exclude-glob .ftp-deploy-sync-state.json ./ __REMOTE_DIR__/
+          mkdir -p __REMOTE_DIR__/tmp
+          put -O __REMOTE_DIR__/tmp tmp/restart.txt
+          bye
+          LFTP_SCRIPT
+          sed -i "s|__REMOTE_DIR__|${REMOTE_DIR}|g" /tmp/deploy.lftp
+
+          echo "--- lftp script ---"
+          cat /tmp/deploy.lftp
+          echo "--- running lftp ---"
+          lftp -u "${MYDEVIL_FTP_USER},${MYDEVIL_FTP_PASSWORD}" \
+               -e "source /tmp/deploy.lftp" \
+               "ftp://${MYDEVIL_FTP_HOST}"
