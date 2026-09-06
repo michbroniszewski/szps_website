@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+
+# Django
+*.sqlite3
+*.sqlite3-journal
+/staticfiles/
+/media/
+# collectstatic output + user-uploaded media — generowane, nie commitujemy
+/public/
+local_settings.py
+
+# FTP-Deploy-Action state (jeśli ktoś ściągnął z serwera)
+.ftp-deploy-sync-state.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Node (na wypadek gdyby coś doszło)
+node_modules/

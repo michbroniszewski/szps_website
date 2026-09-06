@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} — Wydział Sędziowski ŚZPS{% endblock %}
+
+{% block content %}
+<article>
+  <h1>{{ article.title }}</h1>
+  <p><small>{{ article.published_at|date:"j E Y" }}</small></p>
+  {% if article.lead %}<p><strong>{{ article.lead }}</strong></p>{% endif %}
+  <div>{{ article.body|safe }}</div>
+</article>
+<p><a href="{% url 'pages:home' %}">← powrót</a></p>
+{% endblock %}
