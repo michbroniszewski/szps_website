@@ -56,15 +56,15 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
-      # lftp mirror zamiast SamKirkland/basic-ftp — basic-ftp gubi się
-      # na kanale danych TLS mydevila (`SSL alert 50`), lftp działa OK.
+      # Poświadczenia przez `-u user,pass`, skrypt lftp przez
+      # `-e "source ..."`. Nie ma konfliktu z URL (błąd „conflict with
+      # other `open' options" dotyczy tylko `-c/-f/-v/-h`). Skrypt
+      # zawiera same komendy — open dzieje się automatycznie przez URL
+      # z argumentu.
       #
-      # Poświadczenia zapisujemy do ~/.netrc (chmod 600, printf %s bez
-      # interpretacji specjalnych znaków w haśle), lftp bierze je stamtąd
-      # automatycznie. Skrypt lftp to quoted heredoc — żadnych rozwinięć
-      # shellowych w środku, tylko HOST i REMOTE_DIR wstawiane przez sed.
-      # Tak unikamy konfliktu `-f` z argumentami URL/`-u` (lftp odrzuca
-      # `-f` gdy przekażesz URL w linii poleceń).
+      # Sanity-check przed uruchomieniem — łapie sytuację, gdy sekret
+      # nie został dodany albo dodany pod inną nazwą (długość zamiast
+      # samej wartości, więc secret nie wycieka do logu).
       - name: Deploy via FTPS
         env:
           MYDEVIL_FTP_HOST: ${{ vars.MYDEVIL_FTP_HOST || 's70.mydevil.net' }}
@@ -72,10 +72,13 @@ jobs:
           MYDEVIL_FTP_PASSWORD: ${{ secrets.MYDEVIL_FTP_PASSWORD }}
           REMOTE_DIR: /domains/sedziowie.szps.pl/public_python
         run: |
-          umask 077
-          printf 'machine %s\nlogin %s\npassword %s\n' \
-            "${MYDEVIL_FTP_HOST}" "${MYDEVIL_FTP_USER}" "${MYDEVIL_FTP_PASSWORD}" \
-            > "$HOME/.netrc"
+          if [ -z "${MYDEVIL_FTP_USER}" ] || [ -z "${MYDEVIL_FTP_PASSWORD}" ]; then
+            echo "ERROR: brak sekretów MYDEVIL_FTP_USER / MYDEVIL_FTP_PASSWORD."
+            echo "       user length: ${#MYDEVIL_FTP_USER}, password length: ${#MYDEVIL_FTP_PASSWORD}"
+            echo "       Dodaj je w Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "Credentials present: host=${MYDEVIL_FTP_HOST}, user=${#MYDEVIL_FTP_USER}ch, password=${#MYDEVIL_FTP_PASSWORD}ch"
 
           # Skrypt lftp:
           # 1. mirror --reverse pcha całe repo do __REMOTE_DIR__, ALE
@@ -97,15 +100,16 @@ jobs:
           set net:max-retries 3
           set net:reconnect-interval-base 5
           set mirror:parallel-transfer-count 4
-          open ftp://__HOST__
           mirror --reverse --verbose --exclude-glob .git/ --exclude-glob .github/ --exclude-glob .venv/ --exclude-glob venv/ --exclude-glob __pycache__/ --exclude-glob '*.pyc' --exclude-glob db.sqlite3 --exclude-glob db.sqlite3-journal --exclude-glob .env --exclude-glob '.env.*' --exclude public/media/ --exclude-glob tmp/ --exclude-glob uploads/ --exclude-glob screenshots/ --exclude-glob z_orig.png --exclude-glob .thumbnail --exclude-glob node_modules/ --exclude-glob docs/ --exclude-glob .DS_Store --exclude-glob .ftp-deploy-sync-state.json ./ __REMOTE_DIR__/
           mkdir -p __REMOTE_DIR__/tmp
           put -O __REMOTE_DIR__/tmp tmp/restart.txt
           bye
           LFTP_SCRIPT
-          sed -i "s|__HOST__|${MYDEVIL_FTP_HOST}|g; s|__REMOTE_DIR__|${REMOTE_DIR}|g" /tmp/deploy.lftp
+          sed -i "s|__REMOTE_DIR__|${REMOTE_DIR}|g" /tmp/deploy.lftp
 
           echo "--- lftp script ---"
           cat /tmp/deploy.lftp
           echo "--- running lftp ---"
-          lftp -f /tmp/deploy.lftp
+          lftp -u "${MYDEVIL_FTP_USER},${MYDEVIL_FTP_PASSWORD}" \
+               -e "source /tmp/deploy.lftp" \
+               "ftp://${MYDEVIL_FTP_HOST}"
