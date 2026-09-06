@@ -34,7 +34,7 @@
           {% if member.photo %}
             <img src="{{ member.photo.url }}" alt="{{ member.full_name }}">
           {% else %}
-            <image-slot id="m{{ forloop.counter }}" shape="rect" placeholder="Zdjęcie"></image-slot>
+            <div class="member__photo-placeholder" aria-hidden="true"></div>
           {% endif %}
         </div>
         <div class="member__rolebar"></div>

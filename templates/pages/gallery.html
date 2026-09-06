@@ -26,7 +26,7 @@
       <span>Galeria</span>
     </div>
     <h1>Ga<span class="accent">leria</span></h1>
-    <p>Sędziowie w akcji, szkolenia, egzaminy i wydarzenia. Przeciągnij własne zdjęcia na kafelki, aby je dodać.</p>
+    <p>Sędziowie w akcji, szkolenia, egzaminy i wydarzenia.</p>
   </div>
 </section>
 
@@ -34,18 +34,18 @@
 <section class="section" data-screen-label="Galeria — siatka">
   <div class="wrap">
     <div class="gallery">
-      <image-slot id="gal1" class="g-wide g-tall" shape="rounded" radius="16" placeholder="Zdjęcie 1 — przeciągnij tutaj"></image-slot>
-      <image-slot id="gal2" shape="rounded" radius="16" placeholder="Zdjęcie 2"></image-slot>
-      <image-slot id="gal3" shape="rounded" radius="16" placeholder="Zdjęcie 3"></image-slot>
-      <image-slot id="gal4" shape="rounded" radius="16" placeholder="Zdjęcie 4"></image-slot>
-      <image-slot id="gal5" shape="rounded" radius="16" placeholder="Zdjęcie 5"></image-slot>
-      <image-slot id="gal6" shape="rounded" radius="16" placeholder="Zdjęcie 6"></image-slot>
-      <image-slot id="gal7" class="g-tall" shape="rounded" radius="16" placeholder="Zdjęcie 7"></image-slot>
-      <image-slot id="gal8" shape="rounded" radius="16" placeholder="Zdjęcie 8"></image-slot>
-      <image-slot id="gal9" class="g-wide" shape="rounded" radius="16" placeholder="Zdjęcie 9"></image-slot>
-      <image-slot id="gal10" shape="rounded" radius="16" placeholder="Zdjęcie 10"></image-slot>
-      <image-slot id="gal11" shape="rounded" radius="16" placeholder="Zdjęcie 11"></image-slot>
-      <image-slot id="gal12" shape="rounded" radius="16" placeholder="Zdjęcie 12"></image-slot>
+      <div class="gallery-slot g-wide g-tall" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
+      <div class="gallery-slot g-tall" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
+      <div class="gallery-slot g-wide" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
+      <div class="gallery-slot" aria-hidden="true"></div>
     </div>
 
     <div class="reveal" style="margin-top:44px;text-align:center">
@@ -58,24 +58,3 @@
 </section>
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-/* Galeria: dodawanie/zmiana zdjęć dostępne wyłącznie dla administratora.
-   Poza środowiskiem edycyjnym kafelki są tylko do odczytu — blokujemy
-   przeciąganie i wybór pliku, a puste miejsca ukrywamy przed gośćmi. */
-(function(){
-  if (window.omelette && window.omelette.writeFile) return; // administrator
-  var slots = document.querySelectorAll('image-slot');
-  var sync = function(){
-    slots.forEach(function(s){
-      s.style.pointerEvents = 'none';
-      s.style.display = s.hasAttribute('data-filled') ? '' : 'none';
-    });
-  };
-  slots.forEach(function(s){
-    new MutationObserver(sync).observe(s, {attributes:true, attributeFilter:['data-filled']});
-  });
-  sync();
-})();
-</script>
-{% endblock %}
