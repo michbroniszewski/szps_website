@@ -56,10 +56,13 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
-      # lftp mirror (nie SamKirkland/basic-ftp) — ProFTPD mydevila wymaga
-      # session reuse na kanale danych TLS, czego basic-ftp nie robi
-      # (kończyło się `tlsv1 alert decode error`). lftp obsługuje to
-      # natywnie przez ssl:use-tls-session-cache.
+      # lftp mirror zamiast SamKirkland/basic-ftp — basic-ftp gubi się
+      # na kanale danych TLS mydevila (`SSL alert 50`), lftp działa OK.
+      #
+      # Skrypt lftp jest zapisywany do pliku przez quoted heredoc
+      # (żadnych rozwinięć shellowych w środku), a REMOTE_DIR wstawiamy
+      # przez sed. Poświadczenia i host lecą jako argumenty CLI, więc
+      # nie ma ryzyka błędnego cytowania hasła.
       - name: Deploy via FTPS
         env:
           MYDEVIL_FTP_HOST: ${{ vars.MYDEVIL_FTP_HOST || 's70.mydevil.net' }}
@@ -67,38 +70,21 @@ jobs:
           MYDEVIL_FTP_PASSWORD: ${{ secrets.MYDEVIL_FTP_PASSWORD }}
           REMOTE_DIR: /domains/sedziowie.szps.pl/public_python
         run: |
-          lftp -c "
-            set ssl:verify-certificate no;
-            set ssl:use-tls-session-cache yes;
-            set ftp:ssl-force true;
-            set ftp:ssl-protect-data true;
-            set ftp:ssl-allow yes;
-            set ftp:passive-mode true;
-            set net:max-retries 3;
-            set net:reconnect-interval-base 5;
-            set net:timeout 30;
-            set mirror:parallel-transfer-count 4;
-            open ftp://\"\$MYDEVIL_FTP_USER\":\"\$MYDEVIL_FTP_PASSWORD\"@\$MYDEVIL_FTP_HOST;
-            mirror --reverse --verbose --only-newer \
-              --exclude-glob .git/ \
-              --exclude-glob .github/ \
-              --exclude-glob .venv/ \
-              --exclude-glob venv/ \
-              --exclude-glob __pycache__/ \
-              --exclude-glob '*.pyc' \
-              --exclude-glob db.sqlite3 \
-              --exclude-glob db.sqlite3-journal \
-              --exclude-glob .env \
-              --exclude-glob '.env.*' \
-              --exclude public/media/ \
-              --exclude-glob uploads/ \
-              --exclude-glob screenshots/ \
-              --exclude-glob z_orig.png \
-              --exclude-glob .thumbnail \
-              --exclude-glob node_modules/ \
-              --exclude-glob docs/ \
-              --exclude-glob .DS_Store \
-              --exclude-glob .ftp-deploy-sync-state.json \
-              ./ \$REMOTE_DIR/;
-            bye;
-          "
+          cat > /tmp/deploy.lftp <<'LFTP_SCRIPT'
+          set ssl:verify-certificate no
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ftp:ssl-allow yes
+          set ftp:passive-mode true
+          set net:timeout 30
+          set net:max-retries 3
+          set net:reconnect-interval-base 5
+          set mirror:parallel-transfer-count 4
+          mirror --reverse --verbose --only-newer --exclude-glob .git/ --exclude-glob .github/ --exclude-glob .venv/ --exclude-glob venv/ --exclude-glob __pycache__/ --exclude-glob '*.pyc' --exclude-glob db.sqlite3 --exclude-glob db.sqlite3-journal --exclude-glob .env --exclude-glob '.env.*' --exclude public/media/ --exclude-glob uploads/ --exclude-glob screenshots/ --exclude-glob z_orig.png --exclude-glob .thumbnail --exclude-glob node_modules/ --exclude-glob docs/ --exclude-glob .DS_Store --exclude-glob .ftp-deploy-sync-state.json ./ __REMOTE_DIR__/
+          bye
+          LFTP_SCRIPT
+          sed -i "s|__REMOTE_DIR__|${REMOTE_DIR}|g" /tmp/deploy.lftp
+          echo "--- lftp script ---"
+          cat /tmp/deploy.lftp
+          echo "--- running lftp ---"
+          lftp -u "${MYDEVIL_FTP_USER},${MYDEVIL_FTP_PASSWORD}" -f /tmp/deploy.lftp "ftp://${MYDEVIL_FTP_HOST}"
