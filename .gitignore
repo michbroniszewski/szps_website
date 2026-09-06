@@ -12,7 +12,12 @@ env/
 *.sqlite3-journal
 /staticfiles/
 /media/
+# collectstatic output + user-uploaded media — generowane, nie commitujemy
+/public/
 local_settings.py
+
+# FTP-Deploy-Action state (jeśli ktoś ściągnął z serwera)
+.ftp-deploy-sync-state.json
 
 # Environment
 .env

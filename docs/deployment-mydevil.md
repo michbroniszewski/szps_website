@@ -117,11 +117,13 @@ Skrypt jest **idempotentny** — bezpiecznie można go uruchomić drugi raz.
 - wgraj `requirements.txt`
 - poproś administratora o `bash scripts/mydevil-setup.sh`
 
-## Automatyzacja (opcjonalnie, na przyszłość)
+## Automatyzacja kolejnych deployów
 
-Docelowo warto ustawić GitHub Actions z `git-ftp` — wtedy `git push` na
-`main` automatycznie synchronizuje pliki przez SFTP i uderza w
-`tmp/restart.txt`. Instrukcja w osobnym pliku (do zrobienia w kroku 2b).
+Po pierwszym setupie kolejne wdrożenia idą automatycznie przez GitHub
+Actions — patrz [`github-actions-deploy.md`](./github-actions-deploy.md).
+Krótko: dodajesz dwa sekrety (`MYDEVIL_FTP_USER`, `MYDEVIL_FTP_PASSWORD`)
+w GitHubie i `git push main` deploy'uje same. Migracje bazy i nowe pakiety
+pip nadal wymagają uruchomienia `scripts/mydevil-setup.sh` przez admina.
 
 ## Logi
 

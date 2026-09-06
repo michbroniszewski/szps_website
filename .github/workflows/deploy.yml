@@ -1,0 +1,94 @@
+name: Deploy to mydevil
+
+# Wywoływane automatycznie po pushu do main oraz ręcznie z zakładki Actions
+# (przycisk "Run workflow" — przydatne do pierwszego uruchomienia i testów).
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Nie odpalamy równolegle dwóch deployów — kolejny czeka aż poprzedni skończy.
+concurrency:
+  group: deploy-mydevil
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Sync files to sedziowie.szps.pl
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install project dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # collectstatic uruchamiamy w CI, żeby nie musieć go odpalać na
+      # serwerze — od razu wysyłamy gotowe public/static/.
+      # Dane bazy nieistotne (collectstatic nie łączy się z DB), ale
+      # settings.py wymaga zdefiniowanego SECRET_KEY.
+      - name: Collect static files
+        env:
+          DJANGO_SECRET_KEY: ci-only-not-used-at-runtime
+          DJANGO_DEBUG: "False"
+          DJANGO_ALLOWED_HOSTS: sedziowie.szps.pl
+          DB_ENGINE: sqlite
+        run: python manage.py collectstatic --noinput --clear
+
+      # Aktualizacja pliku restartu — Passenger wykrywa zmianę mtime i
+      # przeładowuje aplikację. Deploy uploaduje ten plik jako ostatni,
+      # więc restart dzieje się dopiero gdy reszta jest już na serwerze.
+      - name: Refresh restart trigger
+        run: |
+          mkdir -p tmp
+          date -u +"%Y-%m-%dT%H:%M:%SZ deploy=${{ github.sha }}" > tmp/restart.txt
+
+      - name: Deploy via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ vars.MYDEVIL_FTP_HOST || 's70.mydevil.net' }}
+          protocol: ftps
+          port: 21
+          username: ${{ secrets.MYDEVIL_FTP_USER }}
+          password: ${{ secrets.MYDEVIL_FTP_PASSWORD }}
+          # Katalog docelowy — ścieżka względna do korzenia konta FTP
+          # (`f1448_sedziowie` ma korzeń na poziomie ~/).
+          server-dir: ./domains/sedziowie.szps.pl/public_python/
+          local-dir: ./
+          # Śledzenie inkrementalne — akcja wgrywa tylko pliki które się
+          # zmieniły od ostatniego deployu (stan w .ftp-deploy-sync-state.json).
+          state-name: .ftp-deploy-sync-state.json
+          # Log jednym slajdem — bez debug spamu w Actions.
+          log-level: standard
+          # Pliki i katalogi pomijane. Chronią .env i public/media na serwerze
+          # przed nadpisaniem / skasowaniem przez akcję.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.venv/**
+            **/venv/**
+            **/__pycache__/**
+            **/*.pyc
+            **/db.sqlite3
+            **/db.sqlite3-journal
+            **/.env
+            **/.env.*
+            **/public/media/**
+            **/uploads/**
+            **/screenshots/**
+            **/z_orig.png
+            **/.thumbnail
+            **/node_modules/**
+            **/docs/**
+            **/.DS_Store
