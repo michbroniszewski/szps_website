@@ -80,17 +80,23 @@ jobs:
           fi
           echo "Credentials present: host=${MYDEVIL_FTP_HOST}, user=${#MYDEVIL_FTP_USER}ch, password=${#MYDEVIL_FTP_PASSWORD}ch"
 
-          # Skrypt lftp:
-          # 1. mirror --reverse pcha całe repo do __REMOTE_DIR__, ALE
-          #    pomija katalog tmp/ — dzięki temu tmp/restart.txt nie
-          #    trafi na serwer w losowym momencie (Passenger nie
-          #    zrestartuje się na w połowie wgranej wersji).
-          # 2. put -O wgrywa tmp/restart.txt jako ostatnią czynność —
-          #    Passenger widzi nową mtime dopiero gdy reszta jest już
-          #    na miejscu.
-          # `--only-newer` celowo nie używamy: blokowałoby propagację
-          # `git revert` (serwer miałby „nowszy" plik).
+          # Skrypt lftp — kluczowe ustawienia:
+          # * debug 3          — pełny log FTP (wire-level), potrzebny do
+          #                     diagnostyki gdy mirror milknie
+          # * cmd:fail-exit no — nie przerywaj skryptu na pierwszym błędzie
+          #                     (ProFTPD mydevila zwraca 550 na MKD dla
+          #                     istniejącego katalogu; mirror by abortował)
+          # * --transfer-all   — wgraj każdy plik niezależnie od
+          #                     porównania size/mtime; git checkout resetuje
+          #                     mtime, więc porównanie i tak jest bezużyteczne
+          # * `cd REMOTE_DIR`  — pracujemy relatywnie do docelowego
+          #                     katalogu, żeby ścieżki w logach były
+          #                     czytelne
+          # * `tmp/restart.txt` osobnym `put` na końcu — Passenger widzi
+          #     zmianę mtime dopiero gdy reszta plików jest już wgrana.
           cat > /tmp/deploy.lftp <<'LFTP_SCRIPT'
+          debug 3
+          set cmd:fail-exit no
           set ssl:verify-certificate no
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
@@ -99,10 +105,15 @@ jobs:
           set net:timeout 30
           set net:max-retries 3
           set net:reconnect-interval-base 5
-          set mirror:parallel-transfer-count 4
-          mirror --reverse --verbose --exclude-glob .git/ --exclude-glob .github/ --exclude-glob .venv/ --exclude-glob venv/ --exclude-glob __pycache__/ --exclude-glob '*.pyc' --exclude-glob db.sqlite3 --exclude-glob db.sqlite3-journal --exclude-glob .env --exclude-glob '.env.*' --exclude public/media/ --exclude-glob tmp/ --exclude-glob uploads/ --exclude-glob screenshots/ --exclude-glob z_orig.png --exclude-glob .thumbnail --exclude-glob node_modules/ --exclude-glob docs/ --exclude-glob .DS_Store --exclude-glob .ftp-deploy-sync-state.json ./ __REMOTE_DIR__/
-          mkdir -p __REMOTE_DIR__/tmp
-          put -O __REMOTE_DIR__/tmp tmp/restart.txt
+          set mirror:parallel-transfer-count 2
+          echo "=== cd to remote dir ==="
+          cd __REMOTE_DIR__
+          pwd
+          echo "=== starting mirror ==="
+          mirror --reverse --verbose --transfer-all --exclude-glob .git/ --exclude-glob .github/ --exclude-glob .venv/ --exclude-glob venv/ --exclude-glob __pycache__/ --exclude-glob '*.pyc' --exclude-glob db.sqlite3 --exclude-glob db.sqlite3-journal --exclude-glob .env --exclude-glob '.env.*' --exclude public/media/ --exclude-glob tmp/ --exclude-glob uploads/ --exclude-glob screenshots/ --exclude-glob z_orig.png --exclude-glob .thumbnail --exclude-glob node_modules/ --exclude-glob docs/ --exclude-glob .DS_Store --exclude-glob .ftp-deploy-sync-state.json ./ .
+          echo "=== mirror done, uploading restart trigger ==="
+          put -o tmp/restart.txt tmp/restart.txt
+          echo "=== all done ==="
           bye
           LFTP_SCRIPT
           sed -i "s|__REMOTE_DIR__|${REMOTE_DIR}|g" /tmp/deploy.lftp
