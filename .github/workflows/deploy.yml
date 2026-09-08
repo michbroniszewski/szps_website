@@ -111,8 +111,19 @@ jobs:
           pwd
           echo "=== starting mirror ==="
           mirror --reverse --verbose --transfer-all --exclude-glob .git/ --exclude-glob .github/ --exclude-glob .venv/ --exclude-glob venv/ --exclude-glob __pycache__/ --exclude-glob '*.pyc' --exclude-glob db.sqlite3 --exclude-glob db.sqlite3-journal --exclude-glob .env --exclude-glob '.env.*' --exclude public/media/ --exclude-glob tmp/ --exclude-glob uploads/ --exclude-glob screenshots/ --exclude-glob z_orig.png --exclude-glob .thumbnail --exclude-glob node_modules/ --exclude-glob docs/ --exclude-glob .DS_Store --exclude-glob .ftp-deploy-sync-state.json ./ .
-          echo "=== mirror done, uploading restart trigger ==="
+          echo "=== mirror done, forcing fresh restart trigger ==="
+          echo "--- state before ---"
+          cls -la tmp/
+          rm tmp/restart.txt
           put tmp/restart.txt -o tmp/restart.txt
+          chmod 644 tmp/restart.txt
+          echo "--- state after ---"
+          cls -la tmp/
+          echo "=== also refreshing passenger_wsgi.py mtime ==="
+          cls -la passenger_wsgi.py
+          rm passenger_wsgi.py
+          put passenger_wsgi.py -o passenger_wsgi.py
+          cls -la passenger_wsgi.py
           echo "=== all done ==="
           bye
           LFTP_SCRIPT
