@@ -70,7 +70,12 @@ jobs:
           MYDEVIL_FTP_HOST: ${{ vars.MYDEVIL_FTP_HOST || 's70.mydevil.net' }}
           MYDEVIL_FTP_USER: ${{ secrets.MYDEVIL_FTP_USER }}
           MYDEVIL_FTP_PASSWORD: ${{ secrets.MYDEVIL_FTP_PASSWORD }}
-          REMOTE_DIR: /domains/sedziowie.szps.pl/public_python
+          # Passenger uruchamia aplikację z ~/public_python/ (tak
+          # skonfigurował ją administrator), NIE z katalogu domeny.
+          # Katalog domenowy istnieje na koncie, ale jest nieużywany —
+          # deploy tam nie miał żadnego efektu (Django czytał kod z
+          # innego miejsca).
+          REMOTE_DIR: /public_python
         run: |
           if [ -z "${MYDEVIL_FTP_USER}" ] || [ -z "${MYDEVIL_FTP_PASSWORD}" ]; then
             echo "ERROR: brak sekretów MYDEVIL_FTP_USER / MYDEVIL_FTP_PASSWORD."

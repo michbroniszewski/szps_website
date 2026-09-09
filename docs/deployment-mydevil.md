@@ -5,14 +5,14 @@
 - Domena `sedziowie.szps.pl` skonfigurowana jako **PythonSite** w panelu mydevil.
 - Baza PostgreSQL utworzona — masz dane: host, nazwa bazy, user, hasło.
 - Dostęp SFTP (konto `f1448_sedziowie` na `s70.mydevil.net`) do katalogu
-  `~/domains/sedziowie.szps.pl/public_python/`.
+  `~/public_python/`.
 - Dostęp SSH tylko przez konto główne mydevil (lub przez administratora
   konta głównego).
 
 ## Struktura docelowa na serwerze
 
 ```
-~/domains/sedziowie.szps.pl/public_python/
+~/public_python/
 ├── passenger_wsgi.py        (z repo)
 ├── manage.py                (z repo)
 ├── config/, pages/, board/, documents/, templates/, static/  (z repo)
@@ -52,7 +52,7 @@ DB_PORT=5432
 
 ### 1. Upload przez SFTP (Ty, ~10 min)
 
-Wgraj **całą zawartość repo** do `~/domains/sedziowie.szps.pl/public_python/`,
+Wgraj **całą zawartość repo** do `~/public_python/`,
 z pominięciem:
 - `.git/`
 - `.venv/`
@@ -75,10 +75,10 @@ serwerze po zakończeniu uploadu.
 
 Wyślij osobie z dostępem SSH:
 
-> W katalogu `~/domains/sedziowie.szps.pl/public_python/` wgrałem kod
+> W katalogu `~/public_python/` wgrałem kod
 > Django. Wejdź SSH i uruchom:
 > ```
-> cd ~/domains/sedziowie.szps.pl/public_python && bash scripts/mydevil-setup.sh
+> cd ~/public_python && bash scripts/mydevil-setup.sh
 > ```
 > Skrypt zapyta o login/e-mail/hasło do konta administratora panelu — podaj
 > mi je po fakcie (albo ustaw dowolne i przekaż mi hasło do zmiany).

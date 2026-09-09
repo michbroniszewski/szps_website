@@ -2,7 +2,7 @@
 #
 # Jednorazowa instalacja aplikacji Django na mydevil.net.
 #
-# Uruchamiaj z katalogu ~/domains/sedziowie.szps.pl/public_python/ :
+# Uruchamiaj z katalogu ~/public_python/ :
 #     bash scripts/mydevil-setup.sh
 #
 # Skrypt jest idempotentny — można go bezpiecznie uruchomić drugi raz;
