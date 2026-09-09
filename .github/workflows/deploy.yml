@@ -54,7 +54,15 @@ jobs:
           date -u +"%Y-%m-%dT%H:%M:%SZ deploy=${{ github.sha }}" > tmp/restart.txt
 
       - name: Install lftp
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+        # `apt-get update` bywa flaky (Google Chrome / inne third-party
+        # repo na runnerze potrafią zwrócić Hash Sum mismatch). Traktujemy
+        # go jako non-fatal — lftp jest w standardowych repo Ubuntu i
+        # zwykle da się zainstalować z indeksu już buforowanego w obrazie
+        # runnera. Jeśli faktycznie nie ma pakietu, install padnie
+        # z czytelnym komunikatem.
+        run: |
+          sudo apt-get update -qq || echo "apt-get update returned non-zero, continuing with cached indices"
+          sudo apt-get install -y -qq lftp
 
       # Poświadczenia przez `-u user,pass`, skrypt lftp przez
       # `-e "source ..."`. Nie ma konfliktu z URL (błąd „conflict with
