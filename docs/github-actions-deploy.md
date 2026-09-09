@@ -95,7 +95,7 @@ Pomijane (nie tykają serwera):
 nowego modelu lub zmianie pola w istniejącym musisz poprosić admina o:
 
 ```bash
-cd ~/domains/sedziowie.szps.pl/public_python && bash scripts/mydevil-setup.sh
+cd ~/public_python && bash scripts/mydevil-setup.sh
 ```
 
 Skrypt jest idempotentny — bezpiecznie wykona `pip install` (jeśli
@@ -110,7 +110,7 @@ wymagają `mydevil-setup.sh` u admina.
 i `MYDEVIL_FTP_PASSWORD` w Settings → Secrets.
 
 **„550 Failed to change directory"** — zła ścieżka `REMOTE_DIR` w workflow.
-Sprawdź czy `/domains/sedziowie.szps.pl/public_python` odpowiada temu,
+Sprawdź czy `/public_python` odpowiada temu,
 co widzisz po zalogowaniu przez FTP.
 
 **„tlsv1 alert decode error" / SSL alert 50** — to problem starych akcji
