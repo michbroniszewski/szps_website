@@ -303,25 +303,31 @@ button{font-family:inherit;cursor:pointer}
 .news-card__more svg{width:16px;height:16px;transition:transform .2s}
 .news-card:hover .news-card__more svg{transform:translateX(4px)}
 
-/* expandable post body */
-.news-card__full{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .32s ease,opacity .25s ease,margin-top .32s ease;margin-top:0}
-.news-card__full>*{overflow:hidden;min-height:0}
-.news-card.is-open .news-card__full{grid-template-rows:1fr;opacity:1;margin-top:14px}
-.news-card__full p{flex:none;margin:0 0 10px}
-.news-card__full p:last-child{margin-bottom:0}
-.news-card__full a{color:var(--blue-d);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+/* Elementy używane w treści rozwiniętej artykułu (body_extended) */
 .news-card__schedule{list-style:none;padding:0;margin:4px 0 12px;display:flex;flex-direction:column;gap:10px}
 .news-card__schedule li{display:flex;flex-direction:column;gap:2px;padding:11px 14px;background:var(--soft);border:1px solid var(--line);border-radius:12px}
 .news-card__schedule b{font-family:var(--font-display);font-size:14px;letter-spacing:.01em}
 .news-card__schedule span{color:var(--ink-soft);font-size:14px;line-height:1.4}
 .news-card__schedule i{font-style:normal;opacity:.8}
 .news-card__credit{font-size:13.5px!important;color:var(--ink-soft);font-weight:600}
-.news-card__more{cursor:pointer;background:none;border:0;padding:0;text-align:left}
-.news-card__more-hide{display:none}
-.news-card.is-open .news-card__more-show{display:none}
-.news-card.is-open .news-card__more-hide{display:inline}
-.news-card.is-open .news-card__more svg{transform:rotate(90deg)}
-.news-card.is-open:hover .news-card__more svg{transform:rotate(90deg) translateX(4px)}
+.news-card__more{text-decoration:none}
+.news-card__more:hover{color:var(--gold)}
+
+/* ============================================================
+   ARTICLE DETAIL — pojedyncza aktualność
+   ============================================================ */
+.article{max-width:780px;margin:0 auto}
+.article__cover{border-radius:20px;overflow:hidden;margin-bottom:28px;box-shadow:var(--shadow-md)}
+.article__cover img{width:100%;height:auto;display:block}
+.article__meta{display:flex;align-items:center;gap:12px;color:var(--ink-soft);font-family:var(--font-display);font-weight:600;font-size:14px;margin-top:14px}
+.article__lead{font-size:19px;line-height:1.55;color:var(--ink);font-weight:600;margin:0 0 22px;padding-left:16px;border-left:3px solid var(--gold)}
+.article__body{font-size:16.5px;line-height:1.7;color:var(--ink)}
+.article__body p{margin:0 0 16px}
+.article__body p:last-child{margin-bottom:0}
+.article__body a{color:var(--blue-d);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.article__body ul,.article__body ol{margin:0 0 16px;padding-left:22px}
+.article__body h2,.article__body h3{font-family:var(--font-display);font-weight:800;margin:28px 0 12px;letter-spacing:-.01em}
+.article__body img{max-width:100%;height:auto;border-radius:12px;margin:12px 0}
 
 /* ============================================================
    DOKUMENTY

@@ -126,13 +126,4 @@
   /* ---- Current year ---- */
   const y = document.getElementById('year');
   if (y) y.textContent = new Date().getFullYear();
-
-  /* ---- Expandable news posts ---- */
-  document.querySelectorAll('.news-card__more').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const card = btn.closest('.news-card');
-      const open = card.classList.toggle('is-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  });
 })();

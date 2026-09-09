@@ -70,12 +70,10 @@
           <h3>{{ article.title }}</h3>
           <div>{{ article.body|safe }}</div>
           {% if article.body_extended %}
-          <div class="news-card__full">{{ article.body_extended|safe }}</div>
-          <button class="news-card__more" type="button" aria-expanded="false">
-            <span class="news-card__more-show">Czytaj więcej</span>
-            <span class="news-card__more-hide">Zwiń</span>
+          <a class="news-card__more" href="{% url 'pages:article_detail' article.slug %}">
+            <span>Czytaj więcej</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
+          </a>
           {% endif %}
         </div>
       </article>

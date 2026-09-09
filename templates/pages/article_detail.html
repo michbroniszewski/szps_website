@@ -1,13 +1,63 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ article.title }} — Wydział Sędziowski ŚZPS{% endblock %}
+{% block meta_description %}{{ article.lead|default:article.title }}{% endblock %}
+{% block og_title %}{{ article.title }}{% endblock %}
+{% block og_description %}{{ article.lead|default:article.title }}{% endblock %}
 
 {% block content %}
-<article>
-  <h1>{{ article.title }}</h1>
-  <p><small>{{ article.published_at|date:"j E Y" }}</small></p>
-  {% if article.lead %}<p><strong>{{ article.lead }}</strong></p>{% endif %}
-  <div>{{ article.body|safe }}</div>
-</article>
-<p><a href="{% url 'pages:home' %}">← powrót</a></p>
+<!-- ============ SUB HERO ============ -->
+<section class="subhero" data-screen-label="Aktualność — nagłówek">
+  <div class="subhero__court"></div>
+  <div class="subhero__glow"></div>
+  <img class="subhero__whistle" src="{% static 'assets/whistle.png' %}" alt="">
+  <div class="wrap subhero__inner">
+    <div class="breadcrumb">
+      <a href="{% url 'pages:home' %}">Strona główna</a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      <a href="{% url 'pages:home' %}#aktualnosci">Aktualności</a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      <span>{{ article.title }}</span>
+    </div>
+    <h1>{{ article.title }}</h1>
+    {% if article.badge_label or article.published_at %}
+    <p class="article__meta">
+      {% if article.badge_label %}
+      <span class="tag{% if article.badge_color %} tag--{{ article.badge_color }}{% endif %}">{{ article.badge_label }}</span>
+      {% endif %}
+      <span>{{ article.published_at|date:"j E Y" }}</span>
+    </p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ============ ARTICLE ============ -->
+<section class="section">
+  <div class="wrap">
+    <article class="article reveal">
+      {% if article.cover %}
+      <div class="article__cover">
+        <img src="{{ article.cover.url }}" alt="{{ article.title }}">
+      </div>
+      {% endif %}
+
+      {% if article.lead %}<p class="article__lead">{{ article.lead }}</p>{% endif %}
+
+      <div class="article__body">
+        {{ article.body|safe }}
+        {% if article.body_extended %}
+        {{ article.body_extended|safe }}
+        {% endif %}
+      </div>
+
+      <div class="reveal" style="margin-top:48px;text-align:center">
+        <a class="btn btn--dark" href="{% url 'pages:home' %}#aktualnosci">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleX(-1)"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          Wróć do aktualności
+        </a>
+      </div>
+    </article>
+  </div>
+</section>
 {% endblock %}

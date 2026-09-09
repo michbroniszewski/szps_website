@@ -17,13 +17,21 @@ class Article(models.Model):
     slug = models.SlugField("Slug (adres URL)", max_length=220, unique=True, blank=True)
     lead = models.CharField("Zajawka", max_length=300, blank=True)
     body = models.TextField(
-        "Treść (widoczna od razu)",
-        help_text="Krótki wstęp widoczny bez klikania „Czytaj więcej”. HTML dozwolony.",
+        "Zajawka (widoczna na stronie głównej)",
+        help_text=(
+            "Krótki wstęp pokazywany na kaflu na stronie głównej. "
+            "HTML dozwolony."
+        ),
     )
     body_extended = models.TextField(
-        "Treść rozwijana",
+        "Pełna treść artykułu",
         blank=True,
-        help_text="Dalsza część artykułu pod przyciskiem „Czytaj więcej”. HTML dozwolony.",
+        help_text=(
+            "Dalsza część widoczna po kliknięciu „Czytaj więcej” — otwiera "
+            "osobną stronę z pełnym artykułem. Zostaw puste, jeśli artykuł "
+            "kończy się na zajawce (wtedy „Czytaj więcej” się nie pojawi). "
+            "HTML dozwolony."
+        ),
     )
     badge_color = models.CharField(
         "Kolor etykiety",
