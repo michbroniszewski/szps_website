@@ -30,16 +30,55 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 INSTALLED_APPS = [
+    # django-unfold — musi być PRZED django.contrib.admin, żeby jego
+    # szablony admina wygrały w resolverze.
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.forms",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "tinymce",
     "pages",
     "documents",
     "board",
 ]
+
+# Branding + kolory dla django-unfold. Wszystko opcjonalne — jak
+# usuniesz ten słownik, dostajesz domyślny motyw unfold.
+UNFOLD = {
+    "SITE_TITLE": "Panel ŚZPS",
+    "SITE_HEADER": "Wydział Sędziowski ŚZPS",
+    "SITE_SUBHEADER": "Zarządzanie treścią strony",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+}
+
+# Domyślna konfiguracja edytora TinyMCE. Redaktor dostaje pasek
+# narzędzi z podstawowym formatowaniem, listami, linkami i tabelami —
+# bez wtyczek serwerowych, bez API-key (używamy wersji GPL).
+TINYMCE_DEFAULT_CONFIG = {
+    "height": 400,
+    "menubar": "edit view insert format tools table",
+    "plugins": (
+        "advlist autolink lists link image charmap preview anchor "
+        "searchreplace visualblocks code fullscreen insertdatetime "
+        "media table code help wordcount"
+    ),
+    "toolbar": (
+        "undo redo | formatselect | bold italic underline | "
+        "alignleft aligncenter alignright alignjustify | "
+        "bullist numlist outdent indent | link table image | "
+        "removeformat | code | help"
+    ),
+    "language": "pl",
+    "branding": False,
+    "promotion": False,
+    "convert_urls": False,
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
