@@ -112,20 +112,25 @@ echo "==> Uruchamiam migracje (SQLite → db.sqlite3)"
 "$VENV_PY" manage.py migrate --noinput
 
 # ── superuser admin/admin (tylko lokalnie!) ───────────────────────────
-echo "==> Sprawdzam konto administratora"
+# Idempotentnie: jeśli konto `admin` nie istnieje — utwórz je,
+# jeśli istnieje — zresetuj hasło do `admin` i podnieś flagi.
+# Skrypt jest lokalny (sanity-check wyżej blokuje produkcyjne DB), więc
+# reset hasła to feature, nie bug — zawsze dostajesz działające admin/admin.
+echo "==> Ustawiam konto administratora (admin/admin)"
 "$VENV_PY" manage.py shell <<'PY'
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-if not User.objects.filter(is_superuser=True).exists():
-    User.objects.create_superuser(
-        username="admin",
-        email="admin@example.local",
-        password="admin",
-    )
-    print("    utworzyłem superusera admin / admin (zmień hasło w /admin/)")
-else:
-    print("    superuser już istnieje — pomijam")
+user, created = User.objects.get_or_create(
+    username="admin",
+    defaults={"email": "admin@example.local"},
+)
+user.is_staff = True
+user.is_superuser = True
+user.is_active = True
+user.set_password("admin")
+user.save()
+print("    " + ("utworzyłem" if created else "zresetowałem") + " superusera admin / admin")
 PY
 
 # ── seed przykładowych treści redakcyjnych ────────────────────────────
