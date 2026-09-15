@@ -127,28 +127,4 @@
   const y = document.getElementById('year');
   if (y) y.textContent = new Date().getFullYear();
 
-  /* ---- Expandable news posts (na stronie /aktualnosci/) ---- */
-  document.querySelectorAll('.news-post__more').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const post = btn.closest('.news-post');
-      const open = post.classList.toggle('is-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  });
-
-  /* ---- Deep-link: /aktualnosci/#<slug> otwiera i przewija do wpisu ---- */
-  const openFromHash = () => {
-    const hash = window.location.hash;
-    if (!hash || hash.length < 2) return;
-    const target = document.getElementById(decodeURIComponent(hash.slice(1)));
-    if (!target || !target.classList.contains('news-post')) return;
-    target.classList.add('is-open');
-    const moreBtn = target.querySelector('.news-post__more');
-    if (moreBtn) moreBtn.setAttribute('aria-expanded', 'true');
-    // Loader ma inset:0 z transition, może przeszkodzić w scroll — zaczekaj
-    // aż zniknie (script.js ukrywa go po 'load').
-    setTimeout(() => target.scrollIntoView({behavior: 'smooth', block: 'start'}), 350);
-  };
-  openFromHash();
-  window.addEventListener('hashchange', openFromHash);
 })();

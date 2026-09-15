@@ -335,42 +335,53 @@ button{font-family:inherit;cursor:pointer}
 .news-card.is-open:hover .news-card__more svg{transform:rotate(90deg) translateX(4px)}
 
 /* ============================================================
-   AKTUALNOŚCI — STRONA LISTY (osobna podstrona)
+   AKTUALNOŚCI — LISTA (indeks) + POJEDYNCZY WPIS (detail)
    ============================================================ */
 .news-list{display:flex;flex-direction:column;gap:22px;max-width:820px;margin:0 auto}
+
 .news-post{
-  background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:26px 28px;
-  transition:box-shadow .25s ease,border-color .25s ease;
-  scroll-margin-top:96px;
+  background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:28px 30px;
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
 }
-.news-post:target,.news-post.is-open{box-shadow:var(--shadow-md);border-color:transparent}
 .news-post__head{margin-bottom:12px}
 .news-post__meta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:6px}
 .news-post__meta .tag{position:static;top:auto;left:auto}
 .news-post__date{font-family:var(--font-display);font-weight:600;font-size:13px;color:var(--ink-soft);letter-spacing:.02em}
-.news-post__head h3{font-family:var(--font-display);font-weight:800;font-size:24px;line-height:1.2;margin:6px 0 8px;letter-spacing:-.01em}
-.news-post__lead{color:var(--ink-soft);font-size:16px;margin:0}
-.news-post__body{color:var(--ink);font-size:16px;line-height:1.55}
-.news-post__body p{margin:0 0 10px}
+.news-post__head h1,
+.news-post__head h3{font-family:var(--font-display);font-weight:800;line-height:1.18;margin:6px 0 8px;letter-spacing:-.01em}
+.news-post__head h1{font-size:34px}
+.news-post__head h3{font-size:22px}
+.news-post__lead{color:var(--ink-soft);font-size:16px;margin:6px 0 0}
+.news-post__preview{color:var(--ink-soft);font-size:15.5px;margin:10px 0 0;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+.news-post__body{color:var(--ink);font-size:16.5px;line-height:1.65}
+.news-post__body p{margin:0 0 12px}
 .news-post__body p:last-child{margin-bottom:0}
-.news-post__body a{color:var(--blue-d);font-weight:600}
-/* Sekcja rozwijana — ten sam trick co na kaflach: 0fr → 1fr. */
-.news-post__extended{display:grid;grid-template-rows:0fr;opacity:0;
-  transition:grid-template-rows .32s ease,opacity .25s ease,margin-top .32s ease;margin-top:0}
-.news-post__extended>*{overflow:hidden;min-height:0}
-.news-post.is-open .news-post__extended{grid-template-rows:1fr;opacity:1;margin-top:14px}
+.news-post__body a{color:var(--blue-d);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.news-post__body--extended{margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
+
 .news-post__more{
   display:inline-flex;align-items:center;gap:7px;margin-top:16px;
   font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--blue-d);
-  cursor:pointer;background:none;border:0;padding:0
 }
 .news-post__more svg{width:16px;height:16px;transition:transform .2s}
-.news-post__more:hover svg{transform:translateX(4px)}
-.news-post__more-hide{display:none}
-.news-post.is-open .news-post__more-show{display:none}
-.news-post.is-open .news-post__more-hide{display:inline}
-.news-post.is-open .news-post__more svg{transform:rotate(90deg)}
-.news-post.is-open .news-post__more:hover svg{transform:rotate(90deg) translateX(4px)}
+
+/* Cały wpis w indeksie jest klikalny — jeden duży link. */
+a.news-post--link{
+  display:block;text-decoration:none;color:inherit;
+}
+a.news-post--link:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
+
+/* Wariant "pojedyncza strona wpisu" — nieco więcej powietrza,
+   szerszy kontener czytelniej z długim tekstem. */
+.news-post--single{max-width:820px;margin:0 auto;padding:36px 38px}
+
+.article-back-top{max-width:820px;margin:0 auto 18px}
+.article-back-top a{color:var(--ink-soft);font-weight:600;text-decoration:none}
+.article-back-top a:hover{color:var(--blue-d)}
+.article-back-bottom{max-width:820px;margin:28px auto 0;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
 
 /* ============================================================
    DOKUMENTY

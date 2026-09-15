@@ -6,17 +6,17 @@
 {% block meta_description %}Aktualności i komunikaty Wydziału Sędziowskiego Śląskiego Związku Piłki Siatkowej.{% endblock %}
 
 {% block content %}
-<section class="section section--soft" id="aktualnosci-lista" data-screen-label="Aktualności">
+<section class="section section--soft" data-screen-label="Aktualności">
   <div class="wrap">
     <div class="section-head reveal" style="margin-left:auto;margin-right:auto;text-align:center">
       <span class="eyebrow" style="margin:0 auto">Na bieżąco</span>
       <h2>Aktualności</h2>
-      <p style="margin:0 auto">Wszystkie komunikaty i informacje wydziału. Kliknij „Czytaj więcej”, żeby rozwinąć.</p>
+      <p style="margin:0 auto">Wszystkie komunikaty i informacje wydziału.</p>
     </div>
 
     <div class="news-list">
       {% for article in articles %}
-      <article class="news-post reveal" id="{{ article.slug }}">
+      <a class="news-post news-post--link reveal" href="{% url 'pages:article_detail' article.slug %}">
         <header class="news-post__head">
           <div class="news-post__meta">
             <span class="news-post__date">{{ article.published_at|date:"j E Y" }}</span>
@@ -27,18 +27,12 @@
           <h3>{{ article.title }}</h3>
           {% if article.lead %}<p class="news-post__lead">{{ article.lead }}</p>{% endif %}
         </header>
-
-        <div class="news-post__body">{{ article.body|safe }}</div>
-
-        {% if article.body_extended %}
-        <div class="news-post__extended">{{ article.body_extended|safe }}</div>
-        <button class="news-post__more" type="button" aria-expanded="false" aria-controls="{{ article.slug }}-ext">
-          <span class="news-post__more-show">Czytaj więcej</span>
-          <span class="news-post__more-hide">Zwiń</span>
+        <p class="news-post__preview">{{ article.body|striptags|truncatewords:35 }}</p>
+        <span class="news-post__more">
+          Otwórz wpis
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-        {% endif %}
-      </article>
+        </span>
+      </a>
       {% empty %}
       <p>Brak aktualności. Dodaj pierwszą w <a href="/admin/">panelu administracyjnym</a>.</p>
       {% endfor %}

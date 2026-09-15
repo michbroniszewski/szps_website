@@ -1,13 +1,44 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ article.title }} — Wydział Sędziowski ŚZPS{% endblock %}
+{% block og_title %}{{ article.title }} — Wydział Sędziowski ŚZPS{% endblock %}
+{% block meta_description %}{% if article.lead %}{{ article.lead }}{% else %}{{ article.body|striptags|truncatewords:30 }}{% endif %}{% endblock %}
 
 {% block content %}
-<article>
-  <h1>{{ article.title }}</h1>
-  <p><small>{{ article.published_at|date:"j E Y" }}</small></p>
-  {% if article.lead %}<p><strong>{{ article.lead }}</strong></p>{% endif %}
-  <div>{{ article.body|safe }}</div>
-</article>
-<p><a href="{% url 'pages:home' %}">← powrót</a></p>
+<section class="section section--soft" data-screen-label="Aktualność">
+  <div class="wrap">
+    <p class="article-back-top reveal">
+      <a href="{% url 'pages:home' %}#aktualnosci">← Powrót na stronę główną</a>
+    </p>
+
+    <article class="news-post news-post--single reveal">
+      <header class="news-post__head">
+        <div class="news-post__meta">
+          <span class="news-post__date">{{ article.published_at|date:"j E Y" }}</span>
+          {% if article.badge_label %}
+          <span class="tag{% if article.badge_color %} tag--{{ article.badge_color }}{% endif %}">{{ article.badge_label }}</span>
+          {% endif %}
+        </div>
+        <h1>{{ article.title }}</h1>
+        {% if article.lead %}<p class="news-post__lead">{{ article.lead }}</p>{% endif %}
+      </header>
+
+      <div class="news-post__body">{{ article.body|safe }}</div>
+
+      {% if article.body_extended %}
+      <div class="news-post__body news-post__body--extended">{{ article.body_extended|safe }}</div>
+      {% endif %}
+    </article>
+
+    <div class="article-back-bottom reveal">
+      <a class="btn btn--gold" href="{% url 'pages:home' %}#aktualnosci">
+        ← Powrót na stronę główną
+      </a>
+      <a class="btn btn--ghost" href="{% url 'pages:article_list' %}">
+        Wszystkie aktualności →
+      </a>
+    </div>
+  </div>
+</section>
 {% endblock %}
