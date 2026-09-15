@@ -12,6 +12,15 @@ def home(request):
     )
 
 
+def article_list(request):
+    articles = Article.objects.filter(is_published=True)
+    return render(
+        request,
+        "pages/article_list.html",
+        {"articles": articles, "active_nav": "aktualnosci"},
+    )
+
+
 def gallery(request):
     return render(request, "pages/gallery.html", {"active_nav": "gallery"})
 
