@@ -165,7 +165,9 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 
     # Przekieruj HTTP → HTTPS na poziomie Django (dodatkowo do reguł nginx).
-    SECURE_SSL_REDIRECT = True
+    # Env override potrzebny do testów — Django Client jedzie po http://
+    # i przy SSL redirect dostaje 301 na każdą stronę.
+    SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)
 
     # HSTS: 180 dni + subdomeny + preload. Preload wymaga jednorazowego
     # zgłoszenia domeny do https://hstspreload.org, ale sam nagłówek jest

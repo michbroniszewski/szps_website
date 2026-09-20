@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from documents.models import Document, DocumentCategory
+
 from .models import Article, StaticPage
 
 
@@ -70,6 +72,65 @@ class StaticPageViewTests(TestCase):
         )
         response = self.client.get(reverse("pages:static_page", args=["kontakt"]))
         self.assertEqual(response.status_code, 404)
+
+
+class ArticleListViewTests(TestCase):
+    """Nowa strona /aktualnosci/ — indeks wpisów."""
+
+    def test_list_returns_200(self):
+        response = self.client.get(reverse("pages:article_list"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_shows_only_published(self):
+        Article.objects.create(title="A", body="x", is_published=True)
+        Article.objects.create(title="B", body="x", is_published=False)
+        response = self.client.get(reverse("pages:article_list"))
+        titles = {a.title for a in response.context["articles"]}
+        self.assertIn("A", titles)
+        self.assertNotIn("B", titles)
+
+    def test_list_links_to_detail_pages(self):
+        art = Article.objects.create(title="Linkowana", body="x")
+        response = self.client.get(reverse("pages:article_list"))
+        expected_href = reverse("pages:article_detail", args=[art.slug])
+        self.assertContains(response, f'href="{expected_href}"')
+
+
+class HomeDocumentsSectionTests(TestCase):
+    """Sekcja Dokumenty na home musi wciągać dane z bazy (seed 0003)."""
+
+    def test_home_context_has_doc_categories(self):
+        response = self.client.get(reverse("pages:home"))
+        # Seed migracji 0003 daje 4 kanoniczne kategorie.
+        slugs = {c.slug for c in response.context["doc_categories"]}
+        for expected in {"przepisy-gry", "wytyczne-i-instrukcje",
+                         "materialy-szkoleniowe", "komunikaty"}:
+            self.assertIn(expected, slugs)
+
+    def test_home_renders_document_link_from_db(self):
+        # Dodaj dokument w istniejącej seedowanej kategorii i sprawdź,
+        # że pojawi się jego link na home.
+        cat = DocumentCategory.objects.get(slug="komunikaty")
+        doc = Document.objects.create(
+            title="Test — dodany w teście",
+            category=cat,
+            external_url="/static/dokumenty/test.pdf",
+            description="opis testowy",
+        )
+        response = self.client.get(reverse("pages:home"))
+        self.assertContains(response, doc.title)
+        self.assertContains(response, doc.external_url)
+
+    def test_unpublished_document_hidden(self):
+        cat = DocumentCategory.objects.get(slug="komunikaty")
+        Document.objects.create(
+            title="Schowany dokument",
+            category=cat,
+            external_url="/static/dokumenty/nope.pdf",
+            is_published=False,
+        )
+        response = self.client.get(reverse("pages:home"))
+        self.assertNotContains(response, "Schowany dokument")
 
 
 class SiteInfrastructureTests(TestCase):

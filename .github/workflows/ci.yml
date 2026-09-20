@@ -59,6 +59,9 @@ jobs:
           DJANGO_DEBUG: "False"
           DJANGO_ALLOWED_HOSTS: testserver
           DB_ENGINE: sqlite
+          # Test client jedzie po http://testserver → wyłączamy SSL redirect,
+          # żeby widoki zwracały 200/404 zamiast 301 na HTTPS.
+          DJANGO_SECURE_SSL_REDIRECT: "False"
         run: python manage.py test --verbosity 2
 
       # Sanity-check dla static files — collectstatic to jedyny etap
