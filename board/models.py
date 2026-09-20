@@ -2,7 +2,7 @@ from django.db import models
 
 
 class BoardMember(models.Model):
-    """Członek wydziału sędziowskiego."""
+    """Członek Wydziału sędziowskiego."""
 
     first_name = models.CharField("Imię", max_length=100)
     last_name = models.CharField("Nazwisko", max_length=100)
@@ -24,8 +24,8 @@ class BoardMember(models.Model):
 
     class Meta:
         ordering = ["order", "last_name", "first_name"]
-        verbose_name = "Członek wydziału"
-        verbose_name_plural = "Skład wydziału"
+        verbose_name = "Członek Wydziału"
+        verbose_name_plural = "Skład Wydziału"
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"

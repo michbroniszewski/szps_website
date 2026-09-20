@@ -11,7 +11,7 @@ z bazą PostgreSQL na mydevil.
 - Ma `DJANGO_DEBUG=True` — Django pokazuje pełne stack-trace'y i serwuje
   pliki `MEDIA` / `STATIC` bez pomocy nginxa.
 - Automatycznie zakłada superusera `admin` / `admin` (tylko lokalnie!).
-- Migracje seedują artykuły i skład wydziału (te same wpisy, co na
+- Migracje seedują artykuły i skład Wydziału (te same wpisy, co na
   produkcji — patrz `pages/migrations/0003_seed_initial_articles.py`
   i `board/migrations/0002_seed_initial_members.py`).
 - Komenda `seed_demo_data` dodaje kilka przykładowych stron statycznych
@@ -81,7 +81,7 @@ rm -f db.sqlite3
 bash scripts/local-dev-setup.sh
 ```
 
-Reset tylko treści demo (bez ruszania artykułów/składu wydziału z migracji):
+Reset tylko treści demo (bez ruszania artykułów/składu Wydziału z migracji):
 
 ```bash
 .venv/bin/python manage.py seed_demo_data --reset

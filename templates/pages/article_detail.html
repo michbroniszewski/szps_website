@@ -4,6 +4,7 @@
 {% block title %}{{ article.title }} — Wydział Sędziowski ŚZPS{% endblock %}
 {% block og_title %}{{ article.title }} — Wydział Sędziowski ŚZPS{% endblock %}
 {% block meta_description %}{% if article.lead %}{{ article.lead }}{% else %}{{ article.body|striptags|truncatewords:30 }}{% endif %}{% endblock %}
+{% block body_class %}nav-on-light{% endblock %}
 
 {% block content %}
 <section class="section section--soft" data-screen-label="Aktualność">
