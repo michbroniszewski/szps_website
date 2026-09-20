@@ -154,9 +154,28 @@ MEDIA_ROOT = BASE_DIR / "public" / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 if not DEBUG:
+    # Passenger na mydevil siedzi za nginx-em, który terminuje SSL.
+    # Bez tej pary Django nie wie, że request przyszedł HTTPS-em i
+    # request.is_secure() jest False → cookies bez `secure`, przekierowanie
+    # w pętlę itp.
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+    # Cookies tylko po HTTPS.
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
+
+    # Przekieruj HTTP → HTTPS na poziomie Django (dodatkowo do reguł nginx).
+    SECURE_SSL_REDIRECT = True
+
+    # HSTS: 180 dni + subdomeny + preload. Preload wymaga jednorazowego
+    # zgłoszenia domeny do https://hstspreload.org, ale sam nagłówek jest
+    # bezpieczny i sensowny.
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 180
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Ogólne utwardzenia — nie kosztują nic, a `manage.py check --deploy`
+    # przestaje na nie krzyczeć.
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+    X_FRAME_OPTIONS = "DENY"

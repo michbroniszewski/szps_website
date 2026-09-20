@@ -33,23 +33,24 @@
   drawer.addEventListener('click', e => { if (e.target === drawer) closeD(); });
   drawer.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', closeD));
 
-  /* ---- Reveal on scroll (rect-based — robust without IntersectionObserver) ---- */
-  const reveals = [...document.querySelectorAll('.reveal')];
-  const revealCheck = () => {
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    for (const el of reveals){
-      if (el.classList.contains('in')) continue;
-      const r = el.getBoundingClientRect();
-      if (r.top < vh * 0.92 && r.bottom > 0) el.classList.add('in');
-    }
-  };
-  window.addEventListener('scroll', revealCheck, {passive:true});
-  window.addEventListener('resize', revealCheck);
-  revealCheck();
-  // run a few times after load in case fonts/layout shift, then a final safety sweep
-  [60, 250, 600].forEach(t => setTimeout(revealCheck, t));
-  window.addEventListener('load', () => { revealCheck(); setTimeout(revealCheck, 200); });
-  setTimeout(() => reveals.forEach(el => el.classList.add('in')), 2500);
+  /* ---- Reveal on scroll (IntersectionObserver, jedno wywołanie per el) ---- */
+  const reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && reveals.length){
+    const io = new IntersectionObserver((entries, observer) => {
+      for (const e of entries){
+        if (e.isIntersecting){
+          e.target.classList.add('in');
+          observer.unobserve(e.target);
+        }
+      }
+    }, {rootMargin: '0px 0px -8% 0px', threshold: 0.01});
+    reveals.forEach(el => io.observe(el));
+  } else {
+    // Fallback: bez IO od razu pokazujemy — brak animacji, ale nic nie ginie.
+    reveals.forEach(el => el.classList.add('in'));
+  }
+  // Bezpiecznik: gdyby coś padło (np. observer nie fire'ował) pokaż wszystko po 3s.
+  setTimeout(() => reveals.forEach(el => el.classList.add('in')), 3000);
 
   /* ---- Contact form validation ---- */
   const form = document.getElementById('contactForm');

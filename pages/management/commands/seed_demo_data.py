@@ -1,12 +1,16 @@
 """Idempotentny seed danych do lokalnego testowania.
 
 Uzupełnia zawartość, której NIE wypełniają migracje produkcyjne:
-przykładowe strony statyczne (o wydziale, kontakt, regulamin) i kategorie
-dokumentów. Wpisy nie kolidują z produkcją — wszystko chodzi po
-``update_or_create`` na slugach z prefiksem ``demo-`` (dla stron
-statycznych) i po nazwie/slugu kategorii, więc można spokojnie odpalić
-komendę wielokrotnie oraz — jeśli seed przypadkiem trafi na produkcję —
+przykładowe strony statyczne (o Wydziale, kontakt, regulamin). Wpisy nie
+kolidują z produkcją — wszystko chodzi po ``update_or_create`` na
+slugach z prefiksem ``demo-``, więc można spokojnie odpalić komendę
+wielokrotnie oraz — jeśli seed przypadkiem trafi na produkcję —
 usunąć wpisy filtrując po ``slug__startswith='demo-'``.
+
+Kategorie dokumentów są teraz seedowane migracją
+``documents/0003_seed_initial_documents`` (kanoniczne 4 kategorie
+z produkcji), więc ta komenda ich już nie tworzy, żeby nie nadpisywać
+nazw / opisów z migracji.
 
 Użycie::
 
@@ -18,7 +22,6 @@ from __future__ import annotations
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from documents.models import DocumentCategory
 from pages.models import StaticPage
 
 
@@ -62,35 +65,21 @@ STATIC_PAGES = [
 ]
 
 
-DOCUMENT_CATEGORIES = [
-    {"slug": "komunikaty-ws", "name": "Komunikaty WS", "order": 10,
-     "description": "Oficjalne komunikaty Wydziału Sędziowskiego."},
-    {"slug": "przepisy-gry", "name": "Przepisy gry", "order": 20,
-     "description": "Aktualne przepisy gry PZPS/FIVB."},
-    {"slug": "wytyczne", "name": "Wytyczne", "order": 30,
-     "description": "Wytyczne interpretacyjne dla sędziów."},
-]
-
-
 class Command(BaseCommand):
-    help = "Dodaje przykładowe strony statyczne i kategorie dokumentów (lokalne demo)."
+    help = "Dodaje przykładowe strony statyczne (lokalne demo)."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--reset",
             action="store_true",
-            help="Najpierw usuń wpisy demo (slug rozpoczynający się od 'demo-' "
-                 "dla stron oraz kategorie o slugach z listy DOCUMENT_CATEGORIES).",
+            help="Najpierw usuń wpisy demo (slug rozpoczynający się od 'demo-').",
         )
 
     @transaction.atomic
     def handle(self, *args, **options):
         if options["reset"]:
             removed_pages = StaticPage.objects.filter(slug__startswith="demo-").delete()
-            removed_cats = DocumentCategory.objects.filter(
-                slug__in=[c["slug"] for c in DOCUMENT_CATEGORIES]
-            ).delete()
-            self.stdout.write(f"    reset: strony={removed_pages[0]}, kategorie={removed_cats[0]}")
+            self.stdout.write(f"    reset: strony={removed_pages[0]}")
 
         created_pages = 0
         updated_pages = 0
@@ -108,28 +97,9 @@ class Command(BaseCommand):
             else:
                 updated_pages += 1
 
-        created_cats = 0
-        updated_cats = 0
-        for data in DOCUMENT_CATEGORIES:
-            _, created = DocumentCategory.objects.update_or_create(
-                slug=data["slug"],
-                defaults={
-                    "name": data["name"],
-                    "order": data["order"],
-                    "description": data["description"],
-                },
-            )
-            if created:
-                created_cats += 1
-            else:
-                updated_cats += 1
-
         self.stdout.write(self.style.SUCCESS(
             f"    strony statyczne: {created_pages} nowych, {updated_pages} zaktualizowanych"
         ))
-        self.stdout.write(self.style.SUCCESS(
-            f"    kategorie dokumentów: {created_cats} nowych, {updated_cats} zaktualizowanych"
-        ))
         self.stdout.write(
-            "    ➜ zajrzyj do panelu: /admin/pages/staticpage/ oraz /admin/documents/documentcategory/"
+            "    ➜ zajrzyj do panelu: /admin/pages/staticpage/"
         )
