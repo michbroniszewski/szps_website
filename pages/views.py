@@ -21,10 +21,6 @@ def article_list(request):
     )
 
 
-def gallery(request):
-    return render(request, "pages/gallery.html", {"active_nav": "gallery"})
-
-
 def article_detail(request, slug):
     article = get_object_or_404(Article, slug=slug, is_published=True)
     return render(request, "pages/article_detail.html", {"article": article})
