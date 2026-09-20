@@ -1,14 +1,27 @@
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, render
+
+from documents.models import Document, DocumentCategory
 
 from .models import Article, StaticPage
 
 
 def home(request):
     articles = Article.objects.filter(is_published=True)[:6]
+    doc_categories = DocumentCategory.objects.prefetch_related(
+        Prefetch(
+            "documents",
+            queryset=Document.objects.filter(is_published=True),
+        )
+    )
     return render(
         request,
         "pages/home.html",
-        {"articles": articles, "active_nav": "home"},
+        {
+            "articles": articles,
+            "doc_categories": doc_categories,
+            "active_nav": "home",
+        },
     )
 
 

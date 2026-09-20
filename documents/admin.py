@@ -17,3 +17,12 @@ class DocumentAdmin(ModelAdmin):
     list_filter = ("category", "is_published", "published_at")
     search_fields = ("title", "description")
     date_hierarchy = "published_at"
+    fields = (
+        "title",
+        "category",
+        "file",
+        "external_url",
+        "description",
+        "published_at",
+        "is_published",
+    )
