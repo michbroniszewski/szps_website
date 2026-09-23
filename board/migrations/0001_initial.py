@@ -66,8 +66,8 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "verbose_name": "Członek wydziału",
-                "verbose_name_plural": "Skład wydziału",
+                "verbose_name": "Członek Wydziału",
+                "verbose_name_plural": "Skład Wydziału",
                 "ordering": ["order", "last_name", "first_name"],
             },
         ),

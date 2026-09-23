@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Aktualności — Wydział Sędziowski ŚZPS{% endblock %}
+{% block og_title %}Aktualności — Wydział Sędziowski ŚZPS{% endblock %}
+{% block meta_description %}Aktualności i komunikaty Wydziału Sędziowskiego Śląskiego Związku Piłki Siatkowej.{% endblock %}
+{% block body_class %}nav-on-light{% endblock %}
+
+{% block content %}
+<section class="section section--soft" data-screen-label="Aktualności">
+  <div class="wrap">
+    <div class="section-head reveal" style="margin-left:auto;margin-right:auto;text-align:center">
+      <span class="eyebrow" style="margin:0 auto">Na bieżąco</span>
+      <h2>Aktualności</h2>
+      <p style="margin:0 auto">Wszystkie komunikaty i informacje Wydziału.</p>
+    </div>
+
+    <div class="news-list">
+      {% for article in articles %}
+      <a class="news-post news-post--link reveal" href="{% url 'pages:article_detail' article.slug %}">
+        <header class="news-post__head">
+          <div class="news-post__meta">
+            <span class="news-post__date">{{ article.published_at|date:"j E Y" }}</span>
+            {% if article.badge_label %}
+            <span class="tag{% if article.badge_color %} tag--{{ article.badge_color }}{% endif %}">{{ article.badge_label }}</span>
+            {% endif %}
+          </div>
+          <h3>{{ article.title }}</h3>
+          {% if article.lead %}<p class="news-post__lead">{{ article.lead }}</p>{% endif %}
+        </header>
+        <p class="news-post__preview">{{ article.body|striptags|truncatewords:35 }}</p>
+        <span class="news-post__more">
+          Czytaj więcej
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+      {% empty %}
+      <p>Brak aktualności. Dodaj pierwszą w <a href="/admin/">panelu administracyjnym</a>.</p>
+      {% endfor %}
+    </div>
+
+    <p style="text-align:center;margin-top:32px">
+      <a class="btn btn--ghost" href="{% url 'pages:home' %}">← Powrót na stronę główną</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

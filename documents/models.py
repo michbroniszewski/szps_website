@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class DocumentCategory(models.Model):
@@ -28,9 +30,21 @@ class Document(models.Model):
         on_delete=models.PROTECT,
         related_name="documents",
     )
-    file = models.FileField("Plik", upload_to="documents/%Y/")
+    file = models.FileField(
+        "Plik",
+        upload_to="documents/%Y/",
+        blank=True,
+        help_text="Prześlij plik z dysku ALBO podaj adres w polu poniżej.",
+    )
+    external_url = models.CharField(
+        "Adres pliku",
+        max_length=500,
+        blank=True,
+        help_text="Alternatywa dla pliku — np. „/static/dokumenty/x.pdf” "
+        "albo pełny adres URL do dokumentu w innym miejscu.",
+    )
     description = models.TextField("Opis", blank=True)
-    published_at = models.DateField("Data publikacji", auto_now_add=True)
+    published_at = models.DateField("Data publikacji", default=timezone.now)
     is_published = models.BooleanField("Widoczny na stronie", default=True)
 
     class Meta:
@@ -40,3 +54,13 @@ class Document(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+    def clean(self):
+        if not self.file and not self.external_url:
+            raise ValidationError(
+                "Podaj plik do przesłania ALBO adres w polu „Adres pliku”."
+            )
+
+    def get_href(self) -> str:
+        """Adres do linkowania z frontu — plik, jeśli jest; inaczej external_url."""
+        return self.file.url if self.file else self.external_url

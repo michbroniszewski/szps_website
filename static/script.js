@@ -33,25 +33,26 @@
   drawer.addEventListener('click', e => { if (e.target === drawer) closeD(); });
   drawer.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', closeD));
 
-  /* ---- Reveal on scroll (rect-based — robust without IntersectionObserver) ---- */
-  const reveals = [...document.querySelectorAll('.reveal')];
-  const revealCheck = () => {
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    for (const el of reveals){
-      if (el.classList.contains('in')) continue;
-      const r = el.getBoundingClientRect();
-      if (r.top < vh * 0.92 && r.bottom > 0) el.classList.add('in');
-    }
-  };
-  window.addEventListener('scroll', revealCheck, {passive:true});
-  window.addEventListener('resize', revealCheck);
-  revealCheck();
-  // run a few times after load in case fonts/layout shift, then a final safety sweep
-  [60, 250, 600].forEach(t => setTimeout(revealCheck, t));
-  window.addEventListener('load', () => { revealCheck(); setTimeout(revealCheck, 200); });
-  setTimeout(() => reveals.forEach(el => el.classList.add('in')), 2500);
+  /* ---- Reveal on scroll (IntersectionObserver, jedno wywołanie per el) ---- */
+  const reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && reveals.length){
+    const io = new IntersectionObserver((entries, observer) => {
+      for (const e of entries){
+        if (e.isIntersecting){
+          e.target.classList.add('in');
+          observer.unobserve(e.target);
+        }
+      }
+    }, {rootMargin: '0px 0px -8% 0px', threshold: 0.01});
+    reveals.forEach(el => io.observe(el));
+  } else {
+    // Fallback: bez IO od razu pokazujemy — brak animacji, ale nic nie ginie.
+    reveals.forEach(el => el.classList.add('in'));
+  }
+  // Bezpiecznik: gdyby coś padło (np. observer nie fire'ował) pokaż wszystko po 3s.
+  setTimeout(() => reveals.forEach(el => el.classList.add('in')), 3000);
 
-  /* ---- Contact form validation ---- */
+  /* ---- Contact form ---- */
   const form = document.getElementById('contactForm');
   if (form){
     const showErr = (field, msg) => {
@@ -69,7 +70,7 @@
       el.addEventListener('change', () => clearErr(el));
     });
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       let ok = true;
       const name = form.querySelector('#f-name');
@@ -90,21 +91,39 @@
         return;
       }
 
-      form.style.display = 'none';
-      document.getElementById('formOk').classList.add('show');
+      /* ---- Wysyłka przez backend (POST /kontakt/wyslij/) ---- */
+      const button = form.querySelector('button[type=submit]');
+      const originalLabel = button.innerHTML;
+      button.disabled = true;
+      button.textContent = 'Wysyłam…';
+      document.getElementById('formErr').hidden = true;
 
-      /* ---- Wysyłka wiadomości (test) ---- */
-      // Adres odbiorcy testowego. Otwiera klienta poczty z wypełnioną treścią.
-      const RECIPIENT = 'michbroniszewski@gmail.com';
-      const subject = 'Formularz kontaktowy: ' + topic.value;
-      const body =
-        'Imię i nazwisko: ' + name.value.trim() + '\n' +
-        'E-mail: ' + email.value.trim() + '\n' +
-        'Temat: ' + topic.value + '\n\n' +
-        msg.value.trim();
-      window.location.href = 'mailto:' + RECIPIENT +
-        '?subject=' + encodeURIComponent(subject) +
-        '&body=' + encodeURIComponent(body);
+      const csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
+      const payload = new FormData(form); // czyta wszystkie pola + honeypot + csrf
+
+      try {
+        const resp = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfInput ? csrfInput.value : '',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: payload,
+        });
+        const data = await resp.json().catch(() => ({ok: false}));
+        if (resp.ok && data.ok){
+          form.style.display = 'none';
+          document.getElementById('formOk').classList.add('show');
+        } else {
+          button.disabled = false;
+          button.innerHTML = originalLabel;
+          document.getElementById('formErr').hidden = false;
+        }
+      } catch (err){
+        button.disabled = false;
+        button.innerHTML = originalLabel;
+        document.getElementById('formErr').hidden = false;
+      }
     });
   }
 
@@ -127,12 +146,4 @@
   const y = document.getElementById('year');
   if (y) y.textContent = new Date().getFullYear();
 
-  /* ---- Expandable news posts ---- */
-  document.querySelectorAll('.news-card__more').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const card = btn.closest('.news-card');
-      const open = card.classList.toggle('is-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  });
 })();

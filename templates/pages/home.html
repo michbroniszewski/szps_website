@@ -54,7 +54,7 @@
     <div class="section-head reveal">
       <span class="eyebrow">Na bieżąco</span>
       <h2>Aktualności</h2>
-      <p>Najnowsze informacje i komunikaty wydziału</p>
+      <p>Najnowsze informacje i komunikaty Wydziału</p>
     </div>
     <div class="news-grid">
       {% for article in articles %}
@@ -68,21 +68,22 @@
         <div class="news-card__body">
           <span class="news-card__date">{{ article.published_at|date:"j E Y" }}</span>
           <h3>{{ article.title }}</h3>
-          <div>{{ article.body|safe }}</div>
-          {% if article.body_extended %}
-          <div class="news-card__full">{{ article.body_extended|safe }}</div>
-          <button class="news-card__more" type="button" aria-expanded="false">
-            <span class="news-card__more-show">Czytaj więcej</span>
-            <span class="news-card__more-hide">Zwiń</span>
+          <p class="news-card__excerpt">{{ article.lead|default:article.body|striptags|truncatewords:28 }}</p>
+          <a class="news-card__more" href="{% url 'pages:article_detail' article.slug %}">
+            Czytaj więcej
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
-          {% endif %}
+          </a>
         </div>
       </article>
       {% empty %}
       <p>Brak aktualności. Dodaj pierwszą w <a href="/admin/">panelu administracyjnym</a>.</p>
       {% endfor %}
     </div>
+    {% if articles %}
+    <p style="text-align:center;margin-top:32px">
+      <a class="btn btn--ghost" href="{% url 'pages:article_list' %}">Wszystkie aktualności →</a>
+    </p>
+    {% endif %}
   </div>
 </section>
 
@@ -94,73 +95,22 @@
       <h2>Dokumenty</h2>
       <p></p>
     </div>
+    {% for cat in doc_categories %}{% if cat.documents.all %}
     <div class="doc-group reveal">
-      <h3 class="doc-group__title">Przepisy gry</h3>
+      <h3 class="doc-group__title">{{ cat.name }}</h3>
       <div class="docs-grid">
-        <a class="doc-card" href="{% static 'dokumenty/przepisy-gry-2025-2028.pdf' %}" target="_blank" rel="noopener">
+        {% for doc in cat.documents.all %}
+        <a class="doc-card" href="{{ doc.get_href }}" target="_blank" rel="noopener">
           <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11H4z"/><path d="M14 4v6h6"/><path d="M8 14h7M8 17h7"/></svg></span>
-          <div><h4>Przepisy gry 2025–2028</h4><p class="doc-card__meta"><span class="doc-card__pill">PL</span> Polska wersja przepisów · PDF</p></div>
+          <div><h4>{{ doc.title }}</h4><p class="doc-card__meta">{{ doc.description }}</p></div>
           <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </a>
-        <a class="doc-card" href="{% static 'dokumenty/official-volleyball-rules-2025-2028.pdf' %}" target="_blank" rel="noopener">
-          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11H4z"/><path d="M14 4v6h6"/><path d="M8 14h7M8 17h7"/></svg></span>
-          <div><h4>Official Volleyball Rules 2025–2028</h4><p class="doc-card__meta"><span class="doc-card__pill">EN</span> Oficjalne przepisy FIVB · PDF</p></div>
-          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
+        {% endfor %}
       </div>
     </div>
-
-    <div class="doc-group reveal">
-      <h3 class="doc-group__title">Wytyczne i instrukcje</h3>
-      <div class="docs-grid">
-        <a class="doc-card" href="{% static 'dokumenty/wytyczne-i-instrukcje-sedziowania-2025.pdf' %}" target="_blank" rel="noopener">
-          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 13l9 5 9-5"/></svg></span>
-          <div><h4>Wytyczne i instrukcje sędziowania 2025</h4><p class="doc-card__meta">Interpretacje przepisów i wskazówki praktyczne · PDF</p></div>
-          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-      </div>
-    </div>
-
-    <div class="doc-group reveal">
-      <h3 class="doc-group__title">Materiały szkoleniowe</h3>
-      <div class="docs-grid">
-        <a class="doc-card" href="{% static 'dokumenty/prezentacja-maly-protokol.pdf' %}" target="_blank" rel="noopener">
-          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v12H3z"/><path d="M3 17l5 4M21 17l-5 4M10 11l4-2-4-2z"/></svg></span>
-          <div><h4>Mały protokół — prezentacja</h4><p class="doc-card__meta">Szkolenie z prowadzenia małego protokołu · PDF</p></div>
-          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-      </div>
-    </div>
-
-    <div class="doc-group reveal">
-      <h3 class="doc-group__title">Komunikaty</h3>
-      <div class="docs-grid">
-        <a class="doc-card" href="{% static 'dokumenty/Komunikat_WS_270526.pdf' %}" target="_blank" rel="noopener">
-          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg></span>
-          <div><h4>Komunikat WS — 27.05.2026</h4><p class="doc-card__meta">Komunikat Wydziału Sędziowskiego · PDF</p></div>
-          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-        <a class="doc-card" href="{% static 'dokumenty/komunikat-ws-2026-01-27.pdf' %}" target="_blank" rel="noopener">
-          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg></span>
-          <div><h4>Komunikat WS — 27.01.2026</h4><p class="doc-card__meta">Komunikat Wydziału Sędziowskiego · PDF</p></div>
-          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-        <a class="doc-card" href="{% static 'dokumenty/komunikat-ws-2025-06-24.pdf' %}" target="_blank" rel="noopener">
-          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg></span>
-          <div><h4>Komunikat WS — 24.06.2025</h4><p class="doc-card__meta">Komunikat Wydziału Sędziowskiego · PDF</p></div>
-          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-        <a class="doc-card" href="{% static 'dokumenty/komunikat-ws-2025-04-29.pdf' %}" target="_blank" rel="noopener">
-          <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg></span>
-          <div><h4>Komunikat WS — 29.04.2025</h4><p class="doc-card__meta">Komunikat Wydziału Sędziowskiego · PDF</p></div>
-          <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-      </div>
-    </div>
+    {% endif %}{% endfor %}
   </div>
 </section>
-
-<!-- Sekcja Galeria tymczasowo wyłączona — czeka na model GalleryPhoto -->
 
 <!-- ============ SPONSORZY ============ -->
 <section class="section section--soft" id="sponsorzy" data-screen-label="Partnerzy">
@@ -188,7 +138,7 @@
   <div class="wrap contact-grid">
     <div class="contact-info reveal">
       <span class="eyebrow">Masz pytanie?</span>
-      <h2>Skontaktuj się z wydziałem</h2>
+      <h2>Skontaktuj się z Wydziałem</h2>
       <p class="lead">Sprawy organizacyjne lub szkoleniowe - napisz do nas, a odpowiemy najszybciej, jak to możliwe.</p>
 
       <div class="contact-row">
@@ -207,7 +157,11 @@
     </div>
 
     <div class="reveal d1">
-      <form class="form" id="contactForm" novalidate>
+      <form class="form" id="contactForm" method="post" action="{% url 'pages:contact_submit' %}" novalidate>
+        {% csrf_token %}
+        {# Honeypot: pole niewidoczne dla ludzi, wypełniają je głównie boty. #}
+        <input type="text" name="website" tabindex="-1" autocomplete="off"
+               aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0">
         <div class="form-row">
           <div class="field">
             <label for="f-name">Imię i nazwisko <span class="req">*</span></label>
@@ -238,7 +192,7 @@
           <div class="err">Wiadomość jest zbyt krótka (min. 10 znaków).</div>
         </div>
         <label class="consent">
-          <input type="checkbox" id="f-consent">
+          <input type="checkbox" id="f-consent" name="consent">
           <span>Wyrażam zgodę na przetwarzanie moich danych w celu udzielenia odpowiedzi (RODO). <span class="req">*</span></span>
         </label>
         <button type="submit" class="btn btn--gold">
@@ -249,8 +203,11 @@
       <div class="form__ok" id="formOk">
         <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
         <h3>Dziękujemy!</h3>
-        <p>Otwieramy Twój program pocztowy z gotową wiadomością — wystarczy ją wysłać.</p>
-        <small>Wiadomość trafi na adres testowy: michbroniszewski@gmail.com</small>
+        <p>Wiadomość została wysłana. Odpowiemy najszybciej, jak to możliwe.</p>
+      </div>
+      <div class="form__err" id="formErr" hidden>
+        <p>Nie udało się wysłać wiadomości. Spróbuj ponownie później lub
+          napisz bezpośrednio na <a href="mailto:ws@szps.pl">ws@szps.pl</a>.</p>
       </div>
     </div>
   </div>
