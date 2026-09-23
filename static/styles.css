@@ -491,6 +491,11 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
 .form__ok h3{font-family:var(--font-display);font-weight:800;font-size:24px;margin-bottom:8px}
 .form__ok p{color:var(--ink-soft)}
 .form__ok small{display:block;margin-top:14px;color:var(--ink-soft);font-size:12.5px}
+.form__err{margin-top:14px;padding:14px 18px;border-radius:12px;
+  background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.28);
+  color:#b41818;font-size:14.5px}
+.form__err a{color:#b41818;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.form__err[hidden]{display:none}
 
 /* ============================================================
    FOOTER

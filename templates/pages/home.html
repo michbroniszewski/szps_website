@@ -157,7 +157,11 @@
     </div>
 
     <div class="reveal d1">
-      <form class="form" id="contactForm" novalidate>
+      <form class="form" id="contactForm" method="post" action="{% url 'pages:contact_submit' %}" novalidate>
+        {% csrf_token %}
+        {# Honeypot: pole niewidoczne dla ludzi, wypełniają je głównie boty. #}
+        <input type="text" name="website" tabindex="-1" autocomplete="off"
+               aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0">
         <div class="form-row">
           <div class="field">
             <label for="f-name">Imię i nazwisko <span class="req">*</span></label>
@@ -188,7 +192,7 @@
           <div class="err">Wiadomość jest zbyt krótka (min. 10 znaków).</div>
         </div>
         <label class="consent">
-          <input type="checkbox" id="f-consent">
+          <input type="checkbox" id="f-consent" name="consent">
           <span>Wyrażam zgodę na przetwarzanie moich danych w celu udzielenia odpowiedzi (RODO). <span class="req">*</span></span>
         </label>
         <button type="submit" class="btn btn--gold">
@@ -199,8 +203,11 @@
       <div class="form__ok" id="formOk">
         <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
         <h3>Dziękujemy!</h3>
-        <p>Otwieramy Twój program pocztowy z gotową wiadomością — wystarczy ją wysłać.</p>
-        <small>Wiadomość trafi na adres testowy: michbroniszewski@gmail.com</small>
+        <p>Wiadomość została wysłana. Odpowiemy najszybciej, jak to możliwe.</p>
+      </div>
+      <div class="form__err" id="formErr" hidden>
+        <p>Nie udało się wysłać wiadomości. Spróbuj ponownie później lub
+          napisz bezpośrednio na <a href="mailto:ws@szps.pl">ws@szps.pl</a>.</p>
       </div>
     </div>
   </div>

@@ -153,6 +153,28 @@ MEDIA_ROOT = BASE_DIR / "public" / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ── E-mail (formularz kontaktowy) ────────────────────────────────────
+# Backend domyślnie SMTP na produkcji, `console` na dev — tam nic nie
+# leci na zewnątrz, wiadomość wypisuje się w logu runservera.
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend" if DEBUG
+    else "django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
+EMAIL_TIMEOUT = 15
+
+# From: nagłówek, adresat formularza — konfigurowalne osobno, bo na
+# mydevil mailbox uwierzytelnienia (EMAIL_HOST_USER) to często ten sam
+# adres co „ws@szps.pl", ale nie musi.
+DEFAULT_FROM_EMAIL = os.getenv("DJANGO_FROM_EMAIL", "Formularz ŚZPS <ws@szps.pl>")
+CONTACT_RECIPIENT = os.getenv("CONTACT_RECIPIENT", "ws@szps.pl")
+
 if not DEBUG:
     # Passenger na mydevil siedzi za nginx-em, który terminuje SSL.
     # Bez tej pary Django nie wie, że request przyszedł HTTPS-em i

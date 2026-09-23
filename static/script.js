@@ -52,7 +52,7 @@
   // Bezpiecznik: gdyby coś padło (np. observer nie fire'ował) pokaż wszystko po 3s.
   setTimeout(() => reveals.forEach(el => el.classList.add('in')), 3000);
 
-  /* ---- Contact form validation ---- */
+  /* ---- Contact form ---- */
   const form = document.getElementById('contactForm');
   if (form){
     const showErr = (field, msg) => {
@@ -70,7 +70,7 @@
       el.addEventListener('change', () => clearErr(el));
     });
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       let ok = true;
       const name = form.querySelector('#f-name');
@@ -91,21 +91,39 @@
         return;
       }
 
-      form.style.display = 'none';
-      document.getElementById('formOk').classList.add('show');
+      /* ---- Wysyłka przez backend (POST /kontakt/wyslij/) ---- */
+      const button = form.querySelector('button[type=submit]');
+      const originalLabel = button.innerHTML;
+      button.disabled = true;
+      button.textContent = 'Wysyłam…';
+      document.getElementById('formErr').hidden = true;
 
-      /* ---- Wysyłka wiadomości (test) ---- */
-      // Adres odbiorcy testowego. Otwiera klienta poczty z wypełnioną treścią.
-      const RECIPIENT = 'michbroniszewski@gmail.com';
-      const subject = 'Formularz kontaktowy: ' + topic.value;
-      const body =
-        'Imię i nazwisko: ' + name.value.trim() + '\n' +
-        'E-mail: ' + email.value.trim() + '\n' +
-        'Temat: ' + topic.value + '\n\n' +
-        msg.value.trim();
-      window.location.href = 'mailto:' + RECIPIENT +
-        '?subject=' + encodeURIComponent(subject) +
-        '&body=' + encodeURIComponent(body);
+      const csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
+      const payload = new FormData(form); // czyta wszystkie pola + honeypot + csrf
+
+      try {
+        const resp = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfInput ? csrfInput.value : '',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: payload,
+        });
+        const data = await resp.json().catch(() => ({ok: false}));
+        if (resp.ok && data.ok){
+          form.style.display = 'none';
+          document.getElementById('formOk').classList.add('show');
+        } else {
+          button.disabled = false;
+          button.innerHTML = originalLabel;
+          document.getElementById('formErr').hidden = false;
+        }
+      } catch (err){
+        button.disabled = false;
+        button.innerHTML = originalLabel;
+        document.getElementById('formErr').hidden = false;
+      }
     });
   }
 

@@ -1,9 +1,19 @@
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
 from documents.models import Document, DocumentCategory
 
 from .models import Article, StaticPage
+
+
+VALID_POST = {
+    "name": "Jan Kowalski",
+    "email": "jan@example.com",
+    "topic": "Sprawy organizacyjne",
+    "message": "Dzień dobry, mam pytanie odnośnie…",
+    "consent": "on",
+}
 
 
 class ArticleModelTests(TestCase):
@@ -131,6 +141,63 @@ class HomeDocumentsSectionTests(TestCase):
         )
         response = self.client.get(reverse("pages:home"))
         self.assertNotContains(response, "Schowany dokument")
+
+
+class ContactSubmitTests(TestCase):
+    url = reverse("pages:contact_submit") if hasattr(reverse, "__call__") else "/kontakt/wyslij/"
+
+    def setUp(self):
+        # locmem backend gromadzi wiadomości w mail.outbox; czyścimy dla higieny.
+        mail.outbox = []
+
+    def test_get_returns_405(self):
+        response = self.client.get(reverse("pages:contact_submit"))
+        self.assertEqual(response.status_code, 405)
+
+    def test_valid_post_sends_email(self):
+        response = self.client.post(reverse("pages:contact_submit"), VALID_POST)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"ok": True})
+        self.assertEqual(len(mail.outbox), 1)
+        m = mail.outbox[0]
+        self.assertEqual(m.to, ["ws@szps.pl"])
+        self.assertIn("Sprawy organizacyjne", m.subject)
+        self.assertIn("Jan Kowalski", m.body)
+        self.assertIn("jan@example.com", m.body)
+        # Reply-To pozwala kliknąć "Odpowiedz" i trafić na formularzowego usera.
+        self.assertEqual(m.reply_to, ["jan@example.com"])
+
+    def test_missing_field_returns_400(self):
+        bad = {**VALID_POST, "email": "nope"}
+        response = self.client.post(reverse("pages:contact_submit"), bad)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("email", response.json()["errors"])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_missing_consent_returns_400(self):
+        bad = {**VALID_POST}
+        bad.pop("consent")
+        response = self.client.post(reverse("pages:contact_submit"), bad)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("consent", response.json()["errors"])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_unknown_topic_rejected(self):
+        bad = {**VALID_POST, "topic": "Prześlij zdjęcie karty kredytowej"}
+        response = self.client.post(reverse("pages:contact_submit"), bad)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("topic", response.json()["errors"])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_honeypot_silently_accepts_and_drops(self):
+        # Bot wypełnił ukryte pole `website` — udajemy sukces, nic nie wysyłamy.
+        response = self.client.post(
+            reverse("pages:contact_submit"),
+            {**VALID_POST, "website": "https://spam.example"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"ok": True})
+        self.assertEqual(len(mail.outbox), 0)
 
 
 class SiteInfrastructureTests(TestCase):
