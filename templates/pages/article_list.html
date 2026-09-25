@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static text_extras %}
 
 {% block title %}Aktualności — Wydział Sędziowski ŚZPS{% endblock %}
 {% block og_title %}Aktualności — Wydział Sędziowski ŚZPS{% endblock %}
@@ -28,7 +28,7 @@
           <h3>{{ article.title }}</h3>
           {% if article.lead %}<p class="news-post__lead">{{ article.lead }}</p>{% endif %}
         </header>
-        <p class="news-post__preview">{{ article.body|striptags|truncatewords:35 }}</p>
+        <p class="news-post__preview">{{ article.body|plaintext|truncatewords:35 }}</p>
         <span class="news-post__more">
           Czytaj więcej
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
