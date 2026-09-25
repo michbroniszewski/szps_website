@@ -105,6 +105,14 @@ class ArticleListViewTests(TestCase):
         expected_href = reverse("pages:article_detail", args=[art.slug])
         self.assertContains(response, f'href="{expected_href}"')
 
+    def test_preview_decodes_html_entities(self):
+        # TinyMCE potrafi zapisać „ó” jako &oacute; — podgląd ma pokazać literę.
+        Article.objects.create(title="Encje", body="<p>Sędziowie &oacute;semki&nbsp;i &bdquo;nowi&rdquo;</p>")
+        for url in (reverse("pages:article_list"), reverse("pages:home")):
+            response = self.client.get(url)
+            self.assertContains(response, "Sędziowie ósemki i „nowi”")
+            self.assertNotContains(response, "&amp;oacute;")
+
 
 class HomeDocumentsSectionTests(TestCase):
     """Sekcja Dokumenty na home musi wciągać dane z bazy (seed 0003)."""

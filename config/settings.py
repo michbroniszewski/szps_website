@@ -78,6 +78,8 @@ TINYMCE_DEFAULT_CONFIG = {
     "branding": False,
     "promotion": False,
     "convert_urls": False,
+    # Polskie znaki zapisujemy wprost (ó zamiast &oacute;).
+    "entity_encoding": "raw",
 }
 
 MIDDLEWARE = [

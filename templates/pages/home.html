@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static text_extras %}
 
 {% block title %}Wydział Sędziowski ŚZPS — Śląscy Sędziowie Piłki Siatkowej{% endblock %}
 {% block og_title %}Wydział Sędziowski ŚZPS — Śląscy Sędziowie{% endblock %}
@@ -68,7 +68,7 @@
         <div class="news-card__body">
           <span class="news-card__date">{{ article.published_at|date:"j E Y" }}</span>
           <h3>{{ article.title }}</h3>
-          <p class="news-card__excerpt">{{ article.lead|default:article.body|striptags|truncatewords:28 }}</p>
+          <p class="news-card__excerpt">{{ article.lead|default:article.body|plaintext|truncatewords:28 }}</p>
           <a class="news-card__more" href="{% url 'pages:article_detail' article.slug %}">
             Czytaj więcej
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -100,9 +100,9 @@
       <h3 class="doc-group__title">{{ cat.name }}</h3>
       <div class="docs-grid">
         {% for doc in cat.documents.all %}
-        <a class="doc-card" href="{{ doc.get_href }}" target="_blank" rel="noopener">
+        <a class="doc-card" href="{{ doc.get_href }}" target="_blank" rel="noopener"{% if doc.description %} title="{{ doc.description }}"{% endif %}>
           <span class="doc-card__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11H4z"/><path d="M14 4v6h6"/><path d="M8 14h7M8 17h7"/></svg></span>
-          <div><h4>{{ doc.title }}</h4><p class="doc-card__meta">{{ doc.description }}</p></div>
+          <div class="doc-card__body"><h4>{{ doc.title }}</h4><p class="doc-card__meta">{{ doc.description }}</p></div>
           <span class="doc-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </a>
         {% endfor %}
