@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import sys
 
 from dotenv import load_dotenv
 
@@ -148,7 +149,21 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "public" / "static"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Django 5.1 nie czyta już STATICFILES_STORAGE — bez STORAGES pliki szły
+# pod stałymi adresami (/static/styles.css) i przeglądarki trzymały stary
+# CSS po deployu. Manifest dokleja hash do nazwy, więc każda zmiana pliku
+# to nowy URL. Testy lecą bez collectstatic (brak manifestu), dlatego
+# tam zwykły storage.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if "test" in sys.argv
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        )
+    },
+}
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "public" / "media"
