@@ -1,5 +1,9 @@
+import shutil
+import tempfile
+
 from django.core import mail
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from documents.models import Document, DocumentCategory
@@ -30,6 +34,42 @@ class ArticleModelTests(TestCase):
             title="Nowy tytuł", slug="rec-custom-slug", body="x"
         )
         self.assertEqual(article.slug, "rec-custom-slug")
+
+
+_TMP_MEDIA = tempfile.mkdtemp()
+
+
+@override_settings(MEDIA_ROOT=_TMP_MEDIA)
+class ArticleCoverRenderingTests(TestCase):
+    """Obrazek dodany w panelu (pole `cover`) musi być widoczny na stronie."""
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(_TMP_MEDIA, ignore_errors=True)
+
+    def setUp(self):
+        self.article = Article.objects.create(
+            title="Z obrazkiem",
+            body="x",
+            cover=SimpleUploadedFile("foto.jpg", b"fake", content_type="image/jpeg"),
+        )
+        self.cover_url = self.article.cover.url
+
+    def test_cover_on_home(self):
+        response = self.client.get(reverse("pages:home"))
+        self.assertContains(response, self.cover_url)
+
+    def test_cover_on_article_list(self):
+        response = self.client.get(reverse("pages:article_list"))
+        self.assertContains(response, self.cover_url)
+
+    def test_cover_on_article_detail(self):
+        response = self.client.get(
+            reverse("pages:article_detail", args=[self.article.slug])
+        )
+        self.assertContains(response, 'class="news-post__cover"')
+        self.assertContains(response, self.cover_url)
 
 
 class HomeViewTests(TestCase):

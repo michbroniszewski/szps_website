@@ -18,6 +18,7 @@
     <div class="news-list">
       {% for article in articles %}
       <a class="news-post news-post--link reveal" href="{% url 'pages:article_detail' article.slug %}">
+        {% if article.cover %}<img class="news-post__cover" src="{{ article.cover.url }}" alt="" loading="lazy">{% endif %}
         <header class="news-post__head">
           <div class="news-post__meta">
             <span class="news-post__date">{{ article.published_at|date:"j E Y" }}</span>

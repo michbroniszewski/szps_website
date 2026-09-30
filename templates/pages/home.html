@@ -60,10 +60,11 @@
       {% for article in articles %}
       <article class="news-card reveal {% cycle '' 'd1' 'd2' 'd3' %}">
         <div class="news-card__media nm-{{ forloop.counter }}">
+          {% if article.cover %}<img class="news-card__cover" src="{{ article.cover.url }}" alt="" loading="lazy">{% endif %}
           {% if article.badge_label %}
           <span class="tag{% if article.badge_color %} tag--{{ article.badge_color }}{% endif %}">{{ article.badge_label }}</span>
           {% endif %}
-          {% if article.glyph %}<span class="glyph">{{ article.glyph }}</span>{% endif %}
+          {% if article.glyph and not article.cover %}<span class="glyph">{{ article.glyph }}</span>{% endif %}
         </div>
         <div class="news-card__body">
           <span class="news-card__date">{{ article.published_at|date:"j E Y" }}</span>
