@@ -446,7 +446,7 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
    ============================================================ */
 .sponsors{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:1080px;margin:0 auto}
 .sponsor{
-  background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:40px;
+  background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:40px 24px;
   display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;transition:.22s;
 }
 .sponsor:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:transparent}
@@ -454,8 +454,8 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
 .sponsor__logo img{max-width:240px;max-height:64px;width:auto;height:auto;object-fit:contain}
 .sponsor__name{font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.02em}
 .sponsor__role{font-size:13.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.1em;font-weight:600;font-family:var(--font-display)}
-.sponsor__desc{margin:12px 0 0;font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
-.sponsor__desc a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.sponsor__desc{margin:12px 0 0;font-size:13.5px;line-height:1.45;color:var(--ink-soft)}
+.sponsor__link{display:inline-block;margin-top:8px;font-size:13.5px;color:var(--ink-soft);font-weight:600;text-decoration:underline;text-underline-offset:2px}
 
 /* ============================================================
    KONTAKT
@@ -537,12 +537,14 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
    ============================================================ */
 @media (max-width:1000px){
   .news-grid{grid-template-columns:repeat(2,1fr)}
-  .sponsors{grid-template-columns:repeat(2,1fr);max-width:760px}
-  .sponsor:last-child:nth-child(odd){grid-column:1/-1}
   .obsady__inner{grid-template-columns:1fr;gap:34px}
   .contact-grid{grid-template-columns:1fr;gap:36px}
   .footer__top{grid-template-columns:1fr 1fr;gap:30px}
   .footer__brand{grid-column:1/-1}
+}
+@media (max-width:1180px){
+  .sponsors{grid-template-columns:repeat(2,1fr);max-width:760px}
+  .sponsor:last-child:nth-child(odd){grid-column:1/-1}
 }
 @media (max-width:780px){
   .nav__links,.nav__cta .btn,.nav__cta .fb-btn{display:none}
@@ -556,6 +558,8 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
   body{font-size:16px}
   .wrap{padding:0 18px}
   .news-grid,.sponsors{grid-template-columns:1fr}
+  .sponsor{padding:32px 16px}
+  .sponsor__desc{font-size:13px}
   .form-row{grid-template-columns:1fr}
   .form{padding:24px}
   .hero__cta .btn{flex:1;justify-content:center}
