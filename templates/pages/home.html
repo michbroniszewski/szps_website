@@ -60,10 +60,11 @@
       {% for article in articles %}
       <article class="news-card reveal {% cycle '' 'd1' 'd2' 'd3' %}">
         <div class="news-card__media nm-{{ forloop.counter }}">
+          {% if article.cover %}<img class="news-card__cover" src="{{ article.cover.url }}" alt="" loading="lazy">{% endif %}
           {% if article.badge_label %}
           <span class="tag{% if article.badge_color %} tag--{{ article.badge_color }}{% endif %}">{{ article.badge_label }}</span>
           {% endif %}
-          {% if article.glyph %}<span class="glyph">{{ article.glyph }}</span>{% endif %}
+          {% if article.glyph and not article.cover %}<span class="glyph">{{ article.glyph }}</span>{% endif %}
         </div>
         <div class="news-card__body">
           <span class="news-card__date">{{ article.published_at|date:"j E Y" }}</span>
@@ -118,16 +119,20 @@
     <div class="section-head reveal" style="margin-left:auto;margin-right:auto;text-align:center">
       <span class="eyebrow" style="margin:0 auto">Wspierają nas</span>
       <h2>Partnerzy i sponsorzy</h2>
-      <p style="margin:0 auto">Dziękujemy firmom, które wspierają  Śląskich sędziów siatkówki.</p>
+      <p style="margin:0 auto">Dziękujemy firmom, które wspierają śląskich sędziów siatkówki.</p>
     </div>
     <div class="sponsors">
       <div class="sponsor reveal">
-        <span class="sponsor__logo"><img src="{% static 'assets/martes-sport.png' %}" alt="Martes Sport"></span>
+        <a class="sponsor__logo" href="https://sklepmartes.pl/" target="_blank" rel="noopener" aria-label="Martes Sport — strona sponsora"><img src="{% static 'assets/martes-sport.png' %}" alt="Martes Sport"></a>
         <div><div class="sponsor__name">Martes Sport</div><div class="sponsor__role">Sponsor</div></div>
       </div>
       <div class="sponsor reveal d1">
-        <span class="sponsor__logo"><img src="{% static 'assets/hydrokrak.png' %}" alt="HYDROKRAK"></span>
+        <a class="sponsor__logo" href="https://hydrokrak.pl/" target="_blank" rel="noopener" aria-label="HYDROKRAK — strona sponsora"><img src="{% static 'assets/hydrokrak.png' %}" alt="HYDROKRAK"></a>
         <div><div class="sponsor__name">HYDROKRAK</div><div class="sponsor__role">Sponsor</div></div>
+      </div>
+      <div class="sponsor reveal d2">
+        <a class="sponsor__logo" href="https://www.passcreator.com/" target="_blank" rel="noopener" aria-label="Passcreator — strona partnera"><img src="{% static 'assets/passcreator.png' %}" alt="Passcreator"></a>
+        <div><div class="sponsor__name">Passcreator</div><div class="sponsor__role">Partner technologiczny</div></div>
       </div>
     </div>
   </div>

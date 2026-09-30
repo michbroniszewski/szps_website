@@ -4,6 +4,7 @@
 {% block title %}{{ article.title }} — Wydział Sędziowski ŚZPS{% endblock %}
 {% block og_title %}{{ article.title }} — Wydział Sędziowski ŚZPS{% endblock %}
 {% block meta_description %}{% if article.lead %}{{ article.lead }}{% else %}{{ article.body|plaintext|truncatewords:30 }}{% endif %}{% endblock %}
+{% block og_image %}{% if article.cover %}{{ request.scheme }}://{{ request.get_host }}{{ article.cover.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
 {% block body_class %}nav-on-light{% endblock %}
 
 {% block content %}
@@ -24,6 +25,8 @@
         <h1>{{ article.title }}</h1>
         {% if article.lead %}<p class="news-post__lead">{{ article.lead }}</p>{% endif %}
       </header>
+
+      {% if article.cover %}<img class="news-post__cover" src="{{ article.cover.url }}" alt="{{ article.title }}">{% endif %}
 
       <div class="news-post__body">{{ article.body|safe }}</div>
 
