@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Arkusz ewaluacyjny — Wydział Sędziowski ŚZPS{% endblock %}
+{% block body_class %}nav-on-light{% endblock %}
+
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="{% static 'evaluation.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section section--soft ev">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Obserwacja sędziów</span>
+      <h2>Arkusz ewaluacyjny</h2>
+      <p>Wypełnij arkusz i pobierz gotowy dokument PDF. Wersja robocza zapisuje się w tej przeglądarce, więc odświeżenie strony nie kasuje odpowiedzi.</p>
+    </div>
+
+    {% for message in messages %}
+      <div class="ev-msg ev-msg--{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
+    {% if form.errors %}
+      <div class="ev-msg ev-msg--error" id="ev-errors">
+        Popraw zaznaczone pola ({{ form.errors|length }}).
+        {% for error in form.non_field_errors %}<br>{{ error }}{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" id="evForm" data-bound="{{ form.is_bound|yesno:'1,0' }}" novalidate>
+      {% csrf_token %}
+
+      {# ── Mecz ── #}
+      <div class="form ev-card">
+        <h3 class="ev-card__title">Mecz</h3>
+        <div class="form-row">
+          {% include "evaluation/_field.html" with field=form.competition %}
+          {% include "evaluation/_field.html" with field=form.match_date %}
+        </div>
+        <div class="form-row">
+          {% include "evaluation/_field.html" with field=form.teams %}
+          {% include "evaluation/_field.html" with field=form.result %}
+        </div>
+        <div class="form-row">
+          {% include "evaluation/_field.html" with field=form.observer %}
+          {% include "evaluation/_choices.html" with field=form.difficulty %}
+        </div>
+      </div>
+
+      {# ── Sędziowie ── #}
+      {% for ref in referees %}
+      <div class="form ev-card" data-referee="{{ ref.key }}">
+        <h3 class="ev-card__title ev-card__title--dark">{{ ref.title }}</h3>
+        {% include "evaluation/_field.html" with field=ref.name %}
+        {% for field in ref.choices %}
+          {% include "evaluation/_choices.html" with field=field %}
+        {% endfor %}
+
+        <div class="ev-table-wrap">
+          <table class="ev-grades">
+            <thead>
+              <tr><th>Elementy oceny</th><th colspan="6">Szczegółowa ocena</th></tr>
+            </thead>
+            {% for group in ref.groups %}
+            <tbody>
+              <tr class="ev-grades__group">
+                <th scope="rowgroup">{{ group.title }}</th>
+                <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th>
+              </tr>
+              {% for item in group.items %}
+              <tr class="ev-grades__row{% if item.errors %} invalid{% endif %}">
+                <td>{{ item.label }}</td>
+                {% for radio in item %}
+                <td class="ev-grade">
+                  <label title="{{ radio.choice_label }}">
+                    {{ radio.tag }}<span>{{ radio.choice_label }}</span>
+                  </label>
+                </td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+            {% endfor %}
+          </table>
+        </div>
+        <p class="ev-hint">Ocena wyjściowa to C. Każda inna ocena (A-B lub D-F) wymaga opisu w polu „Przyczyny”.</p>
+
+        {% include "evaluation/_field.html" with field=ref.summary %}
+        {% include "evaluation/_field.html" with field=ref.reasons extra_class="ev-reasons" %}
+      </div>
+      {% endfor %}
+
+      {# ── Uwagi ── #}
+      <div class="form ev-card">
+        <h3 class="ev-card__title">Uwagi</h3>
+        {% include "evaluation/_field.html" with field=form.staff_info %}
+        {% include "evaluation/_field.html" with field=form.notes %}
+
+        <details class="ev-legend">
+          <summary>Podstawowe objaśnienia dotyczące zasad oceny</summary>
+          <ul>
+            {% for rule in grade_rules %}<li>{{ rule }}</li>{% endfor %}
+          </ul>
+          <dl>
+            {% for grade, desc in grade_scale %}<dt>{{ grade }}</dt><dd>{{ desc }}</dd>{% endfor %}
+          </dl>
+        </details>
+      </div>
+
+      <div class="ev-actions">
+        <button type="submit" name="action" value="pdf" class="btn btn--gold">Pobierz PDF</button>
+        {% if email_enabled %}
+          <button type="submit" name="action" value="email" class="btn btn--dark">Wyślij e-mailem</button>
+        {% endif %}
+        <button type="button" class="btn btn--ghost" id="evReset">Wyczyść formularz</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'evaluation.js' %}"></script>
+{% endblock %}

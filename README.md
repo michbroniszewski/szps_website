@@ -17,6 +17,14 @@ Serwer: http://127.0.0.1:8000/, panel: http://127.0.0.1:8000/admin/
 
 Szczegóły i pełen flow „lokalny test → deploy": [`docs/local-testing.md`](docs/local-testing.md).
 
+## Arkusz ewaluacyjny (podstrona ukryta)
+
+`/arkusz-ewaluacyjny/` — formularz obserwatora (wzór WZPS 2017) z
+generowaniem PDF. Nie ma linków w menu ani w sitemap, strona wysyła
+`noindex`. Treść arkusza: `evaluation/sheet.py`; PDF: `evaluation/pdf.py`.
+Ścieżkę i adresatów wysyłki e-mail ustawia się w `.env`
+(`EVALUATION_PATH`, `EVALUATION_EMAIL_RECIPIENTS` — patrz `.env.example`).
+
 ## Dokumentacja
 
 - [`docs/local-testing.md`](docs/local-testing.md) — lokalne środowisko dev.

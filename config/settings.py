@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "pages",
     "documents",
     "board",
+    "evaluation",
 ]
 
 # Branding + kolory dla django-unfold. Wszystko opcjonalne — jak
@@ -191,6 +192,12 @@ EMAIL_TIMEOUT = 15
 # adres co „ws@szps.pl", ale nie musi.
 DEFAULT_FROM_EMAIL = os.getenv("DJANGO_FROM_EMAIL", "Formularz ŚZPS <ws@szps.pl>")
 CONTACT_RECIPIENT = os.getenv("CONTACT_RECIPIENT", "ws@szps.pl")
+
+# Arkusz ewaluacyjny — podstrona bez linków w menu, dostępna tylko po
+# wpisaniu adresu. Ścieżkę można zmienić w .env (np. na trudniejszą do
+# zgadnięcia). Pusta lista adresatów = przycisk „Wyślij e-mailem” ukryty.
+EVALUATION_PATH = os.getenv("EVALUATION_PATH", "arkusz-ewaluacyjny").strip("/")
+EVALUATION_EMAIL_RECIPIENTS = env_list("EVALUATION_EMAIL_RECIPIENTS", [])
 
 if not DEBUG:
     # Passenger na mydevil siedzi za nginx-em, który terminuje SSL.
