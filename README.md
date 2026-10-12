@@ -19,7 +19,7 @@ Szczegóły i pełen flow „lokalny test → deploy": [`docs/local-testing.md`]
 
 ## Arkusz ewaluacyjny (podstrona ukryta)
 
-`/arkusz-ewaluacyjny/` — formularz obserwatora (uproszczony wzór WZPS 2017) z
+`/arkusz-ewaluacyjny/` — formularz obserwatora do oceny jednego sędziego (na bazie wzoru WZPS 2017) z
 generowaniem PDF. Nie ma linków w menu ani w sitemap, strona wysyła
 `noindex`. Treść arkusza: `evaluation/sheet.py`; PDF: `evaluation/pdf.py`.
 Ścieżkę i adresatów wysyłki e-mail ustawia się w `.env`

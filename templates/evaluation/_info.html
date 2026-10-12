@@ -1,0 +1,9 @@
+{% for section in sections %}
+<div class="ev-info__section">
+  {% if section.title %}<p class="ev-info__title">{{ section.title }}</p>{% endif %}
+  {% if section.text %}<p>{{ section.text }}</p>{% endif %}
+  {% if section.points %}
+    <ol type="a">{% for point in section.points %}<li>{{ point }}</li>{% endfor %}</ol>
+  {% endif %}
+</div>
+{% endfor %}

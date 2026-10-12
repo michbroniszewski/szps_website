@@ -3,23 +3,26 @@ from django import forms
 from . import sheet
 
 
-class EvaluationForm(forms.Form):
-    """Formularz budowany dynamicznie z `sheet.py`.
+def _radio(choices, **kwargs):
+    return forms.ChoiceField(
+        choices=choices,
+        widget=forms.RadioSelect,
+        error_messages={"required": "Zaznacz jedną z opcji."},
+        **kwargs,
+    )
 
-    Nazwy pól: nagłówek meczu bez prefiksu, a pola sędziów z prefiksem
-    `r1_` / `r2_` (np. `r1_name`, `r1_g_technika`, `r1_comment`).
+
+class EvaluationForm(forms.Form):
+    """Arkusz jednego sędziego; elementy oceny budowane z `sheet.py`.
+
+    Pola elementów: `g_<klucz>` (ocena A–F) i `c_<klucz>` (komentarz).
     """
 
     competition = forms.ChoiceField(
         label="Rozgrywki",
         choices=[("", "Wybierz rozgrywki…")] + sheet.COMPETITIONS,
     )
-    difficulty = forms.ChoiceField(
-        label="Trudność meczu",
-        choices=sheet.DIFFICULTY,
-        widget=forms.RadioSelect,
-        error_messages={"required": "Zaznacz jedną z opcji."},
-    )
+    difficulty = _radio(sheet.DIFFICULTY, label="Trudność meczu")
     teams = forms.CharField(
         label="Mecz",
         max_length=200,
@@ -36,51 +39,56 @@ class EvaluationForm(forms.Form):
     )
     observer = forms.CharField(label="Obserwator", max_length=120)
 
+    referee_name = forms.CharField(label="Imię i nazwisko sędziego", max_length=120)
+    position = _radio(sheet.POSITIONS, label="Pozycja")
+
+    comment = forms.CharField(
+        label="Komentarz opisowy",
+        required=False,
+        max_length=8000,
+        widget=forms.Textarea(attrs={"rows": 6}),
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for ref in sheet.REFEREES:
-            r = ref["key"]
-            self.fields[f"{r}_name"] = forms.CharField(
-                label="Imię i nazwisko", max_length=120,
+        # Pola elementów wstawiamy przed komentarzem ogólnym.
+        comment = self.fields.pop("comment")
+        for key, label, _info in sheet.ELEMENTS:
+            self.fields[sheet.grade_field(key)] = forms.ChoiceField(
+                label=label,
+                choices=[(g, g) for g in sheet.GRADES],
+                initial=sheet.DEFAULT_GRADE,
+                widget=forms.RadioSelect,
             )
-            for item_key, item_label in sheet.ELEMENTS:
-                self.fields[sheet.grade_field(r, item_key)] = forms.ChoiceField(
-                    label=item_label,
-                    choices=[(g, g) for g in sheet.GRADES],
-                    initial=sheet.DEFAULT_GRADE,
-                    widget=forms.RadioSelect,
-                )
-            self.fields[f"{r}_comment"] = forms.CharField(
-                label="Komentarz opisowy",
+            self.fields[sheet.comment_field(key)] = forms.CharField(
+                label="Komentarz do oceny",
                 required=False,
-                max_length=8000,
-                widget=forms.Textarea(attrs={"rows": 6}),
+                max_length=4000,
+                widget=forms.Textarea(attrs={"rows": 2}),
             )
+        self.fields["comment"] = comment
 
     def clean(self):
         cleaned = super().clean()
         # Zasada z objaśnień: każda ocena inna niż C wymaga komentarza.
-        for ref in sheet.REFEREES:
-            r = ref["key"]
-            non_default = any(
-                cleaned.get(sheet.grade_field(r, k), sheet.DEFAULT_GRADE) != sheet.DEFAULT_GRADE
-                for k, _label in sheet.ELEMENTS
-            )
-            if non_default and not cleaned.get(f"{r}_comment"):
+        for key, _label, _info in sheet.ELEMENTS:
+            grade = cleaned.get(sheet.grade_field(key), sheet.DEFAULT_GRADE)
+            if grade != sheet.DEFAULT_GRADE and not cleaned.get(sheet.comment_field(key)):
                 self.add_error(
-                    f"{r}_comment",
+                    sheet.comment_field(key),
                     "Wystawiono ocenę inną niż C — uzasadnij ją w komentarzu.",
                 )
         return cleaned
 
-    # ── struktury pomocnicze dla szablonu ────────────────────────────
-    def referee_sections(self):
-        for ref in sheet.REFEREES:
-            r = ref["key"]
+    # ── struktura pomocnicza dla szablonu ────────────────────────────
+    def elements(self):
+        for key, label, info in sheet.ELEMENTS:
             yield {
-                "key": r,
-                "title": ref["title"],
-                "name": self[f"{r}_name"],
-                "items": [self[sheet.grade_field(r, k)] for k, _l in sheet.ELEMENTS],
-                "comment": self[f"{r}_comment"],
+                "key": key,
+                "label": label,
+                "grade": self[sheet.grade_field(key)],
+                "comment": self[sheet.comment_field(key)],
+                # Ta sama treść dla obu pozycji → jedno rozwinięcie bez przełączania.
+                "info_shared": info["r1"] if info["r1"] is info["r2"] else None,
+                "info": [(pos, info[pos]) for pos, _l in sheet.POSITIONS],
             }

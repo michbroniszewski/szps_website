@@ -29,13 +29,13 @@ def _noindex(response):
 def _send_email(data, pdf: bytes, filename: str):
     date = data["match_date"].strftime("%d.%m.%Y")
     msg = EmailMessage(
-        subject=f"[Arkusz ewaluacyjny] {data['teams']} ({date})",
+        subject=f"[Arkusz ewaluacyjny] {data['referee_name']} — {data['teams']} ({date})",
         body=(
             f"Obserwator: {data['observer']}\n"
             f"Rozgrywki: {sheet.choice_label(sheet.COMPETITIONS, data['competition'])}\n"
             f"Mecz: {data['teams']} — {data['result']} ({date})\n"
-            f"Sędzia I: {data['r1_name']}\n"
-            f"Sędzia II: {data['r2_name']}\n\n"
+            f"Oceniany: {data['referee_name']} "
+            f"({sheet.choice_label(sheet.POSITIONS, data['position'])})\n\n"
             "Arkusz w załączniku.\n"
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
@@ -79,7 +79,7 @@ def evaluation_form(request):
         "evaluation/form.html",
         {
             "form": form,
-            "referees": list(form.referee_sections()),
+            "elements": list(form.elements()),
             "grade_scale": sheet.GRADE_SCALE,
             "grade_rules": sheet.GRADE_RULES,
             "email_enabled": _email_enabled(),

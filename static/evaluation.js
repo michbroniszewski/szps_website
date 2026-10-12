@@ -5,7 +5,8 @@
   const form = document.getElementById('evForm');
   if (!form) return;
 
-  const KEY = 'szps-arkusz-ewaluacyjny';
+  // v2: arkusz jednego sędziego (inne nazwy pól niż w pierwszej wersji).
+  const KEY = 'szps-arkusz-ewaluacyjny-v2';
   const SKIP = new Set(['csrfmiddlewaretoken', 'action']);
 
   const read = () => {
@@ -32,15 +33,31 @@
     }
   };
 
-  // Ocena inna niż C → pole „Przyczyny” danego sędziego jest wymagane.
-  const refreshReasons = () => {
-    form.querySelectorAll('[data-referee]').forEach(card => {
-      const r = card.dataset.referee;
-      const nonC = card.querySelector(`input[name^="${r}_g_"]:checked:not([value="C"])`);
-      const reasons = card.querySelector('.ev-reasons');
-      if (reasons) reasons.classList.toggle('needed', !!nonC);
+  // Ocena inna niż C → komentarz przy tym elemencie jest wymagany.
+  const refreshComments = () => {
+    form.querySelectorAll('.ev-el').forEach(el => {
+      const nonC = el.querySelector('input[name^="g_"]:checked:not([value="C"])');
+      el.querySelector('.ev-el__comment').classList.toggle('needed', !!nonC);
     });
   };
+
+  // Pozycja sędziego decyduje, które rozwinięcia „i” są widoczne.
+  const refreshPosition = () => {
+    const pos = form.querySelector('input[name="position"]:checked');
+    if (pos) form.dataset.position = pos.value;
+    else delete form.dataset.position;
+  };
+
+  const refresh = () => { refreshComments(); refreshPosition(); };
+
+  form.querySelectorAll('.ev-el__info').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = document.getElementById(btn.getAttribute('aria-controls'));
+      const open = btn.getAttribute('aria-expanded') !== 'true';
+      btn.setAttribute('aria-expanded', open);
+      panel.hidden = !open;
+    });
+  });
 
   if (new URLSearchParams(location.search).has('wyslano')) {
     try { localStorage.removeItem(KEY); } catch (e) {}
@@ -48,10 +65,10 @@
 
   // Po błędzie walidacji formularz ma już dane z serwera — nie nadpisujemy.
   if (form.dataset.bound !== '1') restore();
-  refreshReasons();
+  refresh();
 
-  form.addEventListener('input', () => { save(); refreshReasons(); });
-  form.addEventListener('change', () => { save(); refreshReasons(); });
+  form.addEventListener('input', () => { save(); refresh(); });
+  form.addEventListener('change', () => { save(); refresh(); });
 
   document.getElementById('evReset').addEventListener('click', () => {
     if (!confirm('Wyczyścić wszystkie odpowiedzi?')) return;

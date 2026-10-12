@@ -23,19 +23,32 @@
 .ev-pill input:focus-visible + span{box-shadow:0 0 0 4px rgba(47,166,224,.25)}
 .ev-choices.invalid .ev-pill span{border-color:#dc4040}
 
-/* tabela ocen A–F */
-.ev-table-wrap{overflow-x:auto;margin:8px 0 10px;border:1px solid var(--line);border-radius:12px}
-.ev-grades{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
-.ev-grades th,.ev-grades td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:middle}
-.ev-grades__group th{background:var(--soft);font-family:var(--font-display);font-weight:700}
-.ev-grades__group th + th{width:44px;text-align:center;color:var(--ink-soft);font-size:13px}
-.ev-grades tbody tr:last-child td{border-bottom:0}
-.ev-grades__row.invalid td:first-child{color:#dc4040}
-.ev-grade{text-align:center;padding:4px !important}
-.ev-grade label{display:inline-grid;place-items:center;cursor:pointer}
+/* elementy oceny: nazwa + „i”, przyciski A–F, komentarz */
+.ev-elements{border:1px solid var(--line);border-radius:14px;margin-bottom:22px}
+.ev-el{padding:16px 18px;border-bottom:1px solid var(--line)}
+.ev-el:last-child{border-bottom:0}
+.ev-el.invalid{background:#fff8f8}
+.ev-el__head{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.ev-el__title{flex:1;font-family:var(--font-display);font-weight:700;font-size:15.5px;line-height:1.35}
+.ev-el__info{flex:none;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--blue);background:#fff;color:var(--blue-d);
+  font-family:Georgia,serif;font-style:italic;font-weight:700;font-size:15px;line-height:1;transition:.15s}
+.ev-el__info:hover,.ev-el__info[aria-expanded="true"]{background:var(--blue);color:#fff}
+.ev-el__infopanel{margin:0 0 12px;padding:12px 16px;background:var(--soft);border-left:3px solid var(--blue);border-radius:0 10px 10px 0;font-size:14.5px;color:var(--ink-soft)}
+.ev-info__section + .ev-info__section{margin-top:10px}
+.ev-info__title{font-weight:700;color:var(--ink)}
+.ev-el__infopanel ol{margin:4px 0 0 22px}
+.ev-el__infopanel li + li{margin-top:3px}
+.ev-info__pos{display:none}
+#evForm[data-position="r1"] .ev-info__pos[data-pos="r1"],
+#evForm[data-position="r2"] .ev-info__pos[data-pos="r2"]{display:block}
+#evForm[data-position] .ev-info__nopos{display:none}
+.ev-info__nopos{font-style:italic}
+
+.ev-el__grades{display:flex;gap:8px;margin-bottom:10px}
+.ev-grade{cursor:pointer}
 .ev-grade input{position:absolute;opacity:0;pointer-events:none}
-.ev-grade span{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;border:1.5px solid var(--line);font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--ink-soft);transition:.15s}
-.ev-grade label:hover span{border-color:var(--ink-soft)}
+.ev-grade span{display:grid;place-items:center;width:40px;height:36px;border-radius:9px;border:1.5px solid var(--line);font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--ink-soft);transition:.15s}
+.ev-grade:hover span{border-color:var(--ink-soft)}
 .ev-grade input:focus-visible + span{box-shadow:0 0 0 4px rgba(47,166,224,.25)}
 .ev-grade input:checked + span{background:var(--gold);border-color:var(--gold-d);color:#1a1200}
 .ev-grade input[value="C"]:checked + span{background:var(--soft);border-color:var(--ink-soft);color:var(--ink)}
@@ -44,9 +57,12 @@
 .ev-grade input[value="F"]:checked + span{background:#f6d4d4;border-color:#dc4040;color:#8f1515}
 .ev-grade input[value="A"]:checked + span,
 .ev-grade input[value="B"]:checked + span{background:#d9ecc9;border-color:var(--green);color:var(--green-d)}
+.ev .ev-el__comment{margin-bottom:0}
+.ev .ev-el__comment label{font-size:12.5px;color:var(--ink-soft)}
+.ev .ev-el__comment textarea{min-height:0;padding:9px 12px;font-size:14.5px}
+.ev-el__comment.needed label::after{content:" — wymagany (ocena inna niż C)";color:#dc4040;font-weight:600}
 
 .ev-hint{font-size:13.5px;color:var(--ink-soft);margin-bottom:18px}
-.ev-reasons.needed label::after{content:" — wymagany (są oceny inne niż C)";color:#dc4040;font-weight:600}
 
 .ev-legend{margin-top:6px;font-size:14.5px}
 .ev-legend summary{cursor:pointer;font-family:var(--font-display);font-weight:700}
@@ -68,12 +84,8 @@
   .ev-card__title--dark{margin:-22px -18px 20px;padding:16px 18px}
   .ev-actions .btn{width:100%;justify-content:center}
 
-  /* tabela ocen: opis elementu nad rzędem przycisków A–F */
-  .ev-grades{min-width:0}
-  .ev-grades__group th + th{display:none}
-  .ev-grades__group th{display:block}
-  .ev-grades__row{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--line)}
-  .ev-grades__row td{border-bottom:0}
-  .ev-grades__row td:first-child{grid-column:1 / -1;padding-bottom:2px}
-  .ev-grade{padding:2px 0 10px !important}
+  .ev-el{padding:14px 12px}
+  .ev-el__grades{gap:6px}
+  .ev-grade{flex:1}
+  .ev-grade span{width:auto}
 }

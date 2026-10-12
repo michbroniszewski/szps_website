@@ -107,11 +107,10 @@ def _header(data, st, width):
     return t
 
 
-def _referee(ref, data, st, width):
-    r = ref["key"]
-
+def _evaluation(data, st, width):
+    position = sheet.choice_label(sheet.POSITIONS, data.get("position"))
     title = Table(
-        [[Paragraph(f"{ref['title']} — {escape(data.get(f'{r}_name', ''))}", st["h2"])]],
+        [[Paragraph(f"{escape(data.get('referee_name', ''))} — {position}", st["h2"])]],
         colWidths=[width],
     )
     title.setStyle(TableStyle([
@@ -120,8 +119,9 @@ def _referee(ref, data, st, width):
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
     ]))
 
-    # Tabela ocen: element | A B C D E F
+    # Tabela ocen: element | A B C D E F, pod elementem jego komentarz.
     gw = 9 * mm
+    n = len(sheet.GRADES)
     rows = [[_p("ELEMENTY OCENY", st["bold"])] + [_p(g, st["center"]) for g in sheet.GRADES]]
     style = [
         ("BACKGROUND", (0, 0), (-1, 0), SOFT),
@@ -129,9 +129,9 @@ def _referee(ref, data, st, width):
         ("TOPPADDING", (0, 1), (-1, -1), 5),
         ("BOTTOMPADDING", (0, 1), (-1, -1), 5),
     ]
-    for item_key, item_label in sheet.ELEMENTS:
+    for key, label, _info in sheet.ELEMENTS:
         row_i = len(rows)
-        grade = data.get(sheet.grade_field(r, item_key))
+        grade = data.get(sheet.grade_field(key))
         cells = []
         for col, g in enumerate(sheet.GRADES, start=1):
             if g == grade:
@@ -139,13 +139,21 @@ def _referee(ref, data, st, width):
                 style.append(("BACKGROUND", (col, row_i), (col, row_i), MARK))
             else:
                 cells.append("")
-        rows.append([_p(item_label, st["base"])] + cells)
-    grades = Table(rows, colWidths=[width - gw * len(sheet.GRADES)] + [gw] * len(sheet.GRADES))
+        rows.append([_p(label, st["bold"])] + cells)
+        comment = data.get(sheet.comment_field(key))
+        if comment:
+            row_i = len(rows)
+            text = escape(comment).replace("\n", "<br/>")
+            rows.append([Paragraph(f"<i>Komentarz:</i> {text}", st["small"])] + [""] * n)
+            style.append(("SPAN", (0, row_i), (-1, row_i)))
+    grades = Table(rows, colWidths=[width - gw * n] + [gw] * n)
     grades.setStyle(_box(style))
 
     return [
-        KeepTogether([title, grades, Spacer(1, 6)]),
-        _text_block("Komentarz opisowy", data.get(f"{r}_comment"), st, width),
+        title,
+        grades,
+        Spacer(1, 6),
+        _text_block("Komentarz opisowy", data.get("comment"), st, width),
     ]
 
 
@@ -186,18 +194,17 @@ def build_pdf(data: dict) -> bytes:
         buf, pagesize=A4,
         leftMargin=14 * mm, rightMargin=14 * mm, topMargin=12 * mm, bottomMargin=14 * mm,
         title="Arkusz ewaluacyjny", author=str(data.get("observer", "")),
-        subject=str(data.get("teams", "")),
+        subject=f"{data.get('referee_name', '')} — {data.get('teams', '')}",
     )
     width = doc.width
 
     story = [
-        Paragraph("Arkusz ewaluacyjny sędziów", st["title"]),
+        Paragraph("Arkusz ewaluacyjny sędziego", st["title"]),
         Paragraph("Wydział Sędziowski Śląskiego Związku Piłki Siatkowej", st["subtitle"]),
         _header(data, st, width),
         Spacer(1, 8),
     ]
-    for ref in sheet.REFEREES:
-        story += _referee(ref, data, st, width)
+    story += _evaluation(data, st, width)
     story += [Spacer(1, 6)] + [KeepTogether(_legend(st, width))]
 
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
@@ -206,5 +213,10 @@ def build_pdf(data: dict) -> bytes:
 
 def pdf_filename(data: dict) -> str:
     date = data.get("match_date")
-    parts = ["arkusz", date.isoformat() if date else "", slugify(data.get("teams", ""))]
+    parts = [
+        "arkusz",
+        date.isoformat() if date else "",
+        slugify(data.get("referee_name", "")),
+        slugify(data.get("teams", "")),
+    ]
     return "-".join(p for p in parts if p)[:120] + ".pdf"

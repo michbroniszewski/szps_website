@@ -29,7 +29,7 @@
       </div>
     {% endif %}
 
-    <form method="post" id="evForm" data-bound="{{ form.is_bound|yesno:'1,0' }}" novalidate>
+    <form method="post" id="evForm" data-bound="{{ form.is_bound|yesno:'1,0' }}"{% if form.position.value %} data-position="{{ form.position.value }}"{% endif %} novalidate>
       {% csrf_token %}
 
       {# ── Mecz ── #}
@@ -47,41 +47,49 @@
         {% include "evaluation/_field.html" with field=form.observer %}
       </div>
 
-      {# ── Sędziowie ── #}
-      {% for ref in referees %}
-      <div class="form ev-card" data-referee="{{ ref.key }}">
-        <h3 class="ev-card__title ev-card__title--dark">{{ ref.title }}</h3>
-        {% include "evaluation/_field.html" with field=ref.name %}
-
-        <div class="ev-table-wrap">
-          <table class="ev-grades">
-            <thead>
-              <tr class="ev-grades__group">
-                <th>Elementy oceny</th>
-                <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in ref.items %}
-              <tr class="ev-grades__row{% if item.errors %} invalid{% endif %}">
-                <td>{{ item.label }}</td>
-                {% for radio in item %}
-                <td class="ev-grade">
-                  <label title="{{ radio.choice_label }}">
-                    {{ radio.tag }}<span>{{ radio.choice_label }}</span>
-                  </label>
-                </td>
-                {% endfor %}
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+      {# ── Oceniany sędzia ── #}
+      <div class="form ev-card">
+        <h3 class="ev-card__title ev-card__title--dark">Oceniany sędzia</h3>
+        <div class="form-row">
+          {% include "evaluation/_field.html" with field=form.referee_name %}
+          {% include "evaluation/_choices.html" with field=form.position %}
         </div>
-        <p class="ev-hint">Ocena wyjściowa to C. Każdą inną ocenę (A-B lub D-F) uzasadnij w komentarzu opisowym.</p>
 
-        {% include "evaluation/_field.html" with field=ref.comment extra_class="ev-reasons" %}
+        <p class="ev-hint">Ocena wyjściowa to C. Każdą inną ocenę (A-B lub D-F) uzasadnij w komentarzu przy danym elemencie. Przycisk <b>i</b> rozwija, co obejmuje element.</p>
+
+        <div class="ev-elements">
+          {% for el in elements %}
+          <div class="ev-el{% if el.grade.errors or el.comment.errors %} invalid{% endif %}" data-el="{{ el.key }}">
+            <div class="ev-el__head">
+              <span class="ev-el__title">{{ el.label }}</span>
+              <button type="button" class="ev-el__info" aria-expanded="false" aria-controls="info-{{ el.key }}" title="Szczegóły elementu">i</button>
+            </div>
+            <div class="ev-el__infopanel" id="info-{{ el.key }}" hidden>
+              {% if el.info_shared %}
+                {% include "evaluation/_info.html" with sections=el.info_shared %}
+              {% else %}
+                <p class="ev-info__nopos">Wybierz pozycję sędziego, aby zobaczyć szczegóły.</p>
+                {% for pos, sections in el.info %}
+                  <div class="ev-info__pos" data-pos="{{ pos }}">{% include "evaluation/_info.html" %}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            <div class="ev-el__grades" role="radiogroup" aria-label="{{ el.label }}">
+              {% for radio in el.grade %}
+                <label class="ev-grade" title="{{ radio.choice_label }}">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+              {% endfor %}
+            </div>
+            <div class="field ev-el__comment{% if el.comment.errors %} invalid{% endif %}">
+              <label for="{{ el.comment.id_for_label }}">{{ el.comment.label }}</label>
+              {{ el.comment }}
+              {% for error in el.comment.errors %}<div class="err">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% include "evaluation/_field.html" with field=form.comment %}
       </div>
-      {% endfor %}
 
       <div class="form ev-card">
         <details class="ev-legend">
