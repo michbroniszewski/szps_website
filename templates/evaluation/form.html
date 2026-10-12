@@ -37,16 +37,14 @@
         <h3 class="ev-card__title">Mecz</h3>
         <div class="form-row">
           {% include "evaluation/_field.html" with field=form.competition %}
-          {% include "evaluation/_field.html" with field=form.match_date %}
-        </div>
-        <div class="form-row">
-          {% include "evaluation/_field.html" with field=form.teams %}
-          {% include "evaluation/_field.html" with field=form.result %}
-        </div>
-        <div class="form-row">
-          {% include "evaluation/_field.html" with field=form.observer %}
           {% include "evaluation/_choices.html" with field=form.difficulty %}
         </div>
+        {% include "evaluation/_field.html" with field=form.teams %}
+        <div class="form-row">
+          {% include "evaluation/_field.html" with field=form.match_date %}
+          {% include "evaluation/_field.html" with field=form.result %}
+        </div>
+        {% include "evaluation/_field.html" with field=form.observer %}
       </div>
 
       {# ── Sędziowie ── #}
@@ -54,22 +52,17 @@
       <div class="form ev-card" data-referee="{{ ref.key }}">
         <h3 class="ev-card__title ev-card__title--dark">{{ ref.title }}</h3>
         {% include "evaluation/_field.html" with field=ref.name %}
-        {% for field in ref.choices %}
-          {% include "evaluation/_choices.html" with field=field %}
-        {% endfor %}
 
         <div class="ev-table-wrap">
           <table class="ev-grades">
             <thead>
-              <tr><th>Elementy oceny</th><th colspan="6">Szczegółowa ocena</th></tr>
-            </thead>
-            {% for group in ref.groups %}
-            <tbody>
               <tr class="ev-grades__group">
-                <th scope="rowgroup">{{ group.title }}</th>
+                <th>Elementy oceny</th>
                 <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th>
               </tr>
-              {% for item in group.items %}
+            </thead>
+            <tbody>
+              {% for item in ref.items %}
               <tr class="ev-grades__row{% if item.errors %} invalid{% endif %}">
                 <td>{{ item.label }}</td>
                 {% for radio in item %}
@@ -82,22 +75,15 @@
               </tr>
               {% endfor %}
             </tbody>
-            {% endfor %}
           </table>
         </div>
-        <p class="ev-hint">Ocena wyjściowa to C. Każda inna ocena (A-B lub D-F) wymaga opisu w polu „Przyczyny”.</p>
+        <p class="ev-hint">Ocena wyjściowa to C. Każdą inną ocenę (A-B lub D-F) uzasadnij w komentarzu opisowym.</p>
 
-        {% include "evaluation/_field.html" with field=ref.summary %}
-        {% include "evaluation/_field.html" with field=ref.reasons extra_class="ev-reasons" %}
+        {% include "evaluation/_field.html" with field=ref.comment extra_class="ev-reasons" %}
       </div>
       {% endfor %}
 
-      {# ── Uwagi ── #}
       <div class="form ev-card">
-        <h3 class="ev-card__title">Uwagi</h3>
-        {% include "evaluation/_field.html" with field=form.staff_info %}
-        {% include "evaluation/_field.html" with field=form.notes %}
-
         <details class="ev-legend">
           <summary>Podstawowe objaśnienia dotyczące zasad oceny</summary>
           <ul>

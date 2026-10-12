@@ -27,11 +27,9 @@
 .ev-table-wrap{overflow-x:auto;margin:8px 0 10px;border:1px solid var(--line);border-radius:12px}
 .ev-grades{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
 .ev-grades th,.ev-grades td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:middle}
-.ev-grades thead th{background:var(--navy);color:#fff;font-family:var(--font-display);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase}
-.ev-grades thead th + th{text-align:center}
 .ev-grades__group th{background:var(--soft);font-family:var(--font-display);font-weight:700}
 .ev-grades__group th + th{width:44px;text-align:center;color:var(--ink-soft);font-size:13px}
-.ev-grades tbody:last-child tr:last-child td{border-bottom:0}
+.ev-grades tbody tr:last-child td{border-bottom:0}
 .ev-grades__row.invalid td:first-child{color:#dc4040}
 .ev-grade{text-align:center;padding:4px !important}
 .ev-grade label{display:inline-grid;place-items:center;cursor:pointer}
@@ -48,7 +46,7 @@
 .ev-grade input[value="B"]:checked + span{background:#d9ecc9;border-color:var(--green);color:var(--green-d)}
 
 .ev-hint{font-size:13.5px;color:var(--ink-soft);margin-bottom:18px}
-.ev-reasons.needed label::after{content:" — wymagane (są oceny inne niż C)";color:#dc4040;font-weight:600}
+.ev-reasons.needed label::after{content:" — wymagany (są oceny inne niż C)";color:#dc4040;font-weight:600}
 
 .ev-legend{margin-top:6px;font-size:14.5px}
 .ev-legend summary{cursor:pointer;font-family:var(--font-display);font-weight:700}
@@ -72,7 +70,6 @@
 
   /* tabela ocen: opis elementu nad rzędem przycisków A–F */
   .ev-grades{min-width:0}
-  .ev-grades thead{display:none}
   .ev-grades__group th + th{display:none}
   .ev-grades__group th{display:block}
   .ev-grades__row{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--line)}

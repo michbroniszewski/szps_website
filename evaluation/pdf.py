@@ -20,7 +20,6 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     KeepTogether,
-    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -91,24 +90,13 @@ def _box(cell_style=None):
     ])
 
 
-def _options_row(choices, selected, st):
-    """Wiersz opcji w stylu „☒ wybrane  ☐ niewybrane”."""
-    parts = []
-    for value, label in choices:
-        mark = "☒" if value == selected else "☐"
-        text = f"{mark} {escape(label)}"
-        if value == selected:
-            text = f"<b>{text}</b>"
-        parts.append(text)
-    return Paragraph("&nbsp;&nbsp;&nbsp;".join(parts), st["base"])
-
-
 def _header(data, st, width):
     date = data.get("match_date")
     rows = [
-        [_p("Rozgrywki:", st["bold"]), _p(data.get("competition"), st["base"]),
+        [_p("Rozgrywki:", st["bold"]),
+         _p(sheet.choice_label(sheet.COMPETITIONS, data.get("competition")), st["base"]),
          _p("Data:", st["bold"]), _p(date.strftime("%d.%m.%Y") if date else "", st["base"])],
-        [_p("Zespoły:", st["bold"]), _p(data.get("teams"), st["base"]),
+        [_p("Mecz:", st["bold"]), _p(data.get("teams"), st["base"]),
          _p("Wynik:", st["bold"]), _p(data.get("result"), st["base"])],
         [_p("Obserwator:", st["bold"]), _p(data.get("observer"), st["base"]),
          _p("Trudność:", st["bold"]),
@@ -121,7 +109,6 @@ def _header(data, st, width):
 
 def _referee(ref, data, st, width):
     r = ref["key"]
-    out = []
 
     title = Table(
         [[Paragraph(f"{ref['title']} — {escape(data.get(f'{r}_name', ''))}", st["h2"])]],
@@ -132,44 +119,34 @@ def _referee(ref, data, st, width):
         ("TOPPADDING", (0, 0), (-1, -1), 5),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
     ]))
-    out.append(title)
 
-    rows = [
-        [_p(label, st["bold"]), _options_row(choices, data.get(f"{r}_{key}"), st)]
-        for key, label, choices in sheet.REFEREE_CHOICES
-    ]
-    t = Table(rows, colWidths=[40 * mm, width - 40 * mm])
-    t.setStyle(_box([("BACKGROUND", (0, 0), (0, -1), SOFT)]))
-    out += [t, Spacer(1, 4)]
-
-    # Tabela ocen szczegółowych: element | A B C D E F
-    gw = 8 * mm
-    label_w = width - gw * len(sheet.GRADES)
-    rows = [[_p("ELEMENTY OCENY", st["bold"])] + [_p("", st["base"])] * len(sheet.GRADES)]
+    # Tabela ocen: element | A B C D E F
+    gw = 9 * mm
+    rows = [[_p("ELEMENTY OCENY", st["bold"])] + [_p(g, st["center"]) for g in sheet.GRADES]]
     style = [
-        ("SPAN", (0, 0), (-1, 0)),
         ("BACKGROUND", (0, 0), (-1, 0), SOFT),
         ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+        ("TOPPADDING", (0, 1), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 1), (-1, -1), 5),
     ]
-    for group, items in ref["groups"]:
+    for item_key, item_label in sheet.ELEMENTS:
         row_i = len(rows)
-        rows.append([_p(group, st["bold"])] + [_p(g, st["center"]) for g in sheet.GRADES])
-        style.append(("BACKGROUND", (0, row_i), (-1, row_i), SOFT))
-        for item_key, item_label in items:
-            row_i = len(rows)
-            grade = data.get(sheet.grade_field(r, item_key))
-            cells = []
-            for col, g in enumerate(sheet.GRADES, start=1):
-                if g == grade:
-                    cells.append(Paragraph(f"<b>{g}</b>", st["center"]))
-                    style.append(("BACKGROUND", (col, row_i), (col, row_i), MARK))
-                else:
-                    cells.append("")
-            rows.append([_p(item_label, st["small"])] + cells)
-    t = Table(rows, colWidths=[label_w] + [gw] * len(sheet.GRADES), repeatRows=0)
-    t.setStyle(_box(style))
-    out.append(t)
-    return out
+        grade = data.get(sheet.grade_field(r, item_key))
+        cells = []
+        for col, g in enumerate(sheet.GRADES, start=1):
+            if g == grade:
+                cells.append(Paragraph(f"<b>{g}</b>", st["center"]))
+                style.append(("BACKGROUND", (col, row_i), (col, row_i), MARK))
+            else:
+                cells.append("")
+        rows.append([_p(item_label, st["base"])] + cells)
+    grades = Table(rows, colWidths=[width - gw * len(sheet.GRADES)] + [gw] * len(sheet.GRADES))
+    grades.setStyle(_box(style))
+
+    return [
+        KeepTogether([title, grades, Spacer(1, 6)]),
+        _text_block("Komentarz opisowy", data.get(f"{r}_comment"), st, width),
+    ]
 
 
 def _text_block(title, text, st, width):
@@ -219,31 +196,9 @@ def build_pdf(data: dict) -> bytes:
         _header(data, st, width),
         Spacer(1, 8),
     ]
-    for i, ref in enumerate(sheet.REFEREES):
-        if i:
-            story.append(PageBreak())
-        story += _referee(ref, data, st, width)
-
-    story += [PageBreak()]
     for ref in sheet.REFEREES:
-        r = ref["key"]
-        name = data.get(f"{r}_name", "")
-        story.append(_text_block(
-            f"{ref['title']} ({name}) — podsumowanie mocnych i słabszych stron, "
-            "sugerowane obszary do poprawy, wskazówki",
-            data.get(f"{r}_summary"), st, width,
-        ))
-        story.append(_text_block(
-            f"{ref['title']} ({name}) — przyczyny uzasadniające wystawienie ocen A-B lub D-F",
-            data.get(f"{r}_reasons"), st, width,
-        ))
-    story.append(_text_block(
-        "Informacje o obsadzie pomocniczej nieadekwatnej do poziomu meczu "
-        "lub problemach organizacyjnych",
-        data.get("staff_info"), st, width,
-    ))
-    story.append(_text_block("Notatki", data.get("notes"), st, width))
-    story += [Spacer(1, 6)] + _legend(st, width)
+        story += _referee(ref, data, st, width)
+    story += [Spacer(1, 6)] + [KeepTogether(_legend(st, width))]
 
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
     return buf.getvalue()

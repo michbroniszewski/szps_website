@@ -7,29 +7,19 @@ from . import sheet
 
 def valid_post(**overrides):
     data = {
-        "competition": "II liga mężczyzn",
-        "match_date": "2026-10-03",
+        "competition": "1ligam",
+        "difficulty": "sredni",
         "teams": "Śląsk Katowice – Gwarek Zabrze",
+        "match_date": "2026-10-03",
         "result": "3:1",
         "observer": "Jan Obserwator",
-        "difficulty": "sredni",
-        "staff_info": "",
-        "notes": "",
     }
     for ref in sheet.REFEREES:
         r = ref["key"]
-        data.update({
-            f"{r}_name": f"Sędzia {r}",
-            f"{r}_impact": "bez_wplywu",
-            f"{r}_experience": "duze",
-            f"{r}_recommendation": "utrzymanie",
-            f"{r}_overall": "dobra",
-            f"{r}_summary": "Pewne prowadzenie meczu.",
-            f"{r}_reasons": "",
-        })
-        for _group, items in ref["groups"]:
-            for key, _label in items:
-                data[sheet.grade_field(r, key)] = "C"
+        data[f"{r}_name"] = f"Sędzia {r}"
+        data[f"{r}_comment"] = ""
+        for key, _label in sheet.ELEMENTS:
+            data[sheet.grade_field(r, key)] = "C"
     data.update(overrides)
     return data
 
@@ -66,14 +56,23 @@ class EvaluationPageTests(TestCase):
         self.assertTrue(response.context["form"].has_error("observer"))
         self.assertTrue(response.context["form"].has_error("r1_name"))
 
-    def test_non_c_grade_requires_reasons(self):
-        response = self.client.post(self.url, valid_post(r2_g_lawki="E"))
-        self.assertTrue(response.context["form"].has_error("r2_reasons"))
-        self.assertFalse(response.context["form"].has_error("r1_reasons"))
+    def test_competition_must_come_from_list(self):
+        response = self.client.post(self.url, valid_post(competition="PlusLiga"))
+        self.assertTrue(response.context["form"].has_error("competition"))
 
-    def test_non_c_grade_with_reasons_is_valid(self):
+    def test_page_lists_all_competitions_and_elements(self):
+        response = self.client.get(self.url)
+        for _value, label in sheet.COMPETITIONS + sheet.ELEMENTS:
+            self.assertContains(response, label)
+
+    def test_non_c_grade_requires_comment(self):
+        response = self.client.post(self.url, valid_post(r2_g_relacje="E"))
+        self.assertTrue(response.context["form"].has_error("r2_comment"))
+        self.assertFalse(response.context["form"].has_error("r1_comment"))
+
+    def test_non_c_grade_with_comment_is_valid(self):
         response = self.client.post(
-            self.url, valid_post(r2_g_lawki="E", r2_reasons="Brak kontroli ławki gości.")
+            self.url, valid_post(r2_g_relacje="E", r2_comment="Brak kontroli ławki gości.")
         )
         self.assertEqual(response["Content-Type"], "application/pdf")
 
@@ -96,6 +95,7 @@ class EvaluationPageTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0]
         self.assertEqual(msg.to, ["ws@example.com"])
+        self.assertIn("I Liga Śląska Mężczyzn", msg.body)
         filename, content, mimetype = msg.attachments[0]
         self.assertEqual(mimetype, "application/pdf")
         self.assertTrue(content.startswith(b"%PDF"))

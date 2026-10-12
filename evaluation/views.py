@@ -32,7 +32,7 @@ def _send_email(data, pdf: bytes, filename: str):
         subject=f"[Arkusz ewaluacyjny] {data['teams']} ({date})",
         body=(
             f"Obserwator: {data['observer']}\n"
-            f"Rozgrywki: {data['competition']}\n"
+            f"Rozgrywki: {sheet.choice_label(sheet.COMPETITIONS, data['competition'])}\n"
             f"Mecz: {data['teams']} — {data['result']} ({date})\n"
             f"Sędzia I: {data['r1_name']}\n"
             f"Sędzia II: {data['r2_name']}\n\n"

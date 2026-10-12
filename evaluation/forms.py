@@ -3,45 +3,38 @@ from django import forms
 from . import sheet
 
 
-def _radio(choices, **kwargs):
-    return forms.ChoiceField(
-        choices=choices,
-        widget=forms.RadioSelect,
-        error_messages={"required": "Zaznacz jedną z opcji."},
-        **kwargs,
-    )
-
-
 class EvaluationForm(forms.Form):
     """Formularz budowany dynamicznie z `sheet.py`.
 
     Nazwy pól: nagłówek meczu bez prefiksu, a pola sędziów z prefiksem
-    `r1_` / `r2_` (np. `r1_name`, `r1_g_organizacja`).
+    `r1_` / `r2_` (np. `r1_name`, `r1_g_technika`, `r1_comment`).
     """
 
-    competition = forms.CharField(label="Rozgrywki", max_length=200)
+    competition = forms.ChoiceField(
+        label="Rozgrywki",
+        choices=[("", "Wybierz rozgrywki…")] + sheet.COMPETITIONS,
+    )
+    difficulty = forms.ChoiceField(
+        label="Trudność meczu",
+        choices=sheet.DIFFICULTY,
+        widget=forms.RadioSelect,
+        error_messages={"required": "Zaznacz jedną z opcji."},
+    )
+    teams = forms.CharField(
+        label="Mecz",
+        max_length=200,
+        widget=forms.TextInput(attrs={"placeholder": "np. KS Gwarek Zabrze – MKS Będzin"}),
+    )
     match_date = forms.DateField(
         label="Data",
         widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
     )
-    teams = forms.CharField(label="Zespoły", max_length=200)
-    result = forms.CharField(label="Wynik", max_length=120)
+    result = forms.CharField(
+        label="Wynik",
+        max_length=120,
+        widget=forms.TextInput(attrs={"placeholder": "np. 3:1 (25:20, 23:25, 25:18, 25:22)"}),
+    )
     observer = forms.CharField(label="Obserwator", max_length=120)
-    difficulty = _radio(sheet.DIFFICULTY, label="Trudność meczu")
-
-    staff_info = forms.CharField(
-        label="Informacje o obsadzie pomocniczej nieadekwatnej do poziomu "
-              "meczu lub problemach organizacyjnych",
-        required=False,
-        max_length=4000,
-        widget=forms.Textarea(attrs={"rows": 4}),
-    )
-    notes = forms.CharField(
-        label="Notatki",
-        required=False,
-        max_length=4000,
-        widget=forms.Textarea(attrs={"rows": 4}),
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,27 +43,18 @@ class EvaluationForm(forms.Form):
             self.fields[f"{r}_name"] = forms.CharField(
                 label="Imię i nazwisko", max_length=120,
             )
-            for key, label, choices in sheet.REFEREE_CHOICES:
-                self.fields[f"{r}_{key}"] = _radio(choices, label=label)
-            for _group, items in ref["groups"]:
-                for item_key, item_label in items:
-                    self.fields[sheet.grade_field(r, item_key)] = _radio(
-                        [(g, g) for g in sheet.GRADES],
-                        label=item_label,
-                        initial=sheet.DEFAULT_GRADE,
-                    )
-            self.fields[f"{r}_summary"] = forms.CharField(
-                label="Podsumowanie mocnych i słabszych stron sędziego — "
-                      "sugerowane obszary do poprawy, wskazówki",
+            for item_key, item_label in sheet.ELEMENTS:
+                self.fields[sheet.grade_field(r, item_key)] = forms.ChoiceField(
+                    label=item_label,
+                    choices=[(g, g) for g in sheet.GRADES],
+                    initial=sheet.DEFAULT_GRADE,
+                    widget=forms.RadioSelect,
+                )
+            self.fields[f"{r}_comment"] = forms.CharField(
+                label="Komentarz opisowy",
                 required=False,
-                max_length=6000,
-                widget=forms.Textarea(attrs={"rows": 5}),
-            )
-            self.fields[f"{r}_reasons"] = forms.CharField(
-                label="Przyczyny uzasadniające wystawienie ocen A-B lub D-F",
-                required=False,
-                max_length=6000,
-                widget=forms.Textarea(attrs={"rows": 5}),
+                max_length=8000,
+                widget=forms.Textarea(attrs={"rows": 6}),
             )
 
     def clean(self):
@@ -78,22 +62,16 @@ class EvaluationForm(forms.Form):
         # Zasada z objaśnień: każda ocena inna niż C wymaga komentarza.
         for ref in sheet.REFEREES:
             r = ref["key"]
-            if self._non_default_grades(cleaned, ref) and not cleaned.get(f"{r}_reasons"):
+            non_default = any(
+                cleaned.get(sheet.grade_field(r, k), sheet.DEFAULT_GRADE) != sheet.DEFAULT_GRADE
+                for k, _label in sheet.ELEMENTS
+            )
+            if non_default and not cleaned.get(f"{r}_comment"):
                 self.add_error(
-                    f"{r}_reasons",
-                    "Wystawiono ocenę inną niż C — opisz przyczyny.",
+                    f"{r}_comment",
+                    "Wystawiono ocenę inną niż C — uzasadnij ją w komentarzu.",
                 )
         return cleaned
-
-    @staticmethod
-    def _non_default_grades(cleaned, ref):
-        return [
-            item_key
-            for _group, items in ref["groups"]
-            for item_key, _label in items
-            if cleaned.get(sheet.grade_field(ref["key"], item_key), sheet.DEFAULT_GRADE)
-            != sheet.DEFAULT_GRADE
-        ]
 
     # ── struktury pomocnicze dla szablonu ────────────────────────────
     def referee_sections(self):
@@ -103,14 +81,6 @@ class EvaluationForm(forms.Form):
                 "key": r,
                 "title": ref["title"],
                 "name": self[f"{r}_name"],
-                "choices": [self[f"{r}_{key}"] for key, _l, _c in sheet.REFEREE_CHOICES],
-                "groups": [
-                    {
-                        "title": group,
-                        "items": [self[sheet.grade_field(r, k)] for k, _l in items],
-                    }
-                    for group, items in ref["groups"]
-                ],
-                "summary": self[f"{r}_summary"],
-                "reasons": self[f"{r}_reasons"],
+                "items": [self[sheet.grade_field(r, k)] for k, _l in sheet.ELEMENTS],
+                "comment": self[f"{r}_comment"],
             }
