@@ -195,9 +195,10 @@ CONTACT_RECIPIENT = os.getenv("CONTACT_RECIPIENT", "ws@szps.pl")
 
 # Arkusz ewaluacyjny — podstrona bez linków w menu, dostępna tylko po
 # wpisaniu adresu. Ścieżkę można zmienić w .env (np. na trudniejszą do
-# zgadnięcia). Pusta lista adresatów = przycisk „Wyślij e-mailem” ukryty.
+# zgadnięcia). Wysłane arkusze trafiają do EVALUATION_EMAIL_RECIPIENTS
+# (lista po przecinku), domyślnie na adres formularza kontaktowego.
 EVALUATION_PATH = os.getenv("EVALUATION_PATH", "arkusz-ewaluacyjny").strip("/")
-EVALUATION_EMAIL_RECIPIENTS = env_list("EVALUATION_EMAIL_RECIPIENTS", [])
+EVALUATION_EMAIL_RECIPIENTS = env_list("EVALUATION_EMAIL_RECIPIENTS", [CONTACT_RECIPIENT])
 
 if not DEBUG:
     # Passenger na mydevil siedzi za nginx-em, który terminuje SSL.

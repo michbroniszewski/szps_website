@@ -1,4 +1,10 @@
+import tempfile
+from io import StringIO
+from pathlib import Path
+
+from django.conf import settings
 from django.core import mail
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -100,27 +106,47 @@ class EvaluationPageTests(TestCase):
         )
         self.assertEqual(response["Content-Type"], "application/pdf")
 
-    def test_email_button_hidden_without_recipients(self):
+    def test_send_button_visible_with_default_recipient(self):
         response = self.client.get(self.url)
-        self.assertNotContains(response, 'value="email"')
-
-    def test_email_action_ignored_without_recipients(self):
-        response = self.client.post(self.url, valid_post(action="email"))
-        self.assertEqual(response["Content-Type"], "application/pdf")
-        self.assertEqual(len(mail.outbox), 0)
+        self.assertContains(response, 'value="email"')
+        self.assertContains(response, settings.CONTACT_RECIPIENT)
 
     @override_settings(EVALUATION_EMAIL_RECIPIENTS=["ws@example.com"])
     def test_email_action_sends_pdf(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, 'value="email"')
-
         response = self.client.post(self.url, valid_post(action="email"))
         self.assertRedirects(response, self.url + "?wyslano=1")
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0]
         self.assertEqual(msg.to, ["ws@example.com"])
+        self.assertEqual(msg.cc, [])
         self.assertIn("I Liga Śląska Mężczyzn", msg.body)
         self.assertIn("Anna Kowalska (Sędzia II)", msg.body)
         filename, content, mimetype = msg.attachments[0]
         self.assertEqual(mimetype, "application/pdf")
         self.assertTrue(content.startswith(b"%PDF"))
+
+    def test_email_copy_goes_to_observer(self):
+        self.client.post(self.url, valid_post(action="email", observer_email="obs@example.com"))
+        msg = mail.outbox[0]
+        self.assertEqual(msg.to, settings.EVALUATION_EMAIL_RECIPIENTS)
+        self.assertEqual(msg.cc, ["obs@example.com"])
+        self.assertEqual(msg.reply_to, ["obs@example.com"])
+
+    def test_invalid_form_does_not_send(self):
+        response = self.client.post(self.url, valid_post(action="email", observer=""))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 0)
+
+
+class ExportHtmlCommandTests(TestCase):
+    def test_export_writes_self_contained_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "arkusz.html"
+            call_command("export_evaluation_html", output=str(out), stdout=StringIO())
+            html = out.read_text(encoding="utf-8")
+        self.assertIn("Wersja do przeglądu", html)
+        self.assertIn(".ev-el__info", html)          # CSS wbudowany
+        self.assertIn("refreshPosition", html)       # JS wbudowany
+        self.assertIn("Przybycie na obiekt", html)   # rozwinięcia „i”
+        self.assertNotIn('name="csrfmiddlewaretoken"', html)
+        self.assertNotIn('value="email"', html)

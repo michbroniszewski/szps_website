@@ -15,10 +15,6 @@ from .pdf import build_pdf, pdf_filename
 log = logging.getLogger(__name__)
 
 
-def _email_enabled() -> bool:
-    return bool(settings.EVALUATION_EMAIL_RECIPIENTS)
-
-
 def _noindex(response):
     # Podstrona celowo niepodlinkowana — dodatkowo prosimy wyszukiwarki,
     # żeby jej nie indeksowały, gdyby adres gdzieś wyciekł.
@@ -40,6 +36,9 @@ def _send_email(data, pdf: bytes, filename: str):
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=settings.EVALUATION_EMAIL_RECIPIENTS,
+        # Kopia dla obserwatora; odpowiedź z Wydziału trafi prosto do niego.
+        cc=[data["observer_email"]] if data.get("observer_email") else [],
+        reply_to=[data["observer_email"]] if data.get("observer_email") else [],
     )
     msg.attach(filename, pdf, "application/pdf")
     msg.send(fail_silently=False)
@@ -54,7 +53,7 @@ def evaluation_form(request):
             pdf = build_pdf(data)
             filename = pdf_filename(data)
 
-            if request.POST.get("action") == "email" and _email_enabled():
+            if request.POST.get("action") == "email":
                 try:
                     _send_email(data, pdf, filename)
                 except Exception:
@@ -64,7 +63,11 @@ def evaluation_form(request):
                         "Nie udało się wysłać e-maila. Pobierz PDF i wyślij go ręcznie.",
                     )
                 else:
-                    messages.success(request, "Arkusz został wysłany e-mailem.")
+                    messages.success(
+                        request,
+                        "Arkusz został wysłany do Wydziału Sędziowskiego"
+                        + (f" (kopia: {data['observer_email']})." if data.get("observer_email") else "."),
+                    )
                     # ?wyslano=1 → JS czyści zapisaną wersję roboczą.
                     return redirect(reverse("evaluation:form") + "?wyslano=1")
             else:
@@ -82,6 +85,6 @@ def evaluation_form(request):
             "elements": list(form.elements()),
             "grade_scale": sheet.GRADE_SCALE,
             "grade_rules": sheet.GRADE_RULES,
-            "email_enabled": _email_enabled(),
+            "email_recipients": settings.EVALUATION_EMAIL_RECIPIENTS,
         },
     ))

@@ -32,84 +32,14 @@
     <form method="post" id="evForm" data-bound="{{ form.is_bound|yesno:'1,0' }}"{% if form.position.value %} data-position="{{ form.position.value }}"{% endif %} novalidate>
       {% csrf_token %}
 
-      {# ── Mecz ── #}
-      <div class="form ev-card">
-        <h3 class="ev-card__title">Mecz</h3>
-        <div class="form-row">
-          {% include "evaluation/_field.html" with field=form.competition %}
-          {% include "evaluation/_choices.html" with field=form.difficulty %}
-        </div>
-        {% include "evaluation/_field.html" with field=form.teams %}
-        <div class="form-row">
-          {% include "evaluation/_field.html" with field=form.match_date %}
-          {% include "evaluation/_field.html" with field=form.result %}
-        </div>
-        {% include "evaluation/_field.html" with field=form.observer %}
-      </div>
-
-      {# ── Oceniany sędzia ── #}
-      <div class="form ev-card">
-        <h3 class="ev-card__title ev-card__title--dark">Oceniany sędzia</h3>
-        <div class="form-row">
-          {% include "evaluation/_field.html" with field=form.referee_name %}
-          {% include "evaluation/_choices.html" with field=form.position %}
-        </div>
-
-        <p class="ev-hint">Ocena wyjściowa to C. Każdą inną ocenę (A-B lub D-F) uzasadnij w komentarzu przy danym elemencie. Przycisk <b>i</b> rozwija, co obejmuje element.</p>
-
-        <div class="ev-elements">
-          {% for el in elements %}
-          <div class="ev-el{% if el.grade.errors or el.comment.errors %} invalid{% endif %}" data-el="{{ el.key }}">
-            <div class="ev-el__head">
-              <span class="ev-el__title">{{ el.label }}</span>
-              <button type="button" class="ev-el__info" aria-expanded="false" aria-controls="info-{{ el.key }}" title="Szczegóły elementu">i</button>
-            </div>
-            <div class="ev-el__infopanel" id="info-{{ el.key }}" hidden>
-              {% if el.info_shared %}
-                {% include "evaluation/_info.html" with sections=el.info_shared %}
-              {% else %}
-                <p class="ev-info__nopos">Wybierz pozycję sędziego, aby zobaczyć szczegóły.</p>
-                {% for pos, sections in el.info %}
-                  <div class="ev-info__pos" data-pos="{{ pos }}">{% include "evaluation/_info.html" %}</div>
-                {% endfor %}
-              {% endif %}
-            </div>
-            <div class="ev-el__grades" role="radiogroup" aria-label="{{ el.label }}">
-              {% for radio in el.grade %}
-                <label class="ev-grade" title="{{ radio.choice_label }}">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
-              {% endfor %}
-            </div>
-            <div class="field ev-el__comment{% if el.comment.errors %} invalid{% endif %}">
-              <label for="{{ el.comment.id_for_label }}">{{ el.comment.label }}</label>
-              {{ el.comment }}
-              {% for error in el.comment.errors %}<div class="err">{{ error }}</div>{% endfor %}
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-
-        {% include "evaluation/_field.html" with field=form.comment %}
-      </div>
-
-      <div class="form ev-card">
-        <details class="ev-legend">
-          <summary>Podstawowe objaśnienia dotyczące zasad oceny</summary>
-          <ul>
-            {% for rule in grade_rules %}<li>{{ rule }}</li>{% endfor %}
-          </ul>
-          <dl>
-            {% for grade, desc in grade_scale %}<dt>{{ grade }}</dt><dd>{{ desc }}</dd>{% endfor %}
-          </dl>
-        </details>
-      </div>
+      {% include "evaluation/_sheet.html" %}
 
       <div class="ev-actions">
         <button type="submit" name="action" value="pdf" class="btn btn--gold">Pobierz PDF</button>
-        {% if email_enabled %}
-          <button type="submit" name="action" value="email" class="btn btn--dark">Wyślij e-mailem</button>
-        {% endif %}
+        <button type="submit" name="action" value="email" class="btn btn--dark" id="evSend">Wyślij do Wydziału</button>
         <button type="button" class="btn btn--ghost" id="evReset">Wyczyść formularz</button>
       </div>
+      <p class="ev-hint ev-send-note">„Wyślij do Wydziału” przesyła arkusz w PDF na adres {{ email_recipients|join:", " }}. Kopia trafi na e-mail obserwatora, jeśli został podany.</p>
     </form>
   </div>
 </section>

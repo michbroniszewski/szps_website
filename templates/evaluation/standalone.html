@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Arkusz ewaluacyjny — wersja do przeglądu</title>
+<style>
+{{ css|safe }}
+/* plik do przeglądu: bez nawigacji strony */
+.ev{padding-top:48px}
+.ev-banner{background:var(--navy);color:#fff;padding:14px 0;font-size:14.5px}
+.ev-banner b{color:var(--gold)}
+@media print{
+  .ev-banner,.ev-actions,.ev-el__info{display:none}
+  .ev{padding-top:0;background:#fff}
+  .ev .form{box-shadow:none}
+}
+</style>
+</head>
+<body>
+<div class="ev-banner">
+  <div class="wrap"><b>Wersja do przeglądu</b> · wygenerowano {{ generated|date:"d.m.Y H:i" }} · pobieranie PDF i wysyłka działają tylko na stronie; tutaj można przeklikać arkusz i wydrukować go.</div>
+</div>
+<section class="section section--soft ev">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Obserwacja sędziów</span>
+      <h2>Arkusz ewaluacyjny</h2>
+      <p>Arkusz oceny jednego sędziego. Wybierz pozycję (Sędzia I / II), aby zobaczyć właściwe rozwinięcia pod przyciskiem <b>i</b> przy każdym elemencie.</p>
+    </div>
+
+    <form id="evForm" data-bound="0" onsubmit="return false" novalidate>
+      {% include "evaluation/_sheet.html" %}
+
+      <div class="ev-actions">
+        <button type="button" class="btn btn--gold" onclick="window.print()">Drukuj / zapisz jako PDF</button>
+        <button type="button" class="btn btn--ghost" id="evReset">Wyczyść formularz</button>
+      </div>
+    </form>
+  </div>
+</section>
+<script>
+{{ js|safe }}
+</script>
+</body>
+</html>

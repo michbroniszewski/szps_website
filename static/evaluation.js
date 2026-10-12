@@ -76,6 +76,21 @@
     window.location.href = window.location.pathname;
   });
 
+  // Wysyłka: potwierdzenie i blokada przycisku, żeby nie wysłać dwa razy.
+  // (Pobranie PDF nie przeładowuje strony, więc tamtego przycisku nie blokujemy.)
+  const send = document.getElementById('evSend');
+  if (send) {
+    form.addEventListener('submit', (e) => {
+      if (e.submitter !== send) return;
+      if (!confirm('Wysłać arkusz do Wydziału Sędziowskiego?')) { e.preventDefault(); return; }
+      // Zablokowany przycisk nie trafia do POST — przekazujemy akcję ukrytym polem.
+      const action = document.createElement('input');
+      action.type = 'hidden'; action.name = 'action'; action.value = 'email';
+      form.appendChild(action);
+      setTimeout(() => { send.disabled = true; send.textContent = 'Wysyłanie…'; });
+    });
+  }
+
   const errors = document.getElementById('ev-errors');
   if (errors) {
     const first = form.querySelector('.invalid');

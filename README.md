@@ -23,7 +23,14 @@ Szczegóły i pełen flow „lokalny test → deploy": [`docs/local-testing.md`]
 generowaniem PDF. Nie ma linków w menu ani w sitemap, strona wysyła
 `noindex`. Treść arkusza: `evaluation/sheet.py`; PDF: `evaluation/pdf.py`.
 Ścieżkę i adresatów wysyłki e-mail ustawia się w `.env`
-(`EVALUATION_PATH`, `EVALUATION_EMAIL_RECIPIENTS` — patrz `.env.example`).
+(`EVALUATION_PATH`, `EVALUATION_EMAIL_RECIPIENTS` — patrz `.env.example`;
+domyślnie wysyłka idzie na `CONTACT_RECIPIENT`).
+
+Plik HTML do przeglądu poza stroną (np. do rozesłania członkom Wydziału):
+
+```bash
+.venv/bin/python manage.py export_evaluation_html -o arkusz-ewaluacyjny-podglad.html
+```
 
 ## Dokumentacja
 

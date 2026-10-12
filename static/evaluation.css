@@ -72,6 +72,8 @@
 .ev-legend dd{color:var(--ink-soft)}
 
 .ev-actions{display:flex;flex-wrap:wrap;gap:12px}
+.ev-send-note{margin-top:12px}
+.ev-actions .btn[disabled]{opacity:.6;cursor:wait;transform:none}
 
 .ev-msg{padding:14px 18px;border-radius:12px;margin-bottom:22px;font-size:15px}
 .ev-msg--success{background:rgba(92,154,48,.12);border:1px solid rgba(92,154,48,.4);color:var(--green-d)}

@@ -38,6 +38,11 @@ class EvaluationForm(forms.Form):
         widget=forms.TextInput(attrs={"placeholder": "np. 3:1 (25:20, 23:25, 25:18, 25:22)"}),
     )
     observer = forms.CharField(label="Obserwator", max_length=120)
+    observer_email = forms.EmailField(
+        label="E-mail obserwatora (kopia wysyłki)",
+        required=False,
+        widget=forms.EmailInput(attrs={"placeholder": "opcjonalnie", "autocomplete": "email"}),
+    )
 
     referee_name = forms.CharField(label="Imię i nazwisko sędziego", max_length=120)
     position = _radio(sheet.POSITIONS, label="Pozycja")
