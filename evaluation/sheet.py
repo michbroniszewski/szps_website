@@ -82,7 +82,7 @@ _OSOBOWOSC = [
 # Elementy oceny: (klucz, nazwa, {pozycja: rozwinięcie}).
 ELEMENTS = [
     ("organizacja",
-     "Organizacja: przygotowanie zawodów (czynności administracyjne), "
+     "Przygotowanie zawodów (czynności administracyjne), "
      "ceremoniał przedmeczowy i meczowy, punktualność",
      {"r1": _ORGANIZACJA, "r2": _ORGANIZACJA}),
     ("technika", "Technika sędziowania", {

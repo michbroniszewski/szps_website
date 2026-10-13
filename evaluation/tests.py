@@ -182,7 +182,7 @@ class ResultDocumentTests(TestCase):
         from .pdf import pdf_filename
         self.assertEqual(
             pdf_filename(self._cleaned()),
-            "protokol-obserwacji-2026-10-03-anna-kowalska.pdf",
+            "arkusz-oceny-2026-10-03-anna-kowalska.pdf",
         )
 
     def test_pdf_builds_with_long_comments(self):

@@ -1,7 +1,7 @@
 """Dokument wynikowy (PDF) z wypełnionego arkusza — ReportLab, czysty
 Python, bez bibliotek systemowych, więc działa również na mydevil.
 
-To nie jest kopia formularza, tylko protokół: dane obserwacji, tabela
+To nie jest kopia formularza, tylko arkusz oceny: dane obserwacji, tabela
 wyników z komentarzami, podsumowanie i ocena opisowa.
 
 `build_pdf(cleaned_data) -> bytes` nie zależy od requestu, więc ten sam
@@ -95,7 +95,6 @@ def _styles():
         "grade_label": ParagraphStyle(
             "grade_label", parent=base, fontSize=7, leading=8.5, alignment=TA_CENTER, textColor=INK_SOFT,
         ),
-        "sign": ParagraphStyle("sign", parent=base, fontSize=8.5, alignment=TA_CENTER, textColor=INK_SOFT),
     }
 
 
@@ -278,17 +277,6 @@ def _description(data, st):
     return [Paragraph(_text(p), ParagraphStyle("p", parent=st["base"], spaceAfter=5)) for p in paragraphs]
 
 
-def _signature(data, st, width):
-    line = "." * 60
-    sign = [
-        Paragraph(line, st["sign"]),
-        Paragraph(f"{_text(data.get('observer'))}<br/>podpis obserwatora", st["sign"]),
-    ]
-    t = Table([["", sign]], colWidths=[width - 75 * mm, 75 * mm])
-    t.setStyle(TableStyle([("TOPPADDING", (0, 0), (-1, -1), 16)]))
-    return t
-
-
 def _footer(canvas, doc):
     canvas.saveState()
     canvas.setStrokeColor(LINE)
@@ -296,7 +284,7 @@ def _footer(canvas, doc):
     canvas.line(doc.leftMargin, 13 * mm, A4[0] - doc.rightMargin, 13 * mm)
     canvas.setFont(FONT, 7.5)
     canvas.setFillColor(INK_SOFT)
-    canvas.drawString(doc.leftMargin, 9 * mm, "Protokół obserwacji sędziego — Wydział Sędziowski ŚZPS")
+    canvas.drawString(doc.leftMargin, 9 * mm, "Arkusz oceny — Wydział Sędziowski ŚZPS")
     canvas.drawRightString(A4[0] - doc.rightMargin, 9 * mm, f"Strona {doc.page}")
     canvas.restoreState()
 
@@ -308,14 +296,14 @@ def build_pdf(data: dict) -> bytes:
     doc = SimpleDocTemplate(
         buf, pagesize=A4,
         leftMargin=18 * mm, rightMargin=18 * mm, topMargin=13 * mm, bottomMargin=18 * mm,
-        title="Protokół obserwacji sędziego", author=str(data.get("observer", "")),
+        title="Arkusz oceny", author=str(data.get("observer", "")),
         subject=f"{data.get('referee_name', '')} — {data.get('teams', '')}",
     )
     width = doc.width
     generated = timezone.localtime()
 
     story = _letterhead(st, width, generated) + [
-        Paragraph("Protokół obserwacji sędziego", st["title"]),
+        Paragraph("Arkusz oceny", st["title"]),
         Paragraph("1. Dane obserwacji", st["h2"]),
         _details(data, st, width),
         Paragraph("2. Wyniki oceny", st["h2"]),
@@ -325,15 +313,11 @@ def build_pdf(data: dict) -> bytes:
     if _long_comments(data):
         sections.append(("Komentarze szczegółowe", _detailed_comments(data, st)))
     sections.append(("Podsumowanie", _summary(data, st)))
+    sections.append(("Ocena opisowa", _description(data, st)))
     for n, (title, body) in enumerate(sections, start=3):
         # Nagłówek nie zostaje sam na dole strony.
         story.append(KeepTogether([Paragraph(f"{n}. {title}", st["h2"]), body[0]]))
         story += body[1:]
-    story.append(Paragraph(f"{3 + len(sections)}. Ocena opisowa", st["h2"]))
-    # Podpis nigdy sam na nowej stronie — przechodzi razem z ostatnim akapitem.
-    description = _description(data, st)
-    story += description[:-1]
-    story.append(KeepTogether([description[-1], _signature(data, st, width)]))
 
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
     return buf.getvalue()
@@ -342,7 +326,7 @@ def build_pdf(data: dict) -> bytes:
 def pdf_filename(data: dict) -> str:
     date = data.get("match_date")
     parts = [
-        "protokol-obserwacji",
+        "arkusz-oceny",
         date.isoformat() if date else "",
         slugify(data.get("referee_name", "")),
     ]
