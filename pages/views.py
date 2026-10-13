@@ -48,7 +48,10 @@ def article_detail(request, slug):
 
 
 def static_page(request, slug):
-    page = get_object_or_404(StaticPage, slug=slug, is_published=True)
+    # Redaktorzy widzą też szkice (np. politykę prywatności przed publikacją);
+    # dla pozostałych nieopublikowana strona nie istnieje.
+    pages = StaticPage.objects.all() if request.user.is_staff else StaticPage.objects.filter(is_published=True)
+    page = get_object_or_404(pages, slug=slug)
     return render(request, "pages/static_page.html", {"page": page})
 
 

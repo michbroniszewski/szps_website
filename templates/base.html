@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static text_extras %}<!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
@@ -17,8 +17,6 @@
 <meta property="og:image" content="{% block og_image %}https://sedziowie.szps.pl{% static 'assets/logo.png' %}{% endblock %}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="{% static 'assets/whistle.png' %}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{% static 'styles.css' %}">
 <style>
   /* Krytyczny styl loadera — inline, by nakladka była od pierwszej klatki (bez FOUC) */
@@ -127,7 +125,8 @@
     </div>
     <div class="footer__bottom">
       <span>© <span id="year">{% now "Y" %}</span> Wydział Sędziowski Śląskiego Związku Piłki Siatkowej. Wszelkie prawa zastrzeżone.</span>
-      <span>Śląscy Sędziowie · Piłka siatkowa</span>
+      {% privacy_policy_url as privacy_url %}
+      <span>{% if privacy_url %}<a href="{{ privacy_url }}">Polityka prywatności</a> · {% endif %}Śląscy Sędziowie · Piłka siatkowa</span>
     </div>
   </div>
   <div class="stripe"></div>

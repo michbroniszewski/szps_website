@@ -3,7 +3,20 @@
    System wizualny: nowoczesny, sportowy, dynamiczny
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap');
+/* Fonty hostowane lokalnie (static/fonts/, licencja OFL, źródło: Fontsource).
+   Bez łączenia z Google Fonts — przeglądarka odwiedzającego nie wysyła
+   adresu IP do Google. latin-ext = polskie znaki; unicode-range sprawia,
+   że plik pobiera się tylko, gdy na stronie są takie znaki. */
+@font-face{font-family:'Archivo';font-style:normal;font-display:swap;font-weight:100 900;src:url('fonts/archivo-latin-wght-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Archivo';font-style:normal;font-display:swap;font-weight:100 900;src:url('fonts/archivo-latin-ext-wght-normal.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-display:swap;font-weight:400;src:url('fonts/barlow-latin-400-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-display:swap;font-weight:400;src:url('fonts/barlow-latin-ext-400-normal.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-display:swap;font-weight:500;src:url('fonts/barlow-latin-500-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-display:swap;font-weight:500;src:url('fonts/barlow-latin-ext-500-normal.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-display:swap;font-weight:600;src:url('fonts/barlow-latin-600-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-display:swap;font-weight:600;src:url('fonts/barlow-latin-ext-600-normal.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-display:swap;font-weight:700;src:url('fonts/barlow-latin-700-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-display:swap;font-weight:700;src:url('fonts/barlow-latin-ext-700-normal.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 
 :root{
   /* Kolory marki (z logo: gwizdek żółto-zielono-niebieski) */
@@ -468,6 +481,8 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
 .contact-row__ico svg{width:21px;height:21px}
 .contact-row b{font-family:var(--font-display);font-weight:700;display:block;font-size:15px}
 .contact-row span{color:var(--ink-soft);font-size:15px}
+.contact-row__link{display:block;width:fit-content;margin-top:6px;font-size:14px;font-weight:600;color:var(--blue-d)}
+.contact-row__link:hover{text-decoration:underline;text-underline-offset:2px}
 .contact-info .fb-cta{display:inline-flex;align-items:center;gap:11px;margin-top:24px;
   background:#1877F2;color:#fff;padding:13px 20px;border-radius:11px;font-family:var(--font-display);font-weight:700;
   box-shadow:0 8px 20px rgba(24,119,242,.3);transition:transform .18s}
@@ -492,6 +507,7 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
 .consent{display:flex;gap:11px;align-items:flex-start;margin-bottom:22px;font-size:13.5px;color:var(--ink-soft)}
 .consent input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--blue)}
 .consent.invalid{color:#dc4040}
+.consent a{color:var(--blue-d);font-weight:600;text-decoration:underline;text-underline-offset:2px}
 .form .btn--gold{width:100%;justify-content:center;font-size:16px;padding:16px}
 .form__ok{display:none;text-align:center;padding:30px 10px}
 .form__ok.show{display:block;animation:pop .4s ease}
@@ -506,6 +522,26 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
   color:#b41818;font-size:14.5px}
 .form__err a{color:#b41818;font-weight:700;text-decoration:underline;text-underline-offset:2px}
 .form__err[hidden]{display:none}
+
+/* ============================================================
+   STRONY STATYCZNE (np. polityka prywatności)
+   ============================================================ */
+.static-page{padding-top:150px}
+.static-page .wrap{max-width:860px}
+.static-page__title{font-family:var(--font-display);font-weight:900;font-size:clamp(32px,4.4vw,48px);line-height:1.05;letter-spacing:-.02em;margin-bottom:24px}
+.draft-note{margin-bottom:24px;padding:14px 18px;border-radius:12px;background:rgba(232,168,50,.14);border:1px solid rgba(200,136,26,.4);color:#7a520c;font-size:14.5px}
+.prose{background:var(--bg);border:1px solid var(--line);border-radius:22px;padding:40px;font-size:16.5px;line-height:1.7}
+.prose h2{font-family:var(--font-display);font-weight:800;font-size:22px;line-height:1.25;margin:34px 0 12px}
+.prose h3{font-family:var(--font-display);font-weight:700;font-size:17px;margin:22px 0 8px}
+.prose > :first-child{margin-top:0}
+.prose p{margin:0 0 12px}
+.prose ul,.prose ol{margin:0 0 14px 22px}
+.prose li{margin-bottom:6px}
+.prose a{color:var(--blue-d);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.prose code{font-size:.9em;background:var(--soft);padding:1px 6px;border-radius:5px}
+.prose__meta{color:var(--ink-soft);font-size:14px}
+.prose mark.todo{background:rgba(232,168,50,.3);color:#6b4708;padding:1px 5px;border-radius:4px;font-weight:600;font-size:.92em}
+@media (max-width:560px){.static-page{padding-top:110px}.prose{padding:24px 20px;font-size:16px}}
 
 /* ============================================================
    FOOTER
@@ -523,6 +559,8 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
 .footer__social a:hover{background:#1877F2;transform:translateY(-2px)}
 .footer__social svg{width:19px;height:19px}
 .footer__bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px}
+.footer__bottom a{text-decoration:underline;text-underline-offset:2px}
+.footer__bottom a:hover{color:var(--gold)}
 
 /* ============================================================
    REVEAL ANIMATIONS

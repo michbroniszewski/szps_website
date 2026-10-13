@@ -37,3 +37,6 @@ logs/
 
 # Node (na wypadek gdyby coś doszło)
 node_modules/
+
+# Eksport arkusza do przeglądu (manage.py export_evaluation_html)
+arkusz-oceny-podglad*.html

@@ -1,0 +1,9 @@
+<fieldset class="field ev-choices{% if field.errors %} invalid{% endif %}">
+  <legend>{{ field.label }}{% if field.field.required %} <span class="req">*</span>{% endif %}</legend>
+  <div class="ev-choices__opts">
+    {% for radio in field %}
+      <label class="ev-pill">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+    {% endfor %}
+  </div>
+  {% for error in field.errors %}<div class="err">{{ error }}</div>{% endfor %}
+</fieldset>

@@ -73,6 +73,13 @@ class ArticleCoverRenderingTests(TestCase):
 
 
 class HomeViewTests(TestCase):
+    def test_contact_shows_seat_address_with_maps_link(self):
+        response = self.client.get(reverse("pages:home"))
+        self.assertContains(response, "ul. Bukowa 1A, 40-108 Katowice")
+        self.assertContains(response, "google.com/maps/search/?api=1&amp;query=Bukowa+1A")
+        # Sam odnośnik — bez osadzonej mapy (ciasteczka Google).
+        self.assertNotContains(response, "<iframe")
+
     def test_home_returns_200(self):
         response = self.client.get(reverse("pages:home"))
         self.assertEqual(response.status_code, 200)
@@ -262,3 +269,59 @@ class SiteInfrastructureTests(TestCase):
     def test_admin_redirects_anonymous_to_login(self):
         response = self.client.get("/admin/")
         self.assertIn(response.status_code, (301, 302))
+
+
+class PrivacyPolicyTests(TestCase):
+    """Szkic polityki z migracji 0004 — niewidoczny, dopóki nie opublikowany."""
+
+    url = "/s/polityka-prywatnosci/"
+
+    def setUp(self):
+        self.page = StaticPage.objects.get(slug="polityka-prywatnosci")
+
+    def test_seeded_as_unpublished_draft(self):
+        self.assertFalse(self.page.is_published)
+        self.assertIn("Administrator danych", self.page.body)
+        self.assertIn("ul. Bukowa 1A", self.page.body)
+
+    def test_draft_hidden_from_visitors(self):
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        home = self.client.get(reverse("pages:home"))
+        self.assertNotContains(home, self.url)
+
+    def test_staff_can_preview_draft(self):
+        from django.contrib.auth import get_user_model
+        staff = get_user_model().objects.create_user("red", password="x", is_staff=True)
+        self.client.force_login(staff)
+        response = self.client.get(self.url)
+        self.assertContains(response, "Szkic — strona nie jest opublikowana")
+        self.assertContains(response, '<meta name="robots" content="noindex, nofollow">')
+
+    def test_published_policy_linked_in_footer_and_consent(self):
+        self.page.is_published = True
+        self.page.save()
+        response = self.client.get(reverse("pages:home"))
+        self.assertContains(response, f'<a href="{self.url}">Polityka prywatności</a>')
+        self.assertContains(response, f'Szczegóły w <a href="{self.url}"')
+        page = self.client.get(self.url)
+        self.assertNotContains(page, "Szkic — strona nie jest opublikowana")
+
+
+class SelfHostedFontsTests(TestCase):
+    def test_no_google_fonts(self):
+        from django.conf import settings
+        css = (settings.BASE_DIR / "static" / "styles.css").read_text(encoding="utf-8")
+        self.assertNotIn("fonts.googleapis.com", css)
+        home = self.client.get(reverse("pages:home"))
+        self.assertNotContains(home, "fonts.googleapis.com")
+        self.assertNotContains(home, "fonts.gstatic.com")
+
+    def test_font_files_referenced_in_css_exist(self):
+        import re
+        from django.conf import settings
+        static = settings.BASE_DIR / "static"
+        css = (static / "styles.css").read_text(encoding="utf-8")
+        files = re.findall(r"url\('(fonts/[^']+)'\)", css)
+        self.assertEqual(len(files), 10)
+        for f in files:
+            self.assertTrue((static / f).is_file(), f)

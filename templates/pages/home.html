@@ -152,7 +152,11 @@
       </div>
       <div class="contact-row">
         <span class="contact-row__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></span>
-        <div><b>Siedziba</b><span>Śląski Związek Piłki Siatkowej, Katowice</span></div>
+        <div>
+          <b>Siedziba</b>
+          <span>Śląski Związek Piłki Siatkowej<br>ul. Bukowa 1A, 40-108 Katowice</span>
+          <a class="contact-row__link" href="https://www.google.com/maps/search/?api=1&amp;query=Bukowa+1A%2C+40-108+Katowice" target="_blank" rel="noopener">Otwórz w Mapach Google ↗</a>
+        </div>
       </div>
 
       <a class="fb-cta" href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener">
@@ -198,7 +202,7 @@
         </div>
         <label class="consent">
           <input type="checkbox" id="f-consent" name="consent">
-          <span>Wyrażam zgodę na przetwarzanie moich danych w celu udzielenia odpowiedzi (RODO). <span class="req">*</span></span>
+          {% privacy_policy_url as privacy_url %}<span>Wyrażam zgodę na przetwarzanie moich danych w celu udzielenia odpowiedzi (RODO).{% if privacy_url %} Szczegóły w <a href="{{ privacy_url }}" target="_blank" rel="noopener">polityce prywatności</a>.{% endif %} <span class="req">*</span></span>
         </label>
         <button type="submit" class="btn btn--gold">
           Wyślij wiadomość

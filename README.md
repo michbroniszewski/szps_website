@@ -17,6 +17,31 @@ Serwer: http://127.0.0.1:8000/, panel: http://127.0.0.1:8000/admin/
 
 Szczegóły i pełen flow „lokalny test → deploy": [`docs/local-testing.md`](docs/local-testing.md).
 
+## Arkusz oceny (podstrona ukryta)
+
+`/arkusz-oceny/` — formularz obserwatora do oceny jednego sędziego (na bazie wzoru WZPS 2017) z
+generowaniem PDF. Nie ma linków w menu ani w sitemap, strona wysyła
+`noindex`. Treść arkusza: `evaluation/sheet.py`; PDF: `evaluation/pdf.py`.
+Ścieżkę i adresatów wysyłki e-mail ustawia się w `.env`
+(`EVALUATION_PATH`, `EVALUATION_EMAIL_RECIPIENTS` — patrz `.env.example`;
+domyślnie wysyłka idzie na `CONTACT_RECIPIENT`).
+
+Plik HTML do przeglądu poza stroną (np. do rozesłania członkom Wydziału):
+
+```bash
+.venv/bin/python manage.py export_evaluation_html -o arkusz-oceny-podglad.html
+```
+
+## Prywatność
+
+- Fonty (Archivo, Barlow) są hostowane lokalnie w `static/fonts/` (OFL) —
+  strona nie łączy się z Google Fonts ani innymi serwisami zewnętrznymi.
+- Polityka prywatności to strona statyczna `polityka-prywatnosci`
+  (`/s/polityka-prywatnosci/`), zakładana przez migrację jako szkic.
+  Po uzupełnieniu fragmentów [DO UZUPEŁNIENIA] i zaznaczeniu „Opublikowana”
+  w panelu link pojawia się w stopce i przy zgodzie w formularzu kontaktowym.
+  Zalogowani redaktorzy widzą szkice stron statycznych przed publikacją.
+
 ## Dokumentacja
 
 - [`docs/local-testing.md`](docs/local-testing.md) — lokalne środowisko dev.

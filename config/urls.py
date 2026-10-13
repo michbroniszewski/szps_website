@@ -20,6 +20,7 @@ urlpatterns = [
         TemplateView.as_view(template_name="sitemap.xml", content_type="application/xml"),
     ),
     path("sklad-wydzialu/", include("board.urls")),
+    path(f"{settings.EVALUATION_PATH}/", include("evaluation.urls")),
     path("", include("pages.urls")),
 ]
 
