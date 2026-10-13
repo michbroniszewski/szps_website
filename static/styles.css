@@ -481,7 +481,7 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
 .contact-row__ico svg{width:21px;height:21px}
 .contact-row b{font-family:var(--font-display);font-weight:700;display:block;font-size:15px}
 .contact-row span{color:var(--ink-soft);font-size:15px}
-.contact-row__link{display:inline-block;margin-top:4px;font-size:14px;font-weight:600;color:var(--blue-d)}
+.contact-row__link{display:block;width:fit-content;margin-top:6px;font-size:14px;font-weight:600;color:var(--blue-d)}
 .contact-row__link:hover{text-decoration:underline;text-underline-offset:2px}
 .contact-info .fb-cta{display:inline-flex;align-items:center;gap:11px;margin-top:24px;
   background:#1877F2;color:#fff;padding:13px 20px;border-radius:11px;font-family:var(--font-display);font-weight:700;
