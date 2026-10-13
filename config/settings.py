@@ -193,7 +193,7 @@ EMAIL_TIMEOUT = 15
 DEFAULT_FROM_EMAIL = os.getenv("DJANGO_FROM_EMAIL", "Formularz ŚZPS <ws@szps.pl>")
 CONTACT_RECIPIENT = os.getenv("CONTACT_RECIPIENT", "ws@szps.pl")
 
-# Arkusz ewaluacyjny — podstrona bez linków w menu, dostępna tylko po
+# Arkusz oceny — podstrona bez linków w menu, dostępna tylko po
 # wpisaniu adresu. Ścieżkę można zmienić w .env (np. na trudniejszą do
 # zgadnięcia). Wysłane arkusze trafiają do EVALUATION_EMAIL_RECIPIENTS
 # (lista po przecinku), domyślnie na adres formularza kontaktowego.

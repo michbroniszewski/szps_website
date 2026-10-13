@@ -39,4 +39,4 @@ logs/
 node_modules/
 
 # Eksport arkusza do przeglądu (manage.py export_evaluation_html)
-arkusz-ewaluacyjny-podglad*.html
+arkusz-oceny-podglad*.html

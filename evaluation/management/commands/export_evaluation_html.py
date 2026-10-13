@@ -21,11 +21,11 @@ STATIC_DIR = Path(settings.BASE_DIR) / "static"
 
 
 class Command(BaseCommand):
-    help = "Zapisuje arkusz ewaluacyjny jako samodzielny plik HTML do przeglądu."
+    help = "Zapisuje arkusz oceny jako samodzielny plik HTML do przeglądu."
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "-o", "--output", default="arkusz-ewaluacyjny-podglad.html",
+            "-o", "--output", default="arkusz-oceny-podglad.html",
             help="Ścieżka pliku wynikowego.",
         )
 

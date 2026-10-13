@@ -17,7 +17,7 @@ Serwer: http://127.0.0.1:8000/, panel: http://127.0.0.1:8000/admin/
 
 Szczegóły i pełen flow „lokalny test → deploy": [`docs/local-testing.md`](docs/local-testing.md).
 
-## Arkusz ewaluacyjny (podstrona ukryta)
+## Arkusz oceny (podstrona ukryta)
 
 `/arkusz-ewaluacyjny/` — formularz obserwatora do oceny jednego sędziego (na bazie wzoru WZPS 2017) z
 generowaniem PDF. Nie ma linków w menu ani w sitemap, strona wysyła
@@ -29,7 +29,7 @@ domyślnie wysyłka idzie na `CONTACT_RECIPIENT`).
 Plik HTML do przeglądu poza stroną (np. do rozesłania członkom Wydziału):
 
 ```bash
-.venv/bin/python manage.py export_evaluation_html -o arkusz-ewaluacyjny-podglad.html
+.venv/bin/python manage.py export_evaluation_html -o arkusz-oceny-podglad.html
 ```
 
 ## Dokumentacja

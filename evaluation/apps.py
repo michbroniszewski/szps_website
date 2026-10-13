@@ -4,4 +4,4 @@ from django.apps import AppConfig
 class EvaluationConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "evaluation"
-    verbose_name = "Arkusz ewaluacyjny"
+    verbose_name = "Arkusz oceny"

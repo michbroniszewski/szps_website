@@ -40,6 +40,11 @@ class EvaluationPageTests(TestCase):
         self.assertEqual(response["X-Robots-Tag"], "noindex, nofollow")
         self.assertContains(response, '<meta name="robots" content="noindex, nofollow">')
 
+    def test_page_named_arkusz_oceny(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "<h2>Arkusz oceny</h2>")
+        self.assertContains(response, "<title>Arkusz oceny — Wydział Sędziowski ŚZPS</title>")
+
     def test_page_is_not_linked_from_home(self):
         response = self.client.get(reverse("pages:home"))
         self.assertNotContains(response, self.url)
@@ -121,6 +126,7 @@ class EvaluationPageTests(TestCase):
         self.assertEqual(msg.cc, [])
         self.assertIn("I Liga Śląska Mężczyzn", msg.body)
         self.assertIn("Anna Kowalska (Sędzia II)", msg.body)
+        self.assertTrue(msg.subject.startswith("[Arkusz oceny] Anna Kowalska"))
         filename, content, mimetype = msg.attachments[0]
         self.assertEqual(mimetype, "application/pdf")
         self.assertTrue(content.startswith(b"%PDF"))
@@ -145,6 +151,7 @@ class ExportHtmlCommandTests(TestCase):
             call_command("export_evaluation_html", output=str(out), stdout=StringIO())
             html = out.read_text(encoding="utf-8")
         self.assertIn("Wersja do przeglądu", html)
+        self.assertIn("<h2>Arkusz oceny</h2>", html)
         self.assertIn(".ev-el__info", html)          # CSS wbudowany
         self.assertIn("refreshPosition", html)       # JS wbudowany
         self.assertIn("Przybycie na obiekt", html)   # rozwinięcia „i”

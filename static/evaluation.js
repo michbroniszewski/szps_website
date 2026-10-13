@@ -1,4 +1,4 @@
-/* Arkusz ewaluacyjny — wersja robocza w localStorage + podpowiedzi. */
+/* Arkusz oceny — wersja robocza w localStorage + podpowiedzi. */
 (function(){
   'use strict';
 

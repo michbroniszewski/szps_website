@@ -25,7 +25,7 @@ def _noindex(response):
 def _send_email(data, pdf: bytes, filename: str):
     date = data["match_date"].strftime("%d.%m.%Y")
     msg = EmailMessage(
-        subject=f"[Arkusz ewaluacyjny] {data['referee_name']} — {data['teams']} ({date})",
+        subject=f"[Arkusz oceny] {data['referee_name']} — {data['teams']} ({date})",
         body=(
             f"Obserwator: {data['observer']}\n"
             f"Rozgrywki: {sheet.choice_label(sheet.COMPETITIONS, data['competition'])}\n"
@@ -57,7 +57,7 @@ def evaluation_form(request):
                 try:
                     _send_email(data, pdf, filename)
                 except Exception:
-                    log.exception("Nie udało się wysłać arkusza ewaluacyjnego")
+                    log.exception("Nie udało się wysłać arkusza oceny")
                     messages.error(
                         request,
                         "Nie udało się wysłać e-maila. Pobierz PDF i wyślij go ręcznie.",

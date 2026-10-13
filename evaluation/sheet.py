@@ -1,4 +1,4 @@
-"""Definicja arkusza ewaluacyjnego jednego sędziego (na bazie wzoru WZPS 2017).
+"""Definicja arkusza oceny jednego sędziego (na bazie wzoru WZPS 2017).
 
 Jedno źródło prawdy dla formularza HTML, walidacji i PDF-a — zmiana
 treści arkusza (np. nowy element oceny) to edycja tylko tego pliku.
