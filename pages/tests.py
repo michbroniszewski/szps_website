@@ -73,14 +73,12 @@ class ArticleCoverRenderingTests(TestCase):
 
 
 class HomeViewTests(TestCase):
-    def test_contact_shows_seat_address_and_map(self):
+    def test_contact_shows_seat_address_with_maps_link(self):
         response = self.client.get(reverse("pages:home"))
         self.assertContains(response, "ul. Bukowa 1A, 40-108 Katowice")
         self.assertContains(response, "google.com/maps/search/?api=1&amp;query=Bukowa+1A")
-        # Mapa nie ładuje się sama — iframe wstawia dopiero JS po kliknięciu.
-        self.assertContains(response, 'id="mapLoad"')
+        # Sam odnośnik — bez osadzonej mapy (ciasteczka Google).
         self.assertNotContains(response, "<iframe")
-        self.assertNotContains(response, "ciasteczka Google")  # komentarz szablonu
 
     def test_home_returns_200(self):
         response = self.client.get(reverse("pages:home"))
