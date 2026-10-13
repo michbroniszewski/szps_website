@@ -40,6 +40,9 @@ class EvaluationPageTests(TestCase):
         self.assertEqual(response["X-Robots-Tag"], "noindex, nofollow")
         self.assertContains(response, '<meta name="robots" content="noindex, nofollow">')
 
+    def test_default_url(self):
+        self.assertEqual(self.url, "/arkusz-oceny/")
+
     def test_page_named_arkusz_oceny(self):
         response = self.client.get(self.url)
         self.assertContains(response, "<h2>Arkusz oceny</h2>")

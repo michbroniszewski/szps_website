@@ -152,7 +152,23 @@
       </div>
       <div class="contact-row">
         <span class="contact-row__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.3-7-11a7 7 0 0 1 14 0c0 5.7-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></span>
-        <div><b>Siedziba</b><span>Śląski Związek Piłki Siatkowej, Katowice</span></div>
+        <div>
+          <b>Siedziba</b>
+          <span>Śląski Związek Piłki Siatkowej<br>ul. Bukowa 1A, 40-108 Katowice</span>
+          <a class="contact-row__link" href="https://www.google.com/maps/search/?api=1&amp;query=Bukowa+1A%2C+40-108+Katowice" target="_blank" rel="noopener">Otwórz w Mapach Google ↗</a>
+        </div>
+      </div>
+
+      {% comment %}Mapa ładowana dopiero po kliknięciu: osadzone Mapy Google ustawiają
+         ciasteczka Google, więc nie wczytujemy ich bez akcji odwiedzającego.{% endcomment %}
+      <div class="map-card" id="mapCard"
+           data-embed="https://maps.google.com/maps?q=Bukowa+1A%2C+40-108+Katowice&amp;z=16&amp;output=embed">
+        <div class="map-card__placeholder">
+          <span class="map-card__pin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.3 7 13 7 13s7-7.7 7-13a7 7 0 0 0-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></svg></span>
+          <b>ul. Bukowa 1A, 40-108 Katowice</b>
+          <button type="button" class="btn btn--dark map-card__btn" id="mapLoad">Pokaż mapę</button>
+          <small>Mapa wczyta się z Google Maps po kliknięciu.</small>
+        </div>
       </div>
 
       <a class="fb-cta" href="https://www.facebook.com/sedziowieszps" target="_blank" rel="noopener">

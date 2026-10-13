@@ -52,6 +52,21 @@
   // Bezpiecznik: gdyby coś padło (np. observer nie fire'ował) pokaż wszystko po 3s.
   setTimeout(() => reveals.forEach(el => el.classList.add('in')), 3000);
 
+  /* ---- Mapa siedziby (ładowana dopiero po kliknięciu) ---- */
+  const mapCard = document.getElementById('mapCard');
+  const mapLoad = document.getElementById('mapLoad');
+  if (mapCard && mapLoad){
+    mapLoad.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = mapCard.dataset.embed;
+      iframe.title = 'Mapa: ul. Bukowa 1A, 40-108 Katowice';
+      iframe.loading = 'lazy';
+      iframe.referrerPolicy = 'no-referrer-when-downgrade';
+      iframe.allowFullscreen = true;
+      mapCard.replaceChildren(iframe);
+    });
+  }
+
   /* ---- Contact form ---- */
   const form = document.getElementById('contactForm');
   if (form){

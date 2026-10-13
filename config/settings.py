@@ -197,7 +197,7 @@ CONTACT_RECIPIENT = os.getenv("CONTACT_RECIPIENT", "ws@szps.pl")
 # wpisaniu adresu. Ścieżkę można zmienić w .env (np. na trudniejszą do
 # zgadnięcia). Wysłane arkusze trafiają do EVALUATION_EMAIL_RECIPIENTS
 # (lista po przecinku), domyślnie na adres formularza kontaktowego.
-EVALUATION_PATH = os.getenv("EVALUATION_PATH", "arkusz-ewaluacyjny").strip("/")
+EVALUATION_PATH = os.getenv("EVALUATION_PATH", "arkusz-oceny").strip("/")
 EVALUATION_EMAIL_RECIPIENTS = env_list("EVALUATION_EMAIL_RECIPIENTS", [CONTACT_RECIPIENT])
 
 if not DEBUG:
