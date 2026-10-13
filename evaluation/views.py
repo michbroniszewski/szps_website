@@ -10,7 +10,6 @@ from django.views.decorators.cache import never_cache
 
 from . import sheet
 from .forms import EvaluationForm
-from .pdf import build_pdf, pdf_filename
 
 log = logging.getLogger(__name__)
 
@@ -49,6 +48,11 @@ def evaluation_form(request):
     if request.method == "POST":
         form = EvaluationForm(request.POST)
         if form.is_valid():
+            # Import dopiero tu: jeśli na serwerze zabraknie reportlab (deploy
+            # nie instaluje pakietów), padnie tylko generowanie PDF, a nie
+            # start całej aplikacji przy imporcie urls.
+            from .pdf import build_pdf, pdf_filename
+
             data = form.cleaned_data
             pdf = build_pdf(data)
             filename = pdf_filename(data)
