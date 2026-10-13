@@ -7,6 +7,8 @@ Plik ma wbudowane style i skrypt, działa po otwarciu w przeglądarce
 zmianie `sheet.py` wystarczy go wyeksportować ponownie.
 """
 
+import base64
+import re
 from pathlib import Path
 
 from django.conf import settings
@@ -18,6 +20,15 @@ from evaluation import sheet
 from evaluation.forms import EvaluationForm
 
 STATIC_DIR = Path(settings.BASE_DIR) / "static"
+FONT_URL = re.compile(r"url\('(fonts/[^']+\.woff2)'\)")
+
+
+def _inline_fonts(css: str) -> str:
+    """url('fonts/…woff2') → data URI, żeby plik działał bez serwera."""
+    def embed(match):
+        data = base64.b64encode((STATIC_DIR / match.group(1)).read_bytes()).decode()
+        return f"url(data:font/woff2;base64,{data})"
+    return FONT_URL.sub(embed, css)
 
 
 class Command(BaseCommand):
@@ -37,10 +48,10 @@ class Command(BaseCommand):
             "grade_scale": sheet.GRADE_SCALE,
             "grade_rules": sheet.GRADE_RULES,
             "generated": timezone.localtime(),
-            "css": "\n".join(
+            "css": _inline_fonts("\n".join(
                 (STATIC_DIR / name).read_text(encoding="utf-8")
                 for name in ("styles.css", "evaluation.css")
-            ),
+            )),
             "js": (STATIC_DIR / "evaluation.js").read_text(encoding="utf-8"),
         })
         Path(output).write_text(html, encoding="utf-8")

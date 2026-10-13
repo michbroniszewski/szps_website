@@ -2,12 +2,16 @@
 
 {% block title %}{{ page.title }} — Wydział Sędziowski ŚZPS{% endblock %}
 {% block body_class %}nav-on-light{% endblock %}
+{% block extra_head %}{% if not page.is_published %}<meta name="robots" content="noindex, nofollow">{% endif %}{% endblock %}
 
 {% block content %}
-<section class="section section--soft">
+<section class="section section--soft static-page">
   <div class="wrap">
-    <h1>{{ page.title }}</h1>
-    <div>{{ page.body|safe }}</div>
+    {% if not page.is_published %}
+      <div class="draft-note">Szkic — strona nie jest opublikowana i widzą ją tylko zalogowani redaktorzy. Aby ją udostępnić, zaznacz „Opublikowana” w panelu.</div>
+    {% endif %}
+    <h1 class="static-page__title">{{ page.title }}</h1>
+    <div class="prose">{{ page.body|safe }}</div>
   </div>
 </section>
 {% endblock %}
