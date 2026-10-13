@@ -175,6 +175,16 @@ GRADE_SCALE = [
     ("F", "rażąco duża liczba błędów w ocenie danego elementu – poziom oceny wpłynął znacząco na przebieg rywalizacji sportowej, kompletny brak kontroli danego elementu, katastrofa, zachowania nieakceptowalne"),
 ]
 
+# Krótkie nazwy ocen do dokumentu wynikowego (PDF).
+GRADE_LABELS = {
+    "A": "wybitna",
+    "B": "bardzo dobra",
+    "C": "prawidłowa",
+    "D": "niewielkie błędy",
+    "E": "znaczące błędy",
+    "F": "rażące błędy",
+}
+
 GRADE_RULES = [
     "Oceny szczegółowe (A-F) odzwierciedlają ogólne wrażenie dotyczące odpowiedniej sekcji (elementu gry) przedstawionego w arkuszu.",
     "Punktem wyjściowym jest ocena C. Wystawienie tej oceny w danym elemencie nie wymaga opisu ani komentarza ze strony Obserwatora w podsumowaniu.",

@@ -150,3 +150,43 @@ class ExportHtmlCommandTests(TestCase):
         self.assertIn("Przybycie na obiekt", html)   # rozwinięcia „i”
         self.assertNotIn('name="csrfmiddlewaretoken"', html)
         self.assertNotIn('value="email"', html)
+
+
+class ResultDocumentTests(TestCase):
+    """PDF to dokument wynikowy: tabela wyników + podsumowanie + opis."""
+
+    def _cleaned(self, **overrides):
+        from .forms import EvaluationForm
+        form = EvaluationForm(valid_post(**overrides))
+        self.assertTrue(form.is_valid(), form.errors)
+        return form.cleaned_data
+
+    def _summary_text(self, data):
+        from .pdf import _styles, _summary
+        return " ".join(p.text for p in _summary(data, _styles()))
+
+    def test_summary_all_default(self):
+        text = self._summary_text(self._cleaned())
+        self.assertIn("C × 5", text)
+        self.assertIn("Wszystkie elementy ocenione na poziomie wyjściowym", text)
+
+    def test_summary_lists_elements_above_and_below(self):
+        text = self._summary_text(self._cleaned(
+            g_technika="B", c_technika="x", g_relacje="E", c_relacje="y",
+        ))
+        self.assertIn("Powyżej poziomu wyjściowego: Technika sędziowania (B)", text)
+        self.assertIn("obszary do poprawy: Relacje z zespołami", text)
+        self.assertIn("(E)", text)
+
+    def test_filename_names_referee_and_date(self):
+        from .pdf import pdf_filename
+        self.assertEqual(
+            pdf_filename(self._cleaned()),
+            "protokol-obserwacji-2026-10-03-anna-kowalska.pdf",
+        )
+
+    def test_pdf_builds_with_long_comments(self):
+        from .pdf import build_pdf
+        long = ("Długi komentarz obserwatora. " * 200)[:4000]
+        pdf = build_pdf(self._cleaned(comment=long, c_technika=long))
+        self.assertTrue(pdf.startswith(b"%PDF"))
