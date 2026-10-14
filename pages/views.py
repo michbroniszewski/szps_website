@@ -59,13 +59,7 @@ def static_page(request, slug):
 # JS wysyła POST z formularza kontaktowego na home.
 # Zwracamy JSON, JS pokazuje ekran "Dziękujemy" bez przeładowania strony.
 
-_TOPIC_CHOICES = {
-    "Obsady i delegacje",
-    "Szkolenia i egzaminy",
-    "Sprawy organizacyjne",
-    "Współpraca / sponsoring",
-    "Inne",
-}
+TOPIC_MIN, TOPIC_MAX = 3, 120
 
 
 def _validate_contact(post) -> tuple[dict, dict]:
@@ -74,7 +68,9 @@ def _validate_contact(post) -> tuple[dict, dict]:
     data = {
         "name": post.get("name", "").strip(),
         "email": post.get("email", "").strip(),
-        "topic": post.get("topic", "").strip(),
+        # Temat trafia do nagłówka Subject — scalamy białe znaki (w tym
+        # nowe linie), bo Django odrzuca wieloliniowe nagłówki maila.
+        "topic": " ".join(post.get("topic", "").split()),
         "message": post.get("message", "").strip(),
         "consent": post.get("consent") in {"on", "true", "1"},
     }
@@ -83,8 +79,8 @@ def _validate_contact(post) -> tuple[dict, dict]:
         errors["name"] = "Podaj imię i nazwisko."
     if "@" not in data["email"] or "." not in data["email"].split("@")[-1]:
         errors["email"] = "Podaj poprawny adres e-mail."
-    if data["topic"] not in _TOPIC_CHOICES:
-        errors["topic"] = "Wybierz temat z listy."
+    if not TOPIC_MIN <= len(data["topic"]) <= TOPIC_MAX:
+        errors["topic"] = f"Wpisz temat ({TOPIC_MIN}–{TOPIC_MAX} znaków)."
     if len(data["message"]) < 10:
         errors["message"] = "Wiadomość jest zbyt krótka (min. 10 znaków)."
     if not data["consent"]:

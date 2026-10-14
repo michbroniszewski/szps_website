@@ -237,12 +237,28 @@ class ContactSubmitTests(TestCase):
         self.assertIn("consent", response.json()["errors"])
         self.assertEqual(len(mail.outbox), 0)
 
-    def test_unknown_topic_rejected(self):
-        bad = {**VALID_POST, "topic": "Prześlij zdjęcie karty kredytowej"}
-        response = self.client.post(reverse("pages:contact_submit"), bad)
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("topic", response.json()["errors"])
+    def test_free_text_topic_used_in_subject(self):
+        data = {**VALID_POST, "topic": "Pytanie o obsadę meczu juniorów"}
+        response = self.client.post(reverse("pages:contact_submit"), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mail.outbox[0].subject, "[Formularz WWW] Pytanie o obsadę meczu juniorów")
+
+    def test_too_short_or_long_topic_rejected(self):
+        for topic in ("", "  ", "ab", "x" * 121):
+            bad = {**VALID_POST, "topic": topic}
+            response = self.client.post(reverse("pages:contact_submit"), bad)
+            self.assertEqual(response.status_code, 400, topic)
+            self.assertIn("topic", response.json()["errors"])
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_newlines_in_topic_cannot_inject_headers(self):
+        data = {**VALID_POST, "topic": "Pytanie\r\nBcc: ofiara@example.com"}
+        response = self.client.post(reverse("pages:contact_submit"), data)
+        self.assertEqual(response.status_code, 200)
+        msg = mail.outbox[0]
+        self.assertEqual(msg.subject, "[Formularz WWW] Pytanie Bcc: ofiara@example.com")
+        self.assertEqual(msg.bcc, [])
+        self.assertNotIn("\n", msg.message()["Subject"])
 
     def test_honeypot_silently_accepts_and_drops(self):
         # Bot wypełnił ukryte pole `website` — udajemy sukces, nic nie wysyłamy.
