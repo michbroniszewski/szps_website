@@ -30,9 +30,14 @@ def valid_post(**overrides):
     return data
 
 
+ACCESS_CODE = "kod-testowy"
+
+
+@override_settings(EVALUATION_ACCESS_CODE=ACCESS_CODE)
 class EvaluationPageTests(TestCase):
     def setUp(self):
         self.url = reverse("evaluation:form")
+        self.client.post(self.url, {"access_code": ACCESS_CODE})
 
     def test_page_renders_with_noindex(self):
         response = self.client.get(self.url)
@@ -200,3 +205,134 @@ class ResultDocumentTests(TestCase):
         long = ("Długi komentarz obserwatora. " * 200)[:4000]
         pdf = build_pdf(self._cleaned(comment=long, c_technika=long))
         self.assertTrue(pdf.startswith(b"%PDF"))
+
+
+
+@override_settings(EVALUATION_ACCESS_CODE=ACCESS_CODE)
+class AccessCodeTests(TestCase):
+    def setUp(self):
+        self.url = reverse("evaluation:form")
+
+    def test_form_hidden_without_code(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, 'name="access_code"')
+        self.assertNotContains(response, 'name="referee_name"')
+        self.assertEqual(response["X-Robots-Tag"], "noindex, nofollow")
+
+    def test_correct_code_grants_access_and_is_remembered(self):
+        response = self.client.post(self.url, {"access_code": ACCESS_CODE})
+        self.assertRedirects(response, self.url)
+        self.assertTrue(response.cookies["ev_access"]["httponly"])
+        # Kolejna wizyta — już bez kodu.
+        self.assertContains(self.client.get(self.url), 'name="referee_name"')
+
+    def test_code_is_trimmed(self):
+        response = self.client.post(self.url, {"access_code": f"  {ACCESS_CODE} "})
+        self.assertRedirects(response, self.url)
+
+    def test_wrong_code_rejected(self):
+        response = self.client.post(self.url, {"access_code": "zly"})
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, "Nieprawidłowy kod", status_code=403)
+        self.assertNotIn("ev_access", response.cookies)
+
+    def test_changed_code_invalidates_access(self):
+        self.client.post(self.url, {"access_code": ACCESS_CODE})
+        with self.settings(EVALUATION_ACCESS_CODE="nowy-kod"):
+            self.assertContains(self.client.get(self.url), 'name="access_code"')
+
+    def test_forged_cookie_rejected(self):
+        self.client.cookies["ev_access"] = "cokolwiek"
+        self.assertContains(self.client.get(self.url), 'name="access_code"')
+
+    @override_settings(EVALUATION_ACCESS_CODE="")
+    def test_closed_when_code_not_configured(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 503)
+        self.assertNotContains(response, 'name="access_code"', status_code=503)
+        response = self.client.post(self.url, {"access_code": ""})
+        self.assertEqual(response.status_code, 503)
+        self.assertNotIn("ev_access", response.cookies)
+
+    def test_sheet_post_without_access_sends_nothing(self):
+        response = self.client.post(self.url, valid_post(action="email"))
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(EVALUATION_CODE_ATTEMPT_LIMIT=3)
+    def test_code_attempts_limited(self):
+        for _ in range(3):
+            self.client.post(self.url, {"access_code": "zly"})
+        # Po limicie nawet poprawny kod nie przechodzi.
+        response = self.client.post(self.url, {"access_code": ACCESS_CODE})
+        self.assertEqual(response.status_code, 429)
+        self.assertNotIn("ev_access", response.cookies)
+
+    def test_code_attempt_limit_is_per_ip(self):
+        with self.settings(EVALUATION_CODE_ATTEMPT_LIMIT=1):
+            self.client.post(self.url, {"access_code": "zly"}, REMOTE_ADDR="10.0.0.1")
+            response = self.client.post(self.url, {"access_code": ACCESS_CODE}, REMOTE_ADDR="10.0.0.2")
+        self.assertRedirects(response, self.url)
+
+    def test_honeypot_on_access_page(self):
+        response = self.client.post(self.url, {"access_code": ACCESS_CODE, "ev_hp_field": "http://spam"})
+        self.assertRedirects(response, self.url)
+        self.assertNotIn("ev_access", response.cookies)
+
+
+@override_settings(EVALUATION_ACCESS_CODE=ACCESS_CODE, EVALUATION_EMAIL_RECIPIENTS=["ws@example.com"])
+class SendProtectionTests(TestCase):
+    def setUp(self):
+        self.url = reverse("evaluation:form")
+        self.client.post(self.url, {"access_code": ACCESS_CODE})
+
+    def test_honeypot_pretends_success_without_sending(self):
+        response = self.client.post(self.url, valid_post(action="email", ev_hp_field="x"))
+        self.assertRedirects(response, self.url + "?wyslano=1")
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_honeypot_blocks_pdf_too(self):
+        response = self.client.post(self.url, valid_post(ev_hp_field="x"))
+        self.assertNotEqual(response.get("Content-Type"), "application/pdf")
+
+    def test_send_limit_five_per_hour(self):
+        for _ in range(5):
+            self.client.post(self.url, valid_post(action="email"))
+        self.assertEqual(len(mail.outbox), 5)
+        response = self.client.post(self.url, valid_post(action="email"))
+        self.assertContains(response, "Przekroczono limit 5 wysyłek na godzinę")
+        self.assertEqual(len(mail.outbox), 5)
+        # Pobranie PDF dalej działa.
+        response = self.client.post(self.url, valid_post())
+        self.assertEqual(response["Content-Type"], "application/pdf")
+
+    def test_send_limit_window_expires(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from .models import RateLimitHit
+        for _ in range(5):
+            self.client.post(self.url, valid_post(action="email"))
+        RateLimitHit.objects.update(created_at=timezone.now() - timedelta(minutes=61))
+        self.client.post(self.url, valid_post(action="email"))
+        self.assertEqual(len(mail.outbox), 6)
+
+    def test_failed_send_does_not_count(self):
+        from unittest import mock
+        from .models import RateLimitHit
+        with mock.patch("evaluation.views._send_email", side_effect=OSError("smtp")):
+            response = self.client.post(self.url, valid_post(action="email"))
+        self.assertContains(response, "Nie udało się wysłać")
+        self.assertEqual(RateLimitHit.objects.filter(kind=RateLimitHit.SEND).count(), 0)
+
+    def test_ip_stored_only_as_hash(self):
+        from .models import RateLimitHit
+        self.client.post(self.url, valid_post(action="email"), REMOTE_ADDR="203.0.113.7")
+        hit = RateLimitHit.objects.get(kind=RateLimitHit.SEND)
+        self.assertNotIn("203.0.113.7", hit.client)
+        self.assertEqual(len(hit.client), 64)
+
+    def test_client_ip_uses_last_forwarded_entry(self):
+        from django.test import RequestFactory
+        from .ratelimit import client_ip
+        request = RequestFactory().get("/", HTTP_X_FORWARDED_FOR="1.1.1.1, 198.51.100.9", REMOTE_ADDR="127.0.0.1")
+        self.assertEqual(client_ip(request), "198.51.100.9")

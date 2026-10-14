@@ -72,6 +72,9 @@
 .ev-legend dd{color:var(--ink-soft)}
 
 .ev-actions{display:flex;flex-wrap:wrap;gap:12px}
+.ev-access{max-width:520px}
+.ev-access h2{font-family:var(--font-display);font-weight:800;font-size:clamp(30px,4.4vw,46px);line-height:1.05;letter-spacing:-.02em;margin:14px 0 24px}
+.ev-access .btn{width:100%;justify-content:center}
 .ev-send-note{margin-top:12px}
 .ev-actions .btn[disabled]{opacity:.6;cursor:wait;transform:none}
 

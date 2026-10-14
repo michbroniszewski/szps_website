@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Arkusz oceny — Wydział Sędziowski ŚZPS{% endblock %}
+{% block body_class %}nav-on-light{% endblock %}
+
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="{% static 'evaluation.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section section--soft ev">
+  <div class="wrap">
+    <div class="ev-access">
+      <span class="eyebrow">Obserwacja sędziów</span>
+      <h2>Arkusz oceny</h2>
+
+      {% if error %}<div class="ev-msg ev-msg--error" role="alert">{{ error }}</div>{% endif %}
+
+      {% if configured %}
+      <form method="post" class="form ev-card">
+        {% csrf_token %}
+        {% include "evaluation/_honeypot.html" %}
+        <p class="ev-hint">Arkusz jest dostępny dla obserwatorów Wydziału. Wpisz kod dostępu — przeglądarka zapamięta go na kolejne wizyty.</p>
+        <div class="field">
+          <label for="access_code">Kod dostępu</label>
+          <input type="password" id="access_code" name="access_code" autocomplete="current-password" required autofocus>
+        </div>
+        <button type="submit" class="btn btn--gold">Przejdź do arkusza</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

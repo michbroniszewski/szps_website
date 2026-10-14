@@ -26,6 +26,12 @@ generowaniem PDF. Nie ma linków w menu ani w sitemap, strona wysyła
 (`EVALUATION_PATH`, `EVALUATION_EMAIL_RECIPIENTS` — patrz `.env.example`;
 domyślnie wysyłka idzie na `CONTACT_RECIPIENT`).
 
+Zabezpieczenia arkusza: **kod dostępu** (`EVALUATION_ACCESS_CODE` — bez
+niego arkusz jest zamknięty; lokalnie `test`), pole-pułapka na boty oraz
+limity na adres IP: 5 wysyłek i 10 błędnych kodów na godzinę
+(`EVALUATION_SEND_LIMIT`, `EVALUATION_CODE_ATTEMPT_LIMIT`). Liczniki są
+w bazie (model `RateLimitHit`, IP zapisywane tylko jako skrót HMAC).
+
 Plik HTML do przeglądu poza stroną (np. do rozesłania członkom Wydziału):
 
 ```bash

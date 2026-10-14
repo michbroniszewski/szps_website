@@ -279,6 +279,9 @@ class PrivacyPolicyTests(TestCase):
     def setUp(self):
         self.page = StaticPage.objects.get(slug="polityka-prywatnosci")
 
+    def test_lists_evaluation_access_cookie(self):
+        self.assertIn("<code>ev_access</code>", self.page.body)
+
     def test_seeded_as_unpublished_draft(self):
         self.assertFalse(self.page.is_published)
         self.assertIn("Administrator danych", self.page.body)

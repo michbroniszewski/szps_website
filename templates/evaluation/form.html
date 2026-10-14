@@ -31,6 +31,7 @@
 
     <form method="post" id="evForm" data-bound="{{ form.is_bound|yesno:'1,0' }}"{% if form.position.value %} data-position="{{ form.position.value }}"{% endif %} novalidate>
       {% csrf_token %}
+      {% include "evaluation/_honeypot.html" %}
 
       {% include "evaluation/_sheet.html" %}
 
@@ -39,7 +40,7 @@
         <button type="submit" name="action" value="email" class="btn btn--dark" id="evSend">Wyślij do Wydziału</button>
         <button type="button" class="btn btn--ghost" id="evReset">Wyczyść formularz</button>
       </div>
-      <p class="ev-hint ev-send-note">„Wyślij do Wydziału” przesyła arkusz w PDF na adres {{ email_recipients|join:", " }}. Kopia trafi na e-mail obserwatora, jeśli został podany.</p>
+      <p class="ev-hint ev-send-note">„Wyślij do Wydziału” przesyła arkusz w PDF na adres {{ email_recipients|join:", " }}. Kopia trafi na e-mail obserwatora, jeśli został podany. Limit: {{ send_limit }} wysyłek na godzinę.</p>
     </form>
   </div>
 </section>
