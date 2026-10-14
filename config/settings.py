@@ -199,6 +199,13 @@ CONTACT_RECIPIENT = os.getenv("CONTACT_RECIPIENT", "ws@szps.pl")
 # (lista po przecinku), domyślnie na adres formularza kontaktowego.
 EVALUATION_PATH = os.getenv("EVALUATION_PATH", "arkusz-oceny").strip("/")
 EVALUATION_EMAIL_RECIPIENTS = env_list("EVALUATION_EMAIL_RECIPIENTS", [CONTACT_RECIPIENT])
+# Kod dostępu do arkusza (przekazywany obserwatorom). Pusty = arkusz
+# zamknięty — celowo „fail closed”, żeby zapomniana konfiguracja nie
+# otwierała formularza wysyłającego maile z adresu Wydziału.
+EVALUATION_ACCESS_CODE = os.getenv("EVALUATION_ACCESS_CODE", "").strip()
+# Limity na adres IP w ciągu godziny: wysyłki arkusza i błędne próby kodu.
+EVALUATION_SEND_LIMIT = int(os.getenv("EVALUATION_SEND_LIMIT", "5"))
+EVALUATION_CODE_ATTEMPT_LIMIT = int(os.getenv("EVALUATION_CODE_ATTEMPT_LIMIT", "10"))
 
 if not DEBUG:
     # Passenger na mydevil siedzi za nginx-em, który terminuje SSL.

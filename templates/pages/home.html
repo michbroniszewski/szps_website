@@ -185,15 +185,8 @@
         </div>
         <div class="field">
           <label for="f-topic">Temat <span class="req">*</span></label>
-          <select id="f-topic" name="topic">
-            <option value="">Wybierz temat…</option>
-            <option>Obsady i delegacje</option>
-            <option>Szkolenia i egzaminy</option>
-            <option>Sprawy organizacyjne</option>
-            <option>Współpraca / sponsoring</option>
-            <option>Inne</option>
-          </select>
-          <div class="err">Wybierz temat.</div>
+          <input type="text" id="f-topic" name="topic" maxlength="120" placeholder="np. Pytanie o obsadę meczu">
+          <div class="err">Wpisz temat.</div>
         </div>
         <div class="field">
           <label for="f-msg">Wiadomość <span class="req">*</span></label>

@@ -81,7 +81,7 @@
 
       if (name.value.trim().length < 3){ showErr(name,'Podaj imię i nazwisko.'); ok=false; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())){ showErr(email,'Podaj poprawny adres e-mail.'); ok=false; }
-      if (!topic.value){ showErr(topic,'Wybierz temat.'); ok=false; }
+      if (topic.value.trim().length < 3){ showErr(topic,'Wpisz temat (min. 3 znaki).'); ok=false; }
       if (msg.value.trim().length < 10){ showErr(msg,'Wiadomość jest zbyt krótka (min. 10 znaków).'); ok=false; }
       if (!consent.checked){ consent.closest('.consent').classList.add('invalid'); ok=false; }
 

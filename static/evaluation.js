@@ -7,7 +7,7 @@
 
   // v2: arkusz jednego sędziego (inne nazwy pól niż w pierwszej wersji).
   const KEY = 'szps-arkusz-ewaluacyjny-v2';
-  const SKIP = new Set(['csrfmiddlewaretoken', 'action']);
+  const SKIP = new Set(['csrfmiddlewaretoken', 'action', 'ev_hp_field']);
 
   const read = () => {
     const data = {};
