@@ -75,3 +75,29 @@ class DocumentTests(TestCase):
             external_url="/static/dokumenty/x.pdf",
         )
         doc.clean()  # nie powinno rzucić
+
+    def test_clean_accepts_https_url(self):
+        doc = Document(
+            title="OK", category=self._cat(), external_url="https://example.com/x.pdf"
+        )
+        doc.clean()
+
+    def test_clean_rejects_unsafe_urls(self):
+        cat = self._cat()
+        for url in (
+            "javascript:alert(1)",
+            " JavaScript:alert(1)",
+            "data:text/html,<script>",
+            "//evil.example/x.pdf",
+            "ftp://example.com/x.pdf",
+            "dokumenty/x.pdf",
+        ):
+            doc = Document(title="Zły", category=cat, external_url=url)
+            with self.assertRaises(ValidationError, msg=url):
+                doc.clean()
+
+    def test_get_href_hides_unsafe_legacy_url(self):
+        doc = Document.objects.create(
+            title="Stary wpis", category=self._cat(), external_url="javascript:alert(1)"
+        )
+        self.assertEqual(doc.get_href(), "")

@@ -302,6 +302,19 @@ class SiteInfrastructureTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/xml")
 
+    def test_sitemap_lists_published_content_only(self):
+        Article.objects.create(title="Nowa aktualność", slug="nowa", body="<p>x</p>")
+        Article.objects.create(title="Szkic", slug="szkic", body="<p>x</p>", is_published=False)
+        StaticPage.objects.create(title="Regulamin", slug="regulamin", body="x")
+        StaticPage.objects.create(title="Ukryta", slug="ukryta", body="x", is_published=False)
+        content = self.client.get("/sitemap.xml").content.decode()
+        self.assertIn("https://testserver/aktualnosci/nowa/", content)
+        self.assertIn("https://testserver/s/regulamin/", content)
+        self.assertIn("https://testserver/sklad-wydzialu/", content)
+        self.assertNotIn("/aktualnosci/szkic/", content)
+        self.assertNotIn("/s/ukryta/", content)
+        self.assertNotIn("arkusz", content)
+
     def test_admin_redirects_anonymous_to_login(self):
         response = self.client.get("/admin/")
         self.assertIn(response.status_code, (301, 302))

@@ -1,6 +1,22 @@
+from urllib.parse import urlsplit
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+
+
+def is_safe_href(url: str) -> bool:
+    """Ścieżka na tej stronie („/static/…”) albo adres http(s).
+
+    Blokuje m.in. „javascript:…” i „data:…” — taki link na stronie głównej
+    uruchomiłby kod w przeglądarce odwiedzającego. „//host” to adres
+    zewnętrzny bez schematu, więc też odpada.
+    """
+    url = url.strip()
+    if url.startswith("/") and not url.startswith("//"):
+        return True
+    parts = urlsplit(url)
+    return parts.scheme in {"http", "https"} and bool(parts.netloc)
 
 
 class DocumentCategory(models.Model):
@@ -60,7 +76,15 @@ class Document(models.Model):
             raise ValidationError(
                 "Podaj plik do przesłania ALBO adres w polu „Adres pliku”."
             )
+        if self.external_url and not is_safe_href(self.external_url):
+            raise ValidationError({
+                "external_url": "Podaj ścieżkę zaczynającą się od „/” "
+                "(np. /static/dokumenty/plik.pdf) albo pełny adres http(s)://."
+            })
 
     def get_href(self) -> str:
         """Adres do linkowania z frontu — plik, jeśli jest; inaczej external_url."""
-        return self.file.url if self.file else self.external_url
+        if self.file:
+            return self.file.url
+        # Wpisy sprzed walidacji też nie mogą wstawić niebezpiecznego linku.
+        return self.external_url.strip() if is_safe_href(self.external_url) else ""
