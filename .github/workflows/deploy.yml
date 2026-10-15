@@ -31,7 +31,7 @@ jobs:
       - name: Install project dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install -r requirements.txt
 
       # collectstatic uruchamiamy w CI, żeby nie musieć go odpalać na
       # serwerze — od razu wysyłamy gotowe public/static/.

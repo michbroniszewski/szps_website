@@ -51,37 +51,57 @@ fi
 echo "==> Python: $PY_BIN ($($PY_BIN --version))"
 
 # ── virtualenv ─────────────────────────────────────────────────────────
+VENV_PY=".venv/bin/python"
+
+# Katalog .venv/ może istnieć, ale być uszkodzony (np. po przerwanej
+# instalacji) — wtedy tworzymy go od nowa.
+if [[ -d .venv ]] && ! "$VENV_PY" -c 'import sys' >/dev/null 2>&1; then
+  echo "==> Virtualenv .venv/ jest uszkodzony — tworzę go od nowa"
+  rm -rf .venv
+fi
+
 if [[ ! -d .venv ]]; then
   echo "==> Tworzę virtualenv .venv/"
   "$PY_BIN" -m venv .venv
 else
   echo "==> Virtualenv .venv/ już istnieje — pomijam"
 fi
+echo "==> Python w venv: $("$VENV_PY" --version)"
 
 # ── instalacja zależności ──────────────────────────────────────────────
+# WAŻNE: na mydevil launcher .venv/bin/pip potrafi zwrócić
+# „Permission denied”, choć .venv/bin/python działa. Dlatego pip wołamy
+# ZAWSZE przez interpreter: .venv/bin/python -m pip. Nie zmieniać na
+# .venv/bin/pip.
+VENV_PIP=("$VENV_PY" -m pip)
+
 echo "==> Aktualizuję pip"
-.venv/bin/pip install --upgrade --quiet pip
+"${VENV_PIP[@]}" install --upgrade --quiet pip
 
 echo "==> Instaluję pakiety z requirements.txt"
-.venv/bin/pip install --quiet -r requirements.txt
+"${VENV_PIP[@]}" install --quiet -r requirements.txt
 
 # ── migracje ───────────────────────────────────────────────────────────
 echo "==> Wykonuję migracje bazy"
-.venv/bin/python manage.py migrate --noinput
+"$VENV_PY" manage.py migrate --noinput
 
 # ── statyki ────────────────────────────────────────────────────────────
+# Ostrzeżenia „Found another file with the destination path
+# 'admin/js/...'” są oczekiwane (nakładanie się statyk Django admin
+# i django-unfold) i nie blokują wdrożenia — liczy się kod wyjścia.
 echo "==> Zbieram pliki statyczne do public/static/"
-.venv/bin/python manage.py collectstatic --noinput
+echo "    (ostrzeżenia „Found another file … admin/js/…” są niegroźne)"
+"$VENV_PY" manage.py collectstatic --noinput
 
 # ── superuser (jeśli jeszcze nie ma) ───────────────────────────────────
-has_superuser=$(.venv/bin/python manage.py shell -c \
+has_superuser=$("$VENV_PY" manage.py shell -c \
   'from django.contrib.auth import get_user_model as g; print(g().objects.filter(is_superuser=True).exists())')
 
 if [[ "$has_superuser" == "True" ]]; then
   echo "==> Superuser już istnieje — pomijam createsuperuser"
 else
   echo "==> Tworzę konto administratora (podaj login, e-mail i hasło):"
-  .venv/bin/python manage.py createsuperuser
+  "$VENV_PY" manage.py createsuperuser
 fi
 
 # ── restart Passengera ─────────────────────────────────────────────────
