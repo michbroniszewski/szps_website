@@ -1,8 +1,11 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 from django.views.generic import TemplateView
+
+from pages.sitemaps import SITEMAPS
 
 admin.site.site_header = "Panel administracyjny — Wydział Sędziowski ŚZPS"
 admin.site.site_title = "Panel ŚZPS"
@@ -15,10 +18,7 @@ urlpatterns = [
         "robots.txt",
         TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
     ),
-    path(
-        "sitemap.xml",
-        TemplateView.as_view(template_name="sitemap.xml", content_type="application/xml"),
-    ),
+    path("sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="sitemap"),
     path("sklad-wydzialu/", include("board.urls")),
     path(f"{settings.EVALUATION_PATH}/", include("evaluation.urls")),
     path("", include("pages.urls")),

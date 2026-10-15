@@ -174,7 +174,7 @@
         <div class="form-row">
           <div class="field">
             <label for="f-name">Imię i nazwisko <span class="req">*</span></label>
-            <input type="text" id="f-name" name="name" autocomplete="name" placeholder="Jan Kowalski">
+            <input type="text" id="f-name" name="name" autocomplete="name" maxlength="200" placeholder="Jan Kowalski">
             <div class="err">Podaj imię i nazwisko.</div>
           </div>
           <div class="field">
@@ -190,7 +190,7 @@
         </div>
         <div class="field">
           <label for="f-msg">Wiadomość <span class="req">*</span></label>
-          <textarea id="f-msg" name="message" placeholder="Treść wiadomości…"></textarea>
+          <textarea id="f-msg" name="message" maxlength="10000" placeholder="Treść wiadomości…"></textarea>
           <div class="err">Wiadomość jest zbyt krótka (min. 10 znaków).</div>
         </div>
         <label class="consent">

@@ -59,13 +59,15 @@ else
 fi
 
 VENV_PY=".venv/bin/python"
-VENV_PIP=".venv/bin/pip"
+# pip zawsze przez interpreter z venv (`python -m pip`), nigdy przez
+# launcher .venv/bin/pip — na mydevil bywa on „Permission denied”.
+VENV_PIP=("$VENV_PY" -m pip)
 
 echo "==> Aktualizuję pip"
-"$VENV_PIP" install --upgrade --quiet pip
+"${VENV_PIP[@]}" install --upgrade --quiet pip
 
 echo "==> Instaluję pakiety z requirements.txt"
-"$VENV_PIP" install --quiet -r requirements.txt
+"${VENV_PIP[@]}" install --quiet -r requirements.txt
 
 # ── .env dla trybu lokalnego ──────────────────────────────────────────
 if [[ ! -f .env ]]; then

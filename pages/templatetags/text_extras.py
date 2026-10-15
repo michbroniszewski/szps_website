@@ -23,12 +23,22 @@ def plaintext(value):
 PRIVACY_POLICY_SLUG = "polityka-prywatnosci"
 
 
-@register.simple_tag
-def privacy_policy_url():
+@register.simple_tag(takes_context=True)
+def privacy_policy_url(context):
     """Adres polityki prywatności albo "" — dopóki strona nie jest
-    opublikowana, linki do niej (stopka, zgoda RODO) się nie wyświetlają."""
+    opublikowana, linki do niej (stopka, zgoda RODO) się nie wyświetlają.
+
+    Wynik zapamiętujemy na czas requestu: strona główna pyta o niego dwa
+    razy (stopka i zgoda RODO), a wystarczy jedno zapytanie do bazy."""
     from pages.models import StaticPage
 
+    request = context.get("request")
+    cached = getattr(request, "_privacy_policy_url", None)
+    if cached is not None:
+        return cached
+    url = ""
     if StaticPage.objects.filter(slug=PRIVACY_POLICY_SLUG, is_published=True).exists():
-        return reverse("pages:static_page", args=[PRIVACY_POLICY_SLUG])
-    return ""
+        url = reverse("pages:static_page", args=[PRIVACY_POLICY_SLUG])
+    if request is not None:
+        request._privacy_policy_url = url
+    return url

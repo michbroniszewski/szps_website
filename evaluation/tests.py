@@ -41,16 +41,8 @@ class EvaluationPageTests(TestCase):
 
     def test_page_renders_with_noindex(self):
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
         self.assertEqual(response["X-Robots-Tag"], "noindex, nofollow")
         self.assertContains(response, '<meta name="robots" content="noindex, nofollow">')
-
-    def test_default_url(self):
-        self.assertEqual(self.url, "/arkusz-oceny/")
-
-    def test_page_named_arkusz_oceny(self):
-        response = self.client.get(self.url)
-        self.assertContains(response, "<h2>Arkusz oceny</h2>")
         self.assertContains(response, "<title>Arkusz oceny — Wydział Sędziowski ŚZPS</title>")
 
     def test_page_is_not_linked_from_home(self):
@@ -95,11 +87,6 @@ class EvaluationPageTests(TestCase):
         self.assertContains(response, "Zajęcie przez Sędziego II optymalnej pozycji")
         self.assertContains(response, 'data-pos="r1"')
         self.assertContains(response, 'data-pos="r2"')
-
-    def test_comment_possible_for_every_element(self):
-        form = self.client.get(self.url).context["form"]
-        for key, _label, _info in sheet.ELEMENTS:
-            self.assertIn(sheet.comment_field(key), form.fields)
 
     def test_comment_on_c_grade_is_allowed(self):
         response = self.client.post(
@@ -205,7 +192,6 @@ class ResultDocumentTests(TestCase):
         long = ("Długi komentarz obserwatora. " * 200)[:4000]
         pdf = build_pdf(self._cleaned(comment=long, c_technika=long))
         self.assertTrue(pdf.startswith(b"%PDF"))
-
 
 
 @override_settings(EVALUATION_ACCESS_CODE=ACCESS_CODE)

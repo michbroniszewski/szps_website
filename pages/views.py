@@ -1,13 +1,17 @@
 import logging
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
+from django.core.validators import validate_email
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 
 from documents.models import Document, DocumentCategory
+from evaluation.models import RateLimitHit
+from evaluation.ratelimit import is_limited, record
 
 from .models import Article, StaticPage
 
@@ -60,6 +64,8 @@ def static_page(request, slug):
 # Zwracamy JSON, JS pokazuje ekran "Dziękujemy" bez przeładowania strony.
 
 TOPIC_MIN, TOPIC_MAX = 3, 120
+NAME_MIN, NAME_MAX = 3, 200
+MESSAGE_MIN, MESSAGE_MAX = 10, 10000
 
 
 def _validate_contact(post) -> tuple[dict, dict]:
@@ -75,14 +81,20 @@ def _validate_contact(post) -> tuple[dict, dict]:
         "consent": post.get("consent") in {"on", "true", "1"},
     }
     errors = {}
-    if len(data["name"]) < 3:
+    if not NAME_MIN <= len(data["name"]) <= NAME_MAX:
         errors["name"] = "Podaj imię i nazwisko."
-    if "@" not in data["email"] or "." not in data["email"].split("@")[-1]:
+    try:
+        # Adres trafia do nagłówka Reply-To — walidator Django odrzuca też
+        # nowe linie i inne znaki, które mogłyby go zepsuć.
+        validate_email(data["email"])
+    except ValidationError:
         errors["email"] = "Podaj poprawny adres e-mail."
     if not TOPIC_MIN <= len(data["topic"]) <= TOPIC_MAX:
         errors["topic"] = f"Wpisz temat ({TOPIC_MIN}–{TOPIC_MAX} znaków)."
-    if len(data["message"]) < 10:
-        errors["message"] = "Wiadomość jest zbyt krótka (min. 10 znaków)."
+    if len(data["message"]) < MESSAGE_MIN:
+        errors["message"] = f"Wiadomość jest zbyt krótka (min. {MESSAGE_MIN} znaków)."
+    elif len(data["message"]) > MESSAGE_MAX:
+        errors["message"] = f"Wiadomość jest zbyt długa (maks. {MESSAGE_MAX} znaków)."
     if not data["consent"]:
         errors["consent"] = "Zgoda RODO jest wymagana."
     return data, errors
@@ -98,6 +110,10 @@ def contact_submit(request):
     data, errors = _validate_contact(request.POST)
     if errors:
         return JsonResponse({"ok": False, "errors": errors}, status=400)
+
+    # Limit na IP — bez niego formularz pozwala zasypać skrzynkę Wydziału.
+    if is_limited(RateLimitHit.CONTACT, request, settings.CONTACT_SEND_LIMIT):
+        return JsonResponse({"ok": False, "error": "rate_limited"}, status=429)
 
     body = (
         f"Imię i nazwisko: {data['name']}\n"
@@ -119,4 +135,5 @@ def contact_submit(request):
         return JsonResponse(
             {"ok": False, "error": "send_failed"}, status=502
         )
+    record(RateLimitHit.CONTACT, request)
     return JsonResponse({"ok": True})

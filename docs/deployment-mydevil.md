@@ -93,6 +93,28 @@ Co zrobi skrypt:
 
 Skrypt jest **idempotentny** — bezpiecznie można go uruchomić drugi raz.
 
+#### Znane pułapki na mydevil (lessons learned)
+
+1. **Nigdy nie wołaj `.venv/bin/pip`.** Launcher potrafi zwrócić
+   `Permission denied`, mimo że `.venv/bin/python` działa. Zawsze:
+   ```
+   .venv/bin/python -m pip install --upgrade pip
+   .venv/bin/python -m pip install -r requirements.txt
+   ```
+2. **`psycopg==3.2.3`, nie `psycopg[binary]==3.2.3`.** Wariant `[binary]`
+   kończy się błędem `Could not find a version that satisfies the
+   requirement psycopg-binary`.
+3. **Docelowy runtime to Python 3.11** (`python3.11 -m venv .venv`).
+   Skrypt wybiera `python3.11` w pierwszej kolejności.
+4. **Ostrzeżenia `collectstatic` są niegroźne:**
+   `Found another file with the destination path 'admin/js/inlines.js'`
+   oraz `'admin/js/admin/RelatedObjectLookups.js'` — to nakładanie się
+   statyk Django admin i django-unfold. Liczy się, że komenda kończy się
+   sukcesem (np. `377 unmodified, 1022 post-processed`).
+
+Poprawny przebieg kończy się: `Applying … OK` przy migracjach,
+`Wysłałem sygnał restartu (tmp/restart.txt)` i `✓ Gotowe.`
+
 ### 3. Weryfikacja (Ty)
 
 - `https://sedziowie.szps.pl/` — strona główna
