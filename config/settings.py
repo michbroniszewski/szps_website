@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import sys
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,8 +23,16 @@ def env_list(name: str, default: list[str]) -> list[str]:
     return [item.strip() for item in val.split(",") if item.strip()]
 
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key-change-me")
-DEBUG = env_bool("DJANGO_DEBUG", True)
+INSECURE_SECRET_KEY = "dev-insecure-key-change-me"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "").strip() or INSECURE_SECRET_KEY
+# Domyślnie produkcja — brak DJANGO_DEBUG w .env nie może włączać trybu
+# debug (strony błędów ze szczegółami konfiguracji). Lokalnie .env
+# z .env.local.example ustawia DJANGO_DEBUG=True.
+DEBUG = env_bool("DJANGO_DEBUG", False)
+if not DEBUG and SECRET_KEY == INSECURE_SECRET_KEY:
+    # Znany wszystkim klucz = podrabialne ciasteczka (sesja admina,
+    # dostęp do arkusza). Lepiej nie wystartować niż działać z nim.
+    raise ImproperlyConfigured("Ustaw DJANGO_SECRET_KEY w .env (produkcja, DEBUG=False).")
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
 
 CSRF_TRUSTED_ORIGINS = [
@@ -206,6 +215,8 @@ EVALUATION_ACCESS_CODE = os.getenv("EVALUATION_ACCESS_CODE", "").strip()
 # Limity na adres IP w ciągu godziny: wysyłki arkusza i błędne próby kodu.
 EVALUATION_SEND_LIMIT = int(os.getenv("EVALUATION_SEND_LIMIT", "5"))
 EVALUATION_CODE_ATTEMPT_LIMIT = int(os.getenv("EVALUATION_CODE_ATTEMPT_LIMIT", "10"))
+# Limit wiadomości z formularza kontaktowego na adres IP w ciągu godziny.
+CONTACT_SEND_LIMIT = int(os.getenv("CONTACT_SEND_LIMIT", "5"))
 
 if not DEBUG:
     # Passenger na mydevil siedzi za nginx-em, który terminuje SSL.

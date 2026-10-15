@@ -199,8 +199,6 @@ class HomeDocumentsSectionTests(TestCase):
 
 
 class ContactSubmitTests(TestCase):
-    url = reverse("pages:contact_submit") if hasattr(reverse, "__call__") else "/kontakt/wyslij/"
-
     def setUp(self):
         # locmem backend gromadzi wiadomości w mail.outbox; czyścimy dla higieny.
         mail.outbox = []
@@ -259,6 +257,28 @@ class ContactSubmitTests(TestCase):
         self.assertEqual(msg.subject, "[Formularz WWW] Pytanie Bcc: ofiara@example.com")
         self.assertEqual(msg.bcc, [])
         self.assertNotIn("\n", msg.message()["Subject"])
+
+    def test_email_with_newline_rejected(self):
+        bad = {**VALID_POST, "email": "jan@example.com\nBcc: x@example.com"}
+        response = self.client.post(reverse("pages:contact_submit"), bad)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("email", response.json()["errors"])
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_too_long_message_rejected(self):
+        bad = {**VALID_POST, "message": "x" * 10001}
+        response = self.client.post(reverse("pages:contact_submit"), bad)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("message", response.json()["errors"])
+
+    @override_settings(CONTACT_SEND_LIMIT=2)
+    def test_rate_limit_blocks_after_limit(self):
+        for _ in range(2):
+            response = self.client.post(reverse("pages:contact_submit"), VALID_POST)
+            self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse("pages:contact_submit"), VALID_POST)
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(len(mail.outbox), 2)
 
     def test_honeypot_silently_accepts_and_drops(self):
         # Bot wypełnił ukryte pole `website` — udajemy sukces, nic nie wysyłamy.

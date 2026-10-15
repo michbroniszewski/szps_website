@@ -44,7 +44,7 @@
 </div>
 
 <!-- ============ NAV ============ -->
-{% with active=active_nav|default:"" home_url=home_url|default:'/' %}
+{% with active=active_nav|default:"" %}
 <header class="nav" id="nav">
   <div class="wrap nav__inner">
     <a class="brand" href="{% url 'pages:home' %}" aria-label="Strona główna — Śląscy Sędziowie">
@@ -124,7 +124,7 @@
       </div>
     </div>
     <div class="footer__bottom">
-      <span>© <span id="year">{% now "Y" %}</span> Wydział Sędziowski Śląskiego Związku Piłki Siatkowej. Wszelkie prawa zastrzeżone.</span>
+      <span>© {% now "Y" %} Wydział Sędziowski Śląskiego Związku Piłki Siatkowej. Wszelkie prawa zastrzeżone.</span>
       {% privacy_policy_url as privacy_url %}
       <span>{% if privacy_url %}<a href="{{ privacy_url }}">Polityka prywatności</a> · {% endif %}Śląscy Sędziowie · Piłka siatkowa</span>
     </div>

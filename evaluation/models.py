@@ -12,7 +12,12 @@ class RateLimitHit(models.Model):
 
     SEND = "send"
     CODE = "code"
-    KINDS = [(SEND, "Wysyłka arkusza"), (CODE, "Błędny kod dostępu")]
+    CONTACT = "contact"
+    KINDS = [
+        (SEND, "Wysyłka arkusza"),
+        (CODE, "Błędny kod dostępu"),
+        (CONTACT, "Wiadomość z formularza kontaktowego"),
+    ]
 
     kind = models.CharField(max_length=10, choices=KINDS)
     client = models.CharField("Skrót adresu IP", max_length=64)

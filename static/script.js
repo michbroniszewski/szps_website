@@ -31,7 +31,9 @@
   document.getElementById('burger').addEventListener('click', openD);
   document.getElementById('drawerClose').addEventListener('click', closeD);
   drawer.addEventListener('click', e => { if (e.target === drawer) closeD(); });
-  drawer.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', closeD));
+  // Linki mają postać „/#sekcja” — na stronie głównej klik tylko przewija,
+  // więc szufladę trzeba zamknąć ręcznie.
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeD));
 
   /* ---- Reveal on scroll (IntersectionObserver, jedno wywołanie per el) ---- */
   const reveals = document.querySelectorAll('.reveal');
@@ -128,22 +130,24 @@
   }
 
   /* ---- Active nav link highlight (rect-based) ---- */
-  const sections = [...document.querySelectorAll('section[id]')];
-  const links = [...document.querySelectorAll('.nav__links a')];
-  const spy = () => {
-    const mid = window.innerHeight * 0.4;
-    let current = '';
-    for (const s of sections){
-      const r = s.getBoundingClientRect();
-      if (r.top <= mid && r.bottom >= mid) current = s.id;
-    }
-    links.forEach(l => l.style.opacity = (current && l.getAttribute('href') === '#' + current) ? '1' : '');
-  };
-  window.addEventListener('scroll', spy, {passive:true});
-  spy();
-
-  /* ---- Current year ---- */
-  const y = document.getElementById('year');
-  if (y) y.textContent = new Date().getFullYear();
+  // Tylko linki do sekcji bieżącej strony („/#sekcja” na stronie głównej).
+  // Pozostałych nie ruszamy — np. „Skład Wydziału” ma podświetlenie
+  // ustawione w szablonie i scroll nie może go kasować.
+  const links = [...document.querySelectorAll('.nav__links a')].filter(l =>
+    l.hash && l.pathname === location.pathname && document.getElementById(l.hash.slice(1)));
+  if (links.length){
+    const sections = links.map(l => document.getElementById(l.hash.slice(1)));
+    const spy = () => {
+      const mid = window.innerHeight * 0.4;
+      let current = '';
+      for (const s of sections){
+        const r = s.getBoundingClientRect();
+        if (r.top <= mid && r.bottom >= mid) current = s.id;
+      }
+      links.forEach(l => l.style.opacity = (current && l.hash === '#' + current) ? '1' : '');
+    };
+    window.addEventListener('scroll', spy, {passive:true});
+    spy();
+  }
 
 })();
