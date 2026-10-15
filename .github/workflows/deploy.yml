@@ -7,6 +7,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      full_deploy:
+        description: "Wgraj wszystkie pliki (zamiast tylko zmienionych)"
+        type: boolean
+        default: false
 
 # Nie odpalamy równolegle dwóch deployów — kolejny czeka aż poprzedni skończy.
 concurrency:
@@ -64,87 +69,25 @@ jobs:
           sudo apt-get update -qq || echo "apt-get update returned non-zero, continuing with cached indices"
           sudo apt-get install -y -qq lftp
 
-      # Poświadczenia przez `-u user,pass`, skrypt lftp przez
-      # `-e "source ..."`. Nie ma konfliktu z URL (błąd „conflict with
-      # other `open' options" dotyczy tylko `-c/-f/-v/-h`). Skrypt
-      # zawiera same komendy — open dzieje się automatycznie przez URL
-      # z argumentu.
-      #
-      # Sanity-check przed uruchomieniem — łapie sytuację, gdy sekret
-      # nie został dodany albo dodany pod inną nazwą (długość zamiast
-      # samej wartości, więc secret nie wycieka do logu).
+      # Wysyłamy tylko pliki zmienione od poprzedniego deployu — porównanie
+      # sha256 z manifestem `.deploy-manifest` na serwerze (szczegóły
+      # w scripts/deploy-ftp.sh). Wcześniej `mirror --transfer-all` wgrywał
+      # za każdym razem ~1600 plików / ~100 MB, co trwało ~20 minut.
+      # Pełne wgranie: Actions → Deploy to mydevil → Run workflow → „full”.
       - name: Deploy via FTPS
         env:
-          MYDEVIL_FTP_HOST: ${{ vars.MYDEVIL_FTP_HOST || 's70.mydevil.net' }}
-          MYDEVIL_FTP_USER: ${{ secrets.MYDEVIL_FTP_USER }}
-          MYDEVIL_FTP_PASSWORD: ${{ secrets.MYDEVIL_FTP_PASSWORD }}
-          # Passenger uruchamia aplikację z ~/public_python/ (tak
-          # skonfigurował ją administrator), NIE z katalogu domeny.
-          # Katalog domenowy istnieje na koncie, ale jest nieużywany —
-          # deploy tam nie miał żadnego efektu (Django czytał kod z
-          # innego miejsca).
+          FTP_HOST: ${{ vars.MYDEVIL_FTP_HOST || 's70.mydevil.net' }}
+          FTP_USER: ${{ secrets.MYDEVIL_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.MYDEVIL_FTP_PASSWORD }}
+          # Passenger uruchamia aplikację z /public_python (ścieżka widziana
+          # z konta FTP), nie z katalogu domeny.
           REMOTE_DIR: /public_python
+          FULL_DEPLOY: ${{ inputs.full_deploy && '1' || '0' }}
         run: |
-          if [ -z "${MYDEVIL_FTP_USER}" ] || [ -z "${MYDEVIL_FTP_PASSWORD}" ]; then
+          if [ -z "${FTP_USER}" ] || [ -z "${FTP_PASSWORD}" ]; then
             echo "ERROR: brak sekretów MYDEVIL_FTP_USER / MYDEVIL_FTP_PASSWORD."
-            echo "       user length: ${#MYDEVIL_FTP_USER}, password length: ${#MYDEVIL_FTP_PASSWORD}"
+            echo "       user length: ${#FTP_USER}, password length: ${#FTP_PASSWORD}"
             echo "       Dodaj je w Settings → Secrets and variables → Actions."
             exit 1
           fi
-          echo "Credentials present: host=${MYDEVIL_FTP_HOST}, user=${#MYDEVIL_FTP_USER}ch, password=${#MYDEVIL_FTP_PASSWORD}ch"
-
-          # Skrypt lftp — kluczowe ustawienia:
-          # * debug 3          — pełny log FTP (wire-level), potrzebny do
-          #                     diagnostyki gdy mirror milknie
-          # * cmd:fail-exit no — nie przerywaj skryptu na pierwszym błędzie
-          #                     (ProFTPD mydevila zwraca 550 na MKD dla
-          #                     istniejącego katalogu; mirror by abortował)
-          # * --transfer-all   — wgraj każdy plik niezależnie od
-          #                     porównania size/mtime; git checkout resetuje
-          #                     mtime, więc porównanie i tak jest bezużyteczne
-          # * `cd REMOTE_DIR`  — pracujemy relatywnie do docelowego
-          #                     katalogu, żeby ścieżki w logach były
-          #                     czytelne
-          # * `tmp/restart.txt` osobnym `put` na końcu — Passenger widzi
-          #     zmianę mtime dopiero gdy reszta plików jest już wgrana.
-          cat > /tmp/deploy.lftp <<'LFTP_SCRIPT'
-          debug 3
-          set cmd:fail-exit no
-          set ssl:verify-certificate no
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ftp:ssl-allow yes
-          set ftp:passive-mode true
-          set net:timeout 30
-          set net:max-retries 3
-          set net:reconnect-interval-base 5
-          set mirror:parallel-transfer-count 2
-          echo "=== cd to remote dir ==="
-          cd __REMOTE_DIR__
-          pwd
-          echo "=== starting mirror ==="
-          mirror --reverse --verbose --transfer-all --exclude-glob .git/ --exclude-glob .github/ --exclude-glob .venv/ --exclude-glob venv/ --exclude-glob __pycache__/ --exclude-glob '*.pyc' --exclude-glob db.sqlite3 --exclude-glob db.sqlite3-journal --exclude-glob .env --exclude-glob '.env.*' --exclude public/media/ --exclude-glob tmp/ --exclude-glob uploads/ --exclude-glob screenshots/ --exclude-glob z_orig.png --exclude-glob .thumbnail --exclude-glob node_modules/ --exclude-glob docs/ --exclude-glob .DS_Store --exclude-glob .ftp-deploy-sync-state.json ./ .
-          echo "=== mirror done, forcing fresh restart trigger ==="
-          echo "--- state before ---"
-          cls -la tmp/
-          rm tmp/restart.txt
-          put tmp/restart.txt -o tmp/restart.txt
-          chmod 644 tmp/restart.txt
-          echo "--- state after ---"
-          cls -la tmp/
-          echo "=== also refreshing passenger_wsgi.py mtime ==="
-          cls -la passenger_wsgi.py
-          rm passenger_wsgi.py
-          put passenger_wsgi.py -o passenger_wsgi.py
-          cls -la passenger_wsgi.py
-          echo "=== all done ==="
-          bye
-          LFTP_SCRIPT
-          sed -i "s|__REMOTE_DIR__|${REMOTE_DIR}|g" /tmp/deploy.lftp
-
-          echo "--- lftp script ---"
-          cat /tmp/deploy.lftp
-          echo "--- running lftp ---"
-          lftp -u "${MYDEVIL_FTP_USER},${MYDEVIL_FTP_PASSWORD}" \
-               -e "source /tmp/deploy.lftp" \
-               "ftp://${MYDEVIL_FTP_HOST}"
+          bash scripts/deploy-ftp.sh
