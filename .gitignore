@@ -40,3 +40,6 @@ node_modules/
 
 # Eksport arkusza do przeglądu (manage.py export_evaluation_html)
 arkusz-oceny-podglad*.html
+
+# Manifest przyrostowego deployu (scripts/deploy-ftp.sh)
+.deploy-manifest

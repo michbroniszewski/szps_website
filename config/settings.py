@@ -176,6 +176,12 @@ STORAGES = {
     },
 }
 
+# PDF-y są już skompresowane — gzip nic nie zyskuje, a whitenoise robił
+# z każdego dwie dodatkowe kopie .gz (kilkadziesiąt MB przy każdym deployu).
+from whitenoise.compress import Compressor  # noqa: E402
+
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = (*Compressor.SKIP_COMPRESS_EXTENSIONS, "pdf")
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "public" / "media"
 

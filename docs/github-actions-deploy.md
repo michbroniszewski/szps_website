@@ -18,8 +18,17 @@ Co robi:
    statycznych powstają w GitHubie, nie na serwerze.
 4. Aktualizuje `tmp/restart.txt` datą deployu i skrótem SHA — po wgraniu
    Passenger widzi zmienioną datę i przeładowuje aplikację.
-5. Wgrywa **tylko nowsze pliki** przez FTPS używając `lftp mirror
-   --only-newer` (porównanie mtime).
+5. Wgrywa przez FTPS **tylko pliki zmienione od poprzedniego deployu**
+   (`scripts/deploy-ftp.sh`). Na serwerze leży `.deploy-manifest` z sumami
+   sha256 wgranych plików; skrypt porównuje go z lokalnym i wysyła różnice.
+   Porównujemy treść, nie datę — `git checkout` w CI nadaje wszystkim
+   plikom bieżącą datę. Typowy deploy to kilka–kilkadziesiąt plików
+   i ~1–2 minuty zamiast ~20.
+
+   Pierwszy deploy po tej zmianie (brak manifestu na serwerze) wgrywa
+   wszystko. Pełne wgranie można też wymusić ręcznie: Actions → Deploy to
+   mydevil → Run workflow → zaznacz „Wgraj wszystkie pliki” — przydatne,
+   gdy ktoś zmieniał pliki na serwerze ręcznie (przez SFTP).
 
 ## Dlaczego lftp a nie „gotowa akcja"?
 
@@ -60,7 +69,7 @@ hostem (np. `s71.mydevil.net`). Domyślnie workflow używa `s70.mydevil.net`.
 2. Wejdź do zakładki **Actions** w GitHubie.
 3. Wybierz workflow **Deploy to mydevil**.
 4. Kliknij **Run workflow** → wybierz gałąź → **Run**.
-5. Śledź logi — powinny skończyć się „Deployment complete" po ~1-2 minutach.
+5. Śledź logi — powinny skończyć się „✓ Deploy zakończony.” (pierwszy, pełny deploy trwa ~20 min, kolejne ~1–2 min).
 
 Sprawdź na serwerze przez SFTP, czy zmieniły się daty modyfikacji plików
 i czy pojawił się plik `.ftp-deploy-sync-state.json`.
@@ -78,7 +87,8 @@ Wgrywane:
 - `scripts/` (skrypt setupowy przydatny przy `migrate`)
 - `tmp/restart.txt` (spust restartu — wgrywany na końcu)
 
-Pomijane (nie tykają serwera):
+Pomijane (nie tykają serwera) — wgrywane są tylko pliki śledzone
+w gicie oraz `public/static/`, więc wszystko spoza repo odpada samo:
 - `.git/`, `.github/`, `.venv/`, `__pycache__/`
 - `.env` (na serwerze masz swój — deploy go **nie nadpisze**)
 - `db.sqlite3` (lokalny plik dev)
