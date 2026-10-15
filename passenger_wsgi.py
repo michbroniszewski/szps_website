@@ -30,6 +30,20 @@ if VENV_PYTHON.exists() and sys.executable != str(VENV_PYTHON):
 sys.path.insert(0, str(BASE_DIR))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
-from django.core.wsgi import get_wsgi_application  # noqa: E402
+try:
+    from django.core.wsgi import get_wsgi_application
 
-application = get_wsgi_application()
+    application = get_wsgi_application()
+except Exception:
+    # Błąd przy starcie (np. zły .env) — zanim zadziała logowanie Django.
+    # Zapisujemy traceback do pliku dostępnego przez FTP i zgłaszamy dalej,
+    # żeby Passenger pokazał błąd zamiast działać z połowiczną konfiguracją.
+    import traceback
+    from datetime import datetime
+
+    log_dir = BASE_DIR / "logs"
+    log_dir.mkdir(exist_ok=True)
+    with open(log_dir / "startup-error.log", "a", encoding="utf-8") as f:
+        f.write(f"\n=== {datetime.now():%Y-%m-%d %H:%M:%S} ===\n")
+        traceback.print_exc(file=f)
+    raise
