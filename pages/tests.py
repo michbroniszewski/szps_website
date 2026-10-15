@@ -317,3 +317,37 @@ class SelfHostedFontsTests(TestCase):
         self.assertTrue(files)
         for f in files:
             self.assertTrue((static / f).is_file(), f)
+
+
+class MaintenanceTests(TestCase):
+    def test_flag_file_shows_maintenance_page(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            from pathlib import Path
+            flag = Path(tmp) / "MAINTENANCE_ON"
+            flag.touch()
+            with override_settings(MAINTENANCE_FLAG=flag):
+                response = self.client.get(reverse("pages:home"))
+                self.assertEqual(response.status_code, 503)
+                self.assertEqual(response["Retry-After"], "600")
+                self.assertContains(response, "Trwają prace techniczne", status_code=503)
+            flag.unlink()
+            with override_settings(MAINTENANCE_FLAG=flag):
+                self.assertEqual(self.client.get(reverse("pages:home")).status_code, 200)
+
+    def test_database_error_shows_maintenance_page(self):
+        from unittest import mock
+
+        from django.db import OperationalError
+
+        with mock.patch("pages.views.Article.objects.filter", side_effect=OperationalError("db down")), \
+                self.assertLogs("config.maintenance", level="ERROR"):
+            response = self.client.get(reverse("pages:home"))
+        self.assertEqual(response.status_code, 503)
+        self.assertContains(response, "Trwają prace techniczne", status_code=503)
+
+    def test_500_page_renders_without_database(self):
+        from django.template.loader import render_to_string
+
+        html = render_to_string("500.html")
+        self.assertIn("Coś poszło nie tak", html)
+        self.assertIn("ws@szps.pl", html)

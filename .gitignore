@@ -43,3 +43,6 @@ arkusz-oceny-podglad*.html
 
 # Manifest przyrostowego deployu (scripts/deploy-ftp.sh)
 .deploy-manifest
+
+# Włącznik trybu serwisowego (config/maintenance.py)
+MAINTENANCE_ON

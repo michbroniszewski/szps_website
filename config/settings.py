@@ -97,6 +97,8 @@ TINYMCE_DEFAULT_CONFIG = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Po whitenoise — statyki (style, logo) działają także w trybie serwisowym.
+    "config.maintenance.MaintenanceMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -224,6 +226,10 @@ EVALUATION_SEND_LIMIT = int(os.getenv("EVALUATION_SEND_LIMIT", "5"))
 EVALUATION_CODE_ATTEMPT_LIMIT = int(os.getenv("EVALUATION_CODE_ATTEMPT_LIMIT", "10"))
 # Limit wiadomości z formularza kontaktowego na adres IP w ciągu godziny.
 CONTACT_SEND_LIMIT = int(os.getenv("CONTACT_SEND_LIMIT", "5"))
+
+# Tryb serwisowy: istnienie tego pliku włącza stronę „przerwa techniczna”
+# dla wszystkich (wgraj pusty plik przez FTP, usuń, żeby wyłączyć).
+MAINTENANCE_FLAG = BASE_DIR / "MAINTENANCE_ON"
 
 # ── Logi błędów do pliku ──────────────────────────────────────────────
 # Domyślnie Django przy DEBUG=False nie wypisuje błędów nigdzie (konsola

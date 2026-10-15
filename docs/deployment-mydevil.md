@@ -158,3 +158,24 @@ Podgląd na żywo (admin, przez SSH):
 ```
 tail -f ~/domains/sedziowie.szps.pl/logs/error.log
 ```
+
+## Strona „przerwa techniczna”
+
+Zamiast surowego „Server Error (500)” odwiedzający widzą stronę w stylu
+serwisu z informacją o pracach i kontaktem (kod 503 — wyszukiwarki
+traktują to jako chwilową przerwę):
+
+- **Automatycznie**, gdy aplikacja nie może połączyć się z bazą danych
+  (np. złe hasło w `.env`). Błąd i tak trafia do `logs/django-errors.log`.
+- **Ręcznie** — wgraj przez FTP pusty plik `MAINTENANCE_ON` do
+  `public_python/`. Usunięcie pliku wyłącza tryb serwisowy; restart nie
+  jest potrzebny. Deploy tego pliku nie rusza.
+
+Inne nieoczekiwane błędy pokazują stronę „Coś poszło nie tak”
+(`templates/500.html`).
+
+## Logi bez SSH
+
+Błędy aplikacji: `public_python/logs/django-errors.log`, błędy przy
+starcie (np. zły `.env`): `public_python/logs/startup-error.log` — oba do
+pobrania przez FTP.
