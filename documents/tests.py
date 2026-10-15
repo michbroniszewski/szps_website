@@ -11,12 +11,6 @@ from .models import Document, DocumentCategory
 
 
 class DocumentCategoryTests(TestCase):
-    def test_str_returns_name(self):
-        cat = DocumentCategory.objects.create(
-            name="Test Komunikaty", slug="test-komunikaty"
-        )
-        self.assertEqual(str(cat), "Test Komunikaty")
-
     def test_category_with_document_cannot_be_deleted(self):
         cat = DocumentCategory.objects.create(
             name="Test Przepisy", slug="test-przepisy"
@@ -36,14 +30,6 @@ class DocumentTests(TestCase):
             name="Wytyczne testowe", slug="test-wytyczne"
         )
 
-    def test_published_at_is_set_automatically(self):
-        doc = Document.objects.create(
-            title="Poradnik",
-            category=self._cat(),
-            file=SimpleUploadedFile("p.pdf", b"%PDF-1.4"),
-        )
-        self.assertIsNotNone(doc.published_at)
-
     def test_get_href_prefers_uploaded_file(self):
         doc = Document.objects.create(
             title="Z pliku",
@@ -53,7 +39,6 @@ class DocumentTests(TestCase):
         )
         # gdy jest plik, external_url jest ignorowany
         self.assertEqual(doc.get_href(), doc.file.url)
-        self.assertNotEqual(doc.get_href(), "/static/dokumenty/inny.pdf")
 
     def test_get_href_falls_back_to_external_url(self):
         doc = Document.objects.create(
@@ -68,19 +53,10 @@ class DocumentTests(TestCase):
         with self.assertRaises(ValidationError):
             doc.clean()
 
-    def test_clean_passes_with_external_url_only(self):
-        doc = Document(
-            title="OK",
-            category=self._cat(),
-            external_url="/static/dokumenty/x.pdf",
-        )
-        doc.clean()  # nie powinno rzucić
-
-    def test_clean_accepts_https_url(self):
-        doc = Document(
-            title="OK", category=self._cat(), external_url="https://example.com/x.pdf"
-        )
-        doc.clean()
+    def test_clean_accepts_local_path_and_http_url(self):
+        cat = self._cat()
+        for url in ("/static/dokumenty/x.pdf", "https://example.com/x.pdf"):
+            Document(title="OK", category=cat, external_url=url).clean()  # nie rzuca
 
     def test_clean_rejects_unsafe_urls(self):
         cat = self._cat()

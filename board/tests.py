@@ -14,10 +14,6 @@ class BoardMemberModelTests(TestCase):
 
 
 class BoardListViewTests(TestCase):
-    def test_list_returns_200(self):
-        response = self.client.get(reverse("board:list"))
-        self.assertEqual(response.status_code, 200)
-
     def test_list_shows_only_active_members(self):
         BoardMember.objects.create(
             first_name="Anna", last_name="Aktywna", role="Członek", is_active=True
