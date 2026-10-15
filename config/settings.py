@@ -225,6 +225,52 @@ EVALUATION_CODE_ATTEMPT_LIMIT = int(os.getenv("EVALUATION_CODE_ATTEMPT_LIMIT", "
 # Limit wiadomości z formularza kontaktowego na adres IP w ciągu godziny.
 CONTACT_SEND_LIMIT = int(os.getenv("CONTACT_SEND_LIMIT", "5"))
 
+# ── Logi błędów do pliku ──────────────────────────────────────────────
+# Domyślnie Django przy DEBUG=False nie wypisuje błędów nigdzie (konsola
+# działa tylko w trybie debug), więc 500 na produkcji nie zostawiało
+# śladu. Zapisujemy je do public_python/logs/django-errors.log — plik da
+# się pobrać przez FTP bez dostępu SSH. Katalog nie jest serwowany www.
+LOG_DIR = BASE_DIR / "logs"
+try:
+    LOG_DIR.mkdir(exist_ok=True)
+    _file_logging = os.access(LOG_DIR, os.W_OK)
+except OSError:
+    _file_logging = False
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {"format": "{asctime} {levelname} {name}: {message}", "style": "{"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+        **({"file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "django-errors.log",
+            "maxBytes": 1024 * 1024,
+            "backupCount": 3,
+            "encoding": "utf-8",
+            "formatter": "verbose",
+            "level": "ERROR",
+        }} if _file_logging else {}),
+        "null": {"class": "logging.NullHandler"},
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"] if _file_logging else ["console"],
+            "level": "INFO" if DEBUG else "ERROR",
+        },
+        # Zapytania z obcymi domenami (np. forum.sedziowie.szps.pl) to szum,
+        # nie błąd aplikacji — Django i tak odpowiada na nie 400.
+        "django.security.DisallowedHost": {"handlers": ["null"], "propagate": False},
+    },
+    "root": {
+        "handlers": ["console", "file"] if _file_logging else ["console"],
+        "level": "WARNING",
+    },
+}
+
 if not DEBUG:
     # Passenger na mydevil siedzi za nginx-em, który terminuje SSL.
     # Bez tej pary Django nie wie, że request przyszedł HTTPS-em i
