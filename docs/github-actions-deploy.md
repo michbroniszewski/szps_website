@@ -100,16 +100,13 @@ w gicie oraz `public/static/`, więc wszystko spoza repo odpada samo:
 
 ## Co deploy **nie** robi
 
-**Nie uruchamia migracji bazy.** Dane logowania do Postgresa nie są w CI
-(świadomie — jedno miejsce mniej gdzie może wyciec). Więc po dodaniu
-nowego modelu lub zmianie pola w istniejącym musisz poprosić admina o:
-
-```bash
-cd ~/public_python && bash scripts/mydevil-setup.sh
-```
-
-Skrypt jest idempotentny — bezpiecznie wykona `pip install` (jeśli
-`requirements.txt` się zmienił), `migrate` i restart.
+**Nie uruchamia migracji bazy z CI.** Dane logowania do Postgresa nie są
+w CI (świadomie — jedno miejsce mniej, gdzie mogą wyciec). Migracje
+wykonuje sama aplikacja przy starcie po deployu (`config/automigrate.py`):
+sprawdza, czy jakieś czekają, i stosuje je pod blokadą pliku. Wynik:
+`public_python/logs/migrations.log`. Gdyby migracja się nie powiodła,
+błąd trafia też do `logs/django-errors.log`, a strona pokazuje „przerwę
+techniczną” — wtedy `bash scripts/mydevil-setup.sh` u admina.
 
 **Nie instaluje nowych pakietów pip.** Ta sama zasada — nowe zależności
 wymagają `mydevil-setup.sh` u admina.
@@ -132,9 +129,10 @@ prawdopodobnie została podmieniona; przywróć wariant z tego repo.
 Sprawdź czy `tmp/restart.txt` faktycznie wylądował (przez FTP zobacz datę).
 Jeśli tak, poproś admina o `touch tmp/restart.txt` z powłoki.
 
-**Django zwraca 500 po deployu** — najpewniej brakująca migracja albo
-nowy pakiet. Log w `~/domains/sedziowie.szps.pl/logs/error.log`. Poproś
-admina o `bash scripts/mydevil-setup.sh` żeby uzupełnić.
+**Django zwraca 500 po deployu** — sprawdź przez FTP
+`public_python/logs/django-errors.log`, `startup-error.log` i
+`migrations.log`. Brakujący pakiet pip wymaga `bash scripts/mydevil-setup.sh`
+u admina; migracje aplikacja wykonuje sama.
 
 **Deploy zniszczył plik `.env`** — nie powinien, jest w exclude. Ale
 jeśli tak — na serwerze utwórz plik `.env` ponownie z wartościami z etapu 0
@@ -154,7 +152,7 @@ zmiana w kodzie/HTML/CSS/PDF
    Passenger się restartuje, nowa wersja online
 ```
 
-Zmiana wymagająca migracji lub nowego pakietu — dodatkowo:
+Migracje wykonują się same przy starcie. Nowy pakiet pip — dodatkowo:
 ```
         ↓
    wiadomość do admina + `bash scripts/mydevil-setup.sh` na serwerze

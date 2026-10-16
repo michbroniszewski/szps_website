@@ -351,3 +351,50 @@ class MaintenanceTests(TestCase):
         html = render_to_string("500.html")
         self.assertIn("Coś poszło nie tak", html)
         self.assertIn("ws@szps.pl", html)
+
+
+class AutoMigrateTests(TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        from pathlib import Path
+        self.log_dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _run(self):
+        from config.automigrate import run_pending_migrations
+        with override_settings(LOG_DIR=self.log_dir, AUTO_MIGRATE=True):
+            return run_pending_migrations()
+
+    def test_nothing_to_do_on_migrated_database(self):
+        self.assertFalse(self._run())
+        self.assertFalse((self.log_dir / "migrations.log").exists())
+
+    def test_pending_migrations_are_applied_and_logged(self):
+        from unittest import mock
+        fake = mock.Mock(app_label="evaluation", name="0099_test")
+        fake.name = "0099_test"
+        with mock.patch("config.automigrate.pending_migrations", return_value=[fake]), \
+                mock.patch("config.automigrate.call_command") as migrate:
+            self.assertTrue(self._run())
+        migrate.assert_called_once()
+        self.assertIn("evaluation.0099_test", (self.log_dir / "migrations.log").read_text())
+
+    def test_database_error_does_not_crash_startup(self):
+        from unittest import mock
+
+        from django.db import OperationalError
+        with mock.patch("config.automigrate.pending_migrations", side_effect=OperationalError("db down")), \
+                self.assertLogs("config.automigrate", level="ERROR"):
+            self.assertFalse(self._run())
+        self.assertIn("BŁĄD: OperationalError", (self.log_dir / "migrations.log").read_text())
+
+    def test_can_be_disabled(self):
+        from unittest import mock
+
+        from config.automigrate import run_pending_migrations
+        with mock.patch("config.automigrate.pending_migrations") as pending, \
+                override_settings(AUTO_MIGRATE=False):
+            self.assertFalse(run_pending_migrations())
+        pending.assert_not_called()
