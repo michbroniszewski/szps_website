@@ -398,3 +398,37 @@ class AutoMigrateTests(TestCase):
                 override_settings(AUTO_MIGRATE=False):
             self.assertFalse(run_pending_migrations())
         pending.assert_not_called()
+
+
+class FeaturedDocumentTests(TestCase):
+    def setUp(self):
+        self.cat = DocumentCategory.objects.get(slug="komunikaty")
+
+    def _doc(self, title, **kw):
+        return Document.objects.create(
+            title=title, category=self.cat, external_url="/static/dokumenty/x.pdf", **kw
+        )
+
+    def test_featured_document_shown_as_banner_first_and_not_duplicated(self):
+        self._doc("Informator dla sędziów ŚZPS", is_featured=True, description="Opis informatora")
+        self._doc("Zwykły komunikat")
+        response = self.client.get(reverse("pages:home"))
+        html = response.content.decode()
+        self.assertEqual(html.count("Informator dla sędziów ŚZPS"), 1)
+        self.assertIn('class="doc-featured', html)
+        self.assertLess(html.index("doc-featured"), html.index("Zwykły komunikat"))
+        self.assertContains(response, "Otwórz dokument")
+        self.assertNotIn(
+            "Informator dla sędziów ŚZPS",
+            [d.title for c in response.context["doc_categories"] for d in c.documents.all()],
+        )
+
+    def test_custom_button_label(self):
+        self._doc("Informator", is_featured=True, button_label="Pobierz PDF")
+        self.assertContains(self.client.get(reverse("pages:home")), "Pobierz PDF")
+
+    def test_unpublished_featured_document_hidden(self):
+        self._doc("Ukryty informator", is_featured=True, is_published=False)
+        response = self.client.get(reverse("pages:home"))
+        self.assertNotContains(response, "Ukryty informator")
+        self.assertNotContains(response, 'class="doc-featured')

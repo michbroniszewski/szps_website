@@ -62,6 +62,18 @@ class Document(models.Model):
     description = models.TextField("Opis", blank=True)
     published_at = models.DateField("Data publikacji", default=timezone.now)
     is_published = models.BooleanField("Widoczny na stronie", default=True)
+    is_featured = models.BooleanField(
+        "Wyróżniony",
+        default=False,
+        help_text="Pokazywany na górze sekcji Dokumenty jako baner "
+        "(zamiast na liście w swojej kategorii).",
+    )
+    button_label = models.CharField(
+        "Tekst przycisku",
+        max_length=40,
+        blank=True,
+        help_text="Tylko dla wyróżnionych, np. „Pobierz PDF”. Puste = „Otwórz dokument”.",
+    )
 
     class Meta:
         ordering = ["-published_at", "-id"]

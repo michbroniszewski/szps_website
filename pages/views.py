@@ -20,11 +20,12 @@ log = logging.getLogger(__name__)
 
 def home(request):
     articles = Article.objects.filter(is_published=True)[:6]
+    documents = Document.objects.filter(is_published=True)
+    # Wyróżnione idą na górę sekcji jako baner, więc nie powtarzamy ich
+    # na liście w kategorii.
+    featured_documents = documents.filter(is_featured=True)
     doc_categories = DocumentCategory.objects.prefetch_related(
-        Prefetch(
-            "documents",
-            queryset=Document.objects.filter(is_published=True),
-        )
+        Prefetch("documents", queryset=documents.filter(is_featured=False))
     )
     return render(
         request,
@@ -32,6 +33,7 @@ def home(request):
         {
             "articles": articles,
             "doc_categories": doc_categories,
+            "featured_documents": featured_documents,
             "active_nav": "home",
         },
     )
