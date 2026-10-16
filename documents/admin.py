@@ -13,8 +13,9 @@ class DocumentCategoryAdmin(ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(ModelAdmin):
-    list_display = ("title", "category", "published_at", "is_published")
-    list_filter = ("category", "is_published", "published_at")
+    list_display = ("title", "category", "published_at", "is_published", "is_featured")
+    list_editable = ("is_featured",)
+    list_filter = ("category", "is_published", "is_featured", "published_at")
     search_fields = ("title", "description")
     date_hierarchy = "published_at"
     fields = (
@@ -25,4 +26,6 @@ class DocumentAdmin(ModelAdmin):
         "description",
         "published_at",
         "is_published",
+        "is_featured",
+        "button_label",
     )

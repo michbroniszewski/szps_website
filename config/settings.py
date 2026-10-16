@@ -234,6 +234,10 @@ EVALUATION_CODE_ATTEMPT_LIMIT = int(os.getenv("EVALUATION_CODE_ATTEMPT_LIMIT", "
 # Limit wiadomości z formularza kontaktowego na adres IP w ciągu godziny.
 CONTACT_SEND_LIMIT = int(os.getenv("CONTACT_SEND_LIMIT", "5"))
 
+# Migracje przy starcie aplikacji (config/automigrate.py) — deploy przez FTP
+# nie uruchamia `migrate`, a SSH nie zawsze jest dostępne.
+AUTO_MIGRATE = env_bool("DJANGO_AUTO_MIGRATE", True)
+
 # Tryb serwisowy: istnienie tego pliku włącza stronę „przerwa techniczna”
 # dla wszystkich (wgraj pusty plik przez FTP, usuń, żeby wyłączyć).
 MAINTENANCE_FLAG = BASE_DIR / "MAINTENANCE_ON"
@@ -273,6 +277,8 @@ LOGGING = {
         "django": {
             "handlers": ["console", "file"] if _file_logging else ["console"],
             "level": "INFO" if DEBUG else "ERROR",
+            # Bez tego wpis szedł też do roota i lądował w pliku dwa razy.
+            "propagate": False,
         },
         # Zapytania z obcymi domenami (np. forum.sedziowie.szps.pl) to szum,
         # nie błąd aplikacji — Django i tak odpowiada na nie 400.

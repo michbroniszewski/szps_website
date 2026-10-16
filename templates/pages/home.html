@@ -96,6 +96,17 @@
       <h2>Dokumenty</h2>
       <p></p>
     </div>
+    {% for doc in featured_documents %}
+    <a class="doc-featured reveal" href="{{ doc.get_href }}" target="_blank" rel="noopener">
+      <span class="doc-featured__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8 7h8M8 10.5h6"/></svg></span>
+      <span class="doc-featured__body">
+        <span class="doc-featured__badge">Polecane</span>
+        <span class="doc-featured__title">{{ doc.title }}</span>
+        {% if doc.description %}<span class="doc-featured__desc">{{ doc.description }}</span>{% endif %}
+      </span>
+      <span class="btn btn--gold doc-featured__btn">{{ doc.button_label|default:"Otwórz dokument" }} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span>
+    </a>
+    {% endfor %}
     {% for cat in doc_categories %}{% if cat.documents.all %}
     <div class="doc-group reveal">
       <h3 class="doc-group__title">{{ cat.name }}</h3>

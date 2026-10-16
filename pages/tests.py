@@ -351,3 +351,84 @@ class MaintenanceTests(TestCase):
         html = render_to_string("500.html")
         self.assertIn("Coś poszło nie tak", html)
         self.assertIn("ws@szps.pl", html)
+
+
+class AutoMigrateTests(TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        from pathlib import Path
+        self.log_dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _run(self):
+        from config.automigrate import run_pending_migrations
+        with override_settings(LOG_DIR=self.log_dir, AUTO_MIGRATE=True):
+            return run_pending_migrations()
+
+    def test_nothing_to_do_on_migrated_database(self):
+        self.assertFalse(self._run())
+        self.assertFalse((self.log_dir / "migrations.log").exists())
+
+    def test_pending_migrations_are_applied_and_logged(self):
+        from unittest import mock
+        fake = mock.Mock(app_label="evaluation", name="0099_test")
+        fake.name = "0099_test"
+        with mock.patch("config.automigrate.pending_migrations", return_value=[fake]), \
+                mock.patch("config.automigrate.call_command") as migrate:
+            self.assertTrue(self._run())
+        migrate.assert_called_once()
+        self.assertIn("evaluation.0099_test", (self.log_dir / "migrations.log").read_text())
+
+    def test_database_error_does_not_crash_startup(self):
+        from unittest import mock
+
+        from django.db import OperationalError
+        with mock.patch("config.automigrate.pending_migrations", side_effect=OperationalError("db down")), \
+                self.assertLogs("config.automigrate", level="ERROR"):
+            self.assertFalse(self._run())
+        self.assertIn("BŁĄD: OperationalError", (self.log_dir / "migrations.log").read_text())
+
+    def test_can_be_disabled(self):
+        from unittest import mock
+
+        from config.automigrate import run_pending_migrations
+        with mock.patch("config.automigrate.pending_migrations") as pending, \
+                override_settings(AUTO_MIGRATE=False):
+            self.assertFalse(run_pending_migrations())
+        pending.assert_not_called()
+
+
+class FeaturedDocumentTests(TestCase):
+    def setUp(self):
+        self.cat = DocumentCategory.objects.get(slug="komunikaty")
+
+    def _doc(self, title, **kw):
+        return Document.objects.create(
+            title=title, category=self.cat, external_url="/static/dokumenty/x.pdf", **kw
+        )
+
+    def test_featured_document_shown_as_banner_first_and_not_duplicated(self):
+        self._doc("Informator dla sędziów ŚZPS", is_featured=True, description="Opis informatora")
+        self._doc("Zwykły komunikat")
+        response = self.client.get(reverse("pages:home"))
+        html = response.content.decode()
+        self.assertEqual(html.count("Informator dla sędziów ŚZPS"), 1)
+        self.assertIn('class="doc-featured', html)
+        self.assertLess(html.index("doc-featured"), html.index("Zwykły komunikat"))
+        self.assertContains(response, "Otwórz dokument")
+        self.assertNotIn(
+            "Informator dla sędziów ŚZPS",
+            [d.title for c in response.context["doc_categories"] for d in c.documents.all()],
+        )
+
+    def test_custom_button_label(self):
+        self._doc("Informator", is_featured=True, button_label="Pobierz PDF")
+        self.assertContains(self.client.get(reverse("pages:home")), "Pobierz PDF")
+
+    def test_unpublished_featured_document_hidden(self):
+        self._doc("Ukryty informator", is_featured=True, is_published=False)
+        response = self.client.get(reverse("pages:home"))
+        self.assertNotContains(response, "Ukryty informator")
+        self.assertNotContains(response, 'class="doc-featured')

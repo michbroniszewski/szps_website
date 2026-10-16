@@ -421,6 +421,28 @@ a.news-post--link:hover .news-post__more svg{transform:translateX(4px)}
 .doc-card__arrow svg{display:block;width:18px;height:18px}
 .doc-card__body{min-width:0}
 .doc-card:hover .doc-card__arrow{opacity:1;transform:none;color:var(--blue-d)}
+/* Wyróżniony dokument — jasny baner na górze sekcji */
+.doc-featured{position:relative;display:flex;align-items:center;gap:26px;margin-bottom:34px;padding:28px 32px 32px;
+  border-radius:var(--r);background:linear-gradient(105deg,#FFF7E6,var(--bg) 55%);border:1px solid rgba(232,168,50,.45);
+  box-shadow:0 12px 32px rgba(200,136,26,.14);overflow:hidden;color:var(--ink);text-decoration:none;transition:.22s}
+.doc-featured::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;
+  background:linear-gradient(90deg,var(--gold) 0 33.3%,var(--green) 0 66.6%,var(--blue) 0)}
+.doc-featured:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(200,136,26,.22)}
+.doc-featured__ico{flex:none;width:72px;height:72px;border-radius:18px;display:grid;place-items:center;
+  background:rgba(232,168,50,.16);color:var(--gold-d)}
+.doc-featured__ico svg{width:38px;height:38px}
+.doc-featured__body{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.doc-featured__badge{padding:4px 10px;border-radius:6px;background:var(--gold);color:#241700;margin-bottom:10px;
+  font-family:var(--font-display);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.doc-featured__title{font-family:var(--font-display);font-weight:800;font-size:clamp(21px,3vw,27px);line-height:1.15;letter-spacing:-.01em}
+.doc-featured__desc{margin-top:6px;color:var(--ink-soft);font-size:15.5px}
+.doc-featured__btn{flex:none}
+@media(max-width:700px){
+  .doc-featured{flex-direction:column;align-items:flex-start;gap:18px;padding:22px 20px 26px}
+  .doc-featured__ico{width:56px;height:56px;border-radius:14px}
+  .doc-featured__ico svg{width:30px;height:30px}
+  .doc-featured__btn{width:100%;justify-content:center}
+}
 .doc-group{margin-top:30px}
 .doc-group:first-of-type{margin-top:0}
 .doc-group__title{font-family:var(--font-display);font-weight:800;font-size:15px;letter-spacing:.08em;text-transform:uppercase;

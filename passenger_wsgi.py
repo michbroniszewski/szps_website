@@ -34,6 +34,11 @@ try:
     from django.core.wsgi import get_wsgi_application
 
     application = get_wsgi_application()
+
+    # Deploy przez FTP nie uruchamia `migrate` — robimy to przy starcie.
+    from config.automigrate import run_pending_migrations
+
+    run_pending_migrations()
 except Exception:
     # Błąd przy starcie (np. zły .env) — zanim zadziała logowanie Django.
     # Zapisujemy traceback do pliku dostępnego przez FTP i zgłaszamy dalej,

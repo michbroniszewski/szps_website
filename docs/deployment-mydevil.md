@@ -131,9 +131,11 @@ Poprawny przebieg kończy się: `Applying … OK` przy migracjach,
   `public_python/tmp/restart.txt` (w FileZilla: prawy klik → Właściwości)
 
 **Zmiany wymagające migracji bazy (nowe/zmienione modele):**
-- wgraj pliki + nowe migracje
-- poproś administratora o uruchomienie `bash scripts/mydevil-setup.sh` —
-  skrypt idempotentnie wykona `migrate` + `collectstatic` + restart
+- nic dodatkowego — aplikacja przy starcie (po restarcie Passengera)
+  sama wykonuje oczekujące migracje (`config/automigrate.py`); wynik
+  w `public_python/logs/migrations.log`
+- wyłączenie: `DJANGO_AUTO_MIGRATE=False` w `.env` — wtedy migracje
+  ręcznie przez `bash scripts/mydevil-setup.sh`
 
 **Nowe pakiety w `requirements.txt`:**
 - wgraj `requirements.txt`
