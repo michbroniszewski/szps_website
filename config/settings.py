@@ -6,7 +6,14 @@ from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
+ENV_FILE = BASE_DIR / ".env"
+# Zmienne ustawione w środowisku serwera jeszcze przed wczytaniem .env —
+# zapamiętujemy je do diagnostyki (config/diagnostics.py).
+ENV_PRESET_KEYS = sorted(k for k in os.environ if k.startswith(("DB_", "DJANGO_")))
+# override=True: .env jest jedynym źródłem konfiguracji na serwerze. Bez tego
+# zmienna ustawiona gdzieś w środowisku (np. stare DB_PASSWORD) po cichu
+# wygrywała z plikiem i zmiany w .env nie miały żadnego efektu.
+load_dotenv(ENV_FILE, override=True)
 
 
 def env_bool(name: str, default: bool) -> bool:

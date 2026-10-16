@@ -40,6 +40,11 @@ class MaintenanceMiddleware:
         if isinstance(exception, OperationalError):
             # Odpowiedź z middleware pomija standardowe logowanie 500 —
             # zapisujemy błąd sami, żeby trafił do logs/django-errors.log.
-            log.error("Baza danych niedostępna: %s", request.path, exc_info=exception)
+            from .diagnostics import db_config_report
+
+            log.error(
+                "Baza danych niedostępna: %s\n%s", request.path, db_config_report(),
+                exc_info=exception,
+            )
             return maintenance_response()
         return None

@@ -1,13 +1,14 @@
-{% load static %}<!DOCTYPE html>
+<!DOCTYPE html>
 {# Strony błędów są samodzielne: bez base.html, bez zapytań do bazy i bez #}
-{# kontekstu requestu — muszą działać nawet wtedy, gdy baza leży. #}
+{# kontekstu requestu — muszą działać nawet wtedy, gdy baza leży. Logo #}
+{# stałym adresem zamiast {% static %}, żeby nie zależeć od manifestu. #}
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>{% block title %}{% endblock %} — Wydział Sędziowski ŚZPS</title>
-<link rel="icon" type="image/png" href="{% static 'assets/whistle.png' %}">
+<link rel="icon" type="image/png" href="/static/assets/whistle.png">
 <style>
   *{box-sizing:border-box}
   body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px 16px;
@@ -26,7 +27,7 @@
 </head>
 <body>
 <main class="box">
-  <img src="{% static 'assets/whistle.png' %}" alt="">
+  <img src="/static/assets/whistle.png" alt="">
   <p class="eyebrow">Wydział Sędziowski ŚZPS</p>
   <h1>{% block heading %}{% endblock %}</h1>
   {% block body %}{% endblock %}
