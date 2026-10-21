@@ -29,6 +29,10 @@ def _noindex(response):
 
 def _send_email(data, pdf: bytes, filename: str):
     date = data["match_date"].strftime("%d.%m.%Y")
+    if data.get("central_candidate"):
+        variant = "Kandydat na szczebel centralny: tak"
+    else:
+        variant = f"Rekomendacja: {sheet.choice_label(sheet.RECOMMENDATIONS, data.get('recommendation'))}"
     msg = EmailMessage(
         subject=f"[Arkusz oceny] {data['referee_name']} — {data['teams']} ({date})",
         body=(
@@ -36,7 +40,8 @@ def _send_email(data, pdf: bytes, filename: str):
             f"Rozgrywki: {sheet.choice_label(sheet.COMPETITIONS, data['competition'])}\n"
             f"Mecz: {data['teams']} — {data['result']} ({date})\n"
             f"Oceniany: {data['referee_name']} "
-            f"({sheet.choice_label(sheet.POSITIONS, data['position'])})\n\n"
+            f"({sheet.choice_label(sheet.POSITIONS, data['position'])})\n"
+            f"{variant}\n\n"
             "Arkusz w załączniku.\n"
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,

@@ -29,7 +29,7 @@
       </div>
     {% endif %}
 
-    <form method="post" id="evForm" data-bound="{{ form.is_bound|yesno:'1,0' }}"{% if form.position.value %} data-position="{{ form.position.value }}"{% endif %} novalidate>
+    <form method="post" id="evForm" data-bound="{{ form.is_bound|yesno:'1,0' }}"{% if form.position.value %} data-position="{{ form.position.value }}"{% endif %}{% if form.central_candidate.value %} data-central="1"{% endif %} novalidate>
       {% csrf_token %}
       {% include "evaluation/_honeypot.html" %}
 

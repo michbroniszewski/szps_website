@@ -25,6 +25,29 @@
           {% include "evaluation/_choices.html" with field=form.position %}
         </div>
 
+        <label class="ev-check{% if form.central_candidate.errors %} invalid{% endif %}">
+          {{ form.central_candidate }}
+          <span><b>{{ form.central_candidate.label }}</b>
+            <small>Zaznacz, aby ocenić sędziego w pełnym arkuszu (elementy A–F). Dla pozostałych sędziów wystarczą mocne i słabe strony oraz rekomendacja.</small></span>
+        </label>
+
+        {# ── wariant uproszczony (bez kandydatury) ── #}
+        <div class="ev-mode ev-mode--basic">
+          {% include "evaluation/_field.html" with field=form.strengths required=True %}
+          {% include "evaluation/_field.html" with field=form.weaknesses required=True %}
+          <fieldset class="field ev-choices ev-reco{% if form.recommendation.errors %} invalid{% endif %}">
+            <legend>{{ form.recommendation.label }} <span class="req">*</span></legend>
+            <div class="ev-reco__opts">
+              {% for radio in form.recommendation %}
+                <label class="ev-pill ev-reco__opt">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+              {% endfor %}
+            </div>
+            {% for error in form.recommendation.errors %}<div class="err">{{ error }}</div>{% endfor %}
+          </fieldset>
+        </div>
+
+        {# ── wariant pełny (kandydat na szczebel centralny) ── #}
+        <div class="ev-mode ev-mode--full">
         <p class="ev-hint">Ocena wyjściowa to C. Każdą inną ocenę (A-B lub D-F) uzasadnij w komentarzu przy danym elemencie. Przycisk <b>i</b> rozwija, co obejmuje element.</p>
 
         <div class="ev-elements">
@@ -59,6 +82,7 @@
         </div>
 
         {% include "evaluation/_field.html" with field=form.comment %}
+        </div>
       </div>
 
       <div class="form ev-card">

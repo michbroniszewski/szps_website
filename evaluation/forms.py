@@ -15,7 +15,10 @@ def _radio(choices, **kwargs):
 class EvaluationForm(forms.Form):
     """Arkusz jednego sędziego; elementy oceny budowane z `sheet.py`.
 
-    Pola elementów: `g_<klucz>` (ocena A–F) i `c_<klucz>` (komentarz).
+    Dwa warianty, zależnie od pola `central_candidate`:
+    * kandydat na szczebel centralny — pełna ocena elementów: `g_<klucz>`
+      (ocena A–F) i `c_<klucz>` (komentarz),
+    * pozostali — mocne i słabe strony oraz rekomendacja uprawnień.
     """
 
     competition = forms.ChoiceField(
@@ -46,6 +49,21 @@ class EvaluationForm(forms.Form):
 
     referee_name = forms.CharField(label="Imię i nazwisko sędziego", max_length=120)
     position = _radio(sheet.POSITIONS, label="Pozycja")
+    central_candidate = forms.BooleanField(
+        label="Kandydat na szczebel centralny", required=False,
+    )
+
+    # Wariant uproszczony (sędzia nie jest kandydatem na szczebel centralny).
+    # Wymagane tylko w tym wariancie — sprawdza to clean().
+    strengths = forms.CharField(
+        label="Mocne strony sędziego", required=False, max_length=4000,
+        widget=forms.Textarea(attrs={"rows": 4}),
+    )
+    weaknesses = forms.CharField(
+        label="Słabe strony sędziego", required=False, max_length=4000,
+        widget=forms.Textarea(attrs={"rows": 4}),
+    )
+    recommendation = _radio(sheet.RECOMMENDATIONS, label="Rekomendacja", required=False)
 
     comment = forms.CharField(
         label="Komentarz opisowy",
@@ -64,6 +82,8 @@ class EvaluationForm(forms.Form):
                 choices=[(g, g) for g in sheet.GRADES],
                 initial=sheet.DEFAULT_GRADE,
                 widget=forms.RadioSelect,
+                # Wymagane tylko u kandydata — sprawdza to clean().
+                required=False,
             )
             self.fields[sheet.comment_field(key)] = forms.CharField(
                 label="Komentarz do oceny",
@@ -75,15 +95,37 @@ class EvaluationForm(forms.Form):
 
     def clean(self):
         cleaned = super().clean()
-        # Zasada z objaśnień: każda ocena inna niż C wymaga komentarza.
+        if cleaned.get("central_candidate"):
+            self._clean_full(cleaned)
+        else:
+            self._clean_basic(cleaned)
+        return cleaned
+
+    def _clean_full(self, cleaned):
         for key, _label, _info in sheet.ELEMENTS:
-            grade = cleaned.get(sheet.grade_field(key), sheet.DEFAULT_GRADE)
-            if grade != sheet.DEFAULT_GRADE and not cleaned.get(sheet.comment_field(key)):
+            grade = cleaned.get(sheet.grade_field(key))
+            if not grade:
+                self.add_error(sheet.grade_field(key), "Wybierz ocenę.")
+            # Zasada z objaśnień: każda ocena inna niż C wymaga komentarza.
+            elif grade != sheet.DEFAULT_GRADE and not cleaned.get(sheet.comment_field(key)):
                 self.add_error(
                     sheet.comment_field(key),
                     "Wystawiono ocenę inną niż C — uzasadnij ją w komentarzu.",
                 )
-        return cleaned
+
+    def _clean_basic(self, cleaned):
+        if not cleaned.get("strengths"):
+            self.add_error("strengths", "Opisz mocne strony sędziego.")
+        if not cleaned.get("weaknesses"):
+            self.add_error("weaknesses", "Opisz słabe strony sędziego.")
+        if not cleaned.get("recommendation"):
+            self.add_error("recommendation", "Zaznacz jedną z opcji.")
+        # Oceny elementów i komentarz opisowy należą tylko do pełnego
+        # arkusza — w tym wariancie nie trafiają do PDF.
+        cleaned.pop("comment", None)
+        for key, _label, _info in sheet.ELEMENTS:
+            cleaned.pop(sheet.grade_field(key), None)
+            cleaned.pop(sheet.comment_field(key), None)
 
     # ── struktura pomocnicza dla szablonu ────────────────────────────
     def elements(self):

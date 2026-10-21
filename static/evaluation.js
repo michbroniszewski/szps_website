@@ -28,6 +28,7 @@
     for (const [name, value] of Object.entries(data)) {
       form.querySelectorAll(`[name="${CSS.escape(name)}"]`).forEach(el => {
         if (el.type === 'radio') el.checked = el.value === value;
+        else if (el.type === 'checkbox') el.checked = true;  // w FormData są tylko zaznaczone
         else el.value = value;
       });
     }
@@ -48,7 +49,14 @@
     else delete form.dataset.position;
   };
 
-  const refresh = () => { refreshComments(); refreshPosition(); };
+  // Kandydat na szczebel centralny → pełny arkusz; inaczej wariant uproszczony.
+  const refreshCentral = () => {
+    const box = form.querySelector('input[name="central_candidate"]');
+    if (box && box.checked) form.dataset.central = '1';
+    else delete form.dataset.central;
+  };
+
+  const refresh = () => { refreshComments(); refreshPosition(); refreshCentral(); };
 
   form.querySelectorAll('.ev-el__info').forEach(btn => {
     btn.addEventListener('click', () => {
