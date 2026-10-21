@@ -365,6 +365,12 @@ class CentralCandidateTests(TestCase):
         for field in ("strengths", "weaknesses", "recommendation"):
             self.assertTrue(form.has_error(field), field)
 
+    def test_basic_variant_drops_descriptive_comment(self):
+        from .forms import EvaluationForm
+        form = EvaluationForm(basic_post(comment="Komentarz z pełnego arkusza"))
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertNotIn("comment", form.cleaned_data)
+
     def test_basic_variant_ignores_hidden_grades(self):
         # Oceny ukrytej sekcji (np. z wersji roboczej) nie blokują wysyłki.
         response = self.client.post(self.url, basic_post(g_relacje="E"))

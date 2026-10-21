@@ -111,5 +111,10 @@
 .ev-reco{margin-bottom:22px}
 .ev-reco__opts{display:flex;flex-direction:column;gap:8px}
 .ev-reco__opt span{display:block;border-radius:10px;padding:11px 16px}
-.ev-reco__opt input[value="podwyzszenie"]:checked + span{background:var(--green-d);border-color:var(--green-d)}
-.ev-reco__opt input[value="obnizenie"]:checked + span{background:#b42323;border-color:#b42323}
+/* zaznaczona rekomendacja: delikatne kolory jak przy ocenach A–F */
+.ev-reco__opt input:checked + span{font-weight:700}
+.ev-reco__opt input[value="podwyzszenie"]:checked + span{background:#d9ecc9;border-color:var(--green);color:var(--green-d)}
+.ev-reco__opt input[value="obserwacja_podwyzszenie"]:checked + span{background:#eef6e7;border-color:#9cc47a;color:var(--green-d)}
+.ev-reco__opt input[value="bez_zmian"]:checked + span{background:#e8ecf0;border-color:var(--ink-soft);color:var(--ink)}
+.ev-reco__opt input[value="obserwacja_obnizenie"]:checked + span{background:#fceeee;border-color:#e59a9a;color:#8f1515}
+.ev-reco__opt input[value="obnizenie"]:checked + span{background:#f6d4d4;border-color:#dc4040;color:#8f1515}

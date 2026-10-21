@@ -53,6 +53,15 @@ GRADE_BG = {
     "F": colors.HexColor("#F8DEDE"),
 }
 
+# Rekomendacja (wariant uproszczony): tło i pasek — te same odcienie co na stronie.
+RECOMMENDATION_COLORS = {
+    "podwyzszenie": (colors.HexColor("#DCEDCF"), GREEN),
+    "obserwacja_podwyzszenie": (colors.HexColor("#EEF6E7"), colors.HexColor("#9CC47A")),
+    "bez_zmian": (SOFT, colors.HexColor("#9AA5B1")),
+    "obserwacja_obnizenie": (colors.HexColor("#FCEEEE"), colors.HexColor("#E59A9A")),
+    "obnizenie": (colors.HexColor("#F8DEDE"), colors.HexColor("#DC4040")),
+}
+
 _fonts_registered = False
 
 
@@ -289,11 +298,13 @@ def _basic_assessment(data, st):
             Paragraph(_text(p), ParagraphStyle("pb", parent=st["base"], spaceAfter=5))
             for p in (data.get(key) or "—").split("\n\n") if p.strip()
         ]
-    reco = sheet.choice_label(sheet.RECOMMENDATIONS, data.get("recommendation")) or "—"
+    key = data.get("recommendation")
+    reco = sheet.choice_label(sheet.RECOMMENDATIONS, key) or "—"
+    background, accent = RECOMMENDATION_COLORS.get(key, (SOFT, GOLD))
     box = Table([[Paragraph(f"Rekomendacja: <b>{escape(reco)}</b>", st["base"])]])
     box.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), SOFT),
-        ("LINEBEFORE", (0, 0), (0, -1), 3, GOLD),
+        ("BACKGROUND", (0, 0), (-1, -1), background),
+        ("LINEBEFORE", (0, 0), (0, -1), 3, accent),
         ("LEFTPADDING", (0, 0), (-1, -1), 10),
         ("TOPPADDING", (0, 0), (-1, -1), 7),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
@@ -338,9 +349,9 @@ def build_pdf(data: dict) -> bytes:
         if _long_comments(data):
             sections.append(("Komentarze szczegółowe", _detailed_comments(data, st)))
         sections.append(("Podsumowanie", _summary(data, st)))
+        sections.append(("Ocena opisowa", _description(data, st)))
     else:
         sections = [("Ocena sędziego", _basic_assessment(data, st))]
-    sections.append(("Ocena opisowa", _description(data, st)))
     start = 3 if data.get("central_candidate") else 2
     for n, (title, body) in enumerate(sections, start=start):
         # Nagłówek nie zostaje sam na dole strony.

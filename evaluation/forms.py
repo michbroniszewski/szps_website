@@ -120,7 +120,9 @@ class EvaluationForm(forms.Form):
             self.add_error("weaknesses", "Opisz słabe strony sędziego.")
         if not cleaned.get("recommendation"):
             self.add_error("recommendation", "Zaznacz jedną z opcji.")
-        # Oceny elementów nie należą do tego wariantu — nie trafiają do PDF.
+        # Oceny elementów i komentarz opisowy należą tylko do pełnego
+        # arkusza — w tym wariancie nie trafiają do PDF.
+        cleaned.pop("comment", None)
         for key, _label, _info in sheet.ELEMENTS:
             cleaned.pop(sheet.grade_field(key), None)
             cleaned.pop(sheet.comment_field(key), None)
