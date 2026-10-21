@@ -94,3 +94,22 @@
   .ev-grade{flex:1}
   .ev-grade span{width:auto}
 }
+
+/* kandydat na szczebel centralny: przełącznik wariantu arkusza */
+.ev-check{display:flex;gap:12px;align-items:flex-start;margin:4px 0 22px;padding:14px 16px;border:1.5px solid var(--line);
+  border-radius:12px;background:var(--soft);cursor:pointer;transition:.15s}
+.ev-check:hover{border-color:var(--ink-soft)}
+.ev-check input{flex:none;width:20px;height:20px;margin-top:2px;accent-color:var(--navy);cursor:pointer}
+.ev-check b{display:block;font-family:var(--font-display);font-size:15.5px}
+.ev-check small{display:block;color:var(--ink-soft);font-size:13.5px;margin-top:2px}
+#evForm[data-central="1"] .ev-check{border-color:var(--gold);background:#fff7e6}
+.ev-mode--full{display:none}
+#evForm[data-central="1"] .ev-mode--full{display:block}
+#evForm[data-central="1"] .ev-mode--basic{display:none}
+
+/* rekomendacja: pionowa lista „pigułek”, od podwyższenia do obniżenia */
+.ev-reco{margin-bottom:22px}
+.ev-reco__opts{display:flex;flex-direction:column;gap:8px}
+.ev-reco__opt span{display:block;border-radius:10px;padding:11px 16px}
+.ev-reco__opt input[value="podwyzszenie"]:checked + span{background:var(--green-d);border-color:var(--green-d)}
+.ev-reco__opt input[value="obnizenie"]:checked + span{background:#b42323;border-color:#b42323}

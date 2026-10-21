@@ -28,6 +28,16 @@ COMPETITIONS = [
     ("1ligam", "I Liga Śląska Mężczyzn"),
 ]
 
+# Rekomendacja dla sędziego, który NIE jest kandydatem na szczebel
+# centralny (uproszczony arkusz: mocne/słabe strony + rekomendacja).
+RECOMMENDATIONS = [
+    ("podwyzszenie", "Podwyższenie uprawnień"),
+    ("obserwacja_podwyzszenie", "Do obserwacji pod kątem podwyższenia uprawnień"),
+    ("bez_zmian", "Pozostawienie uprawnień bez zmian"),
+    ("obserwacja_obnizenie", "Do obserwacji pod kątem obniżenia uprawnień"),
+    ("obnizenie", "Obniżenie uprawnień"),
+]
+
 # Pozycja ocenianego sędziego — od niej zależą rozwinięcia (przycisk „i”).
 POSITIONS = [
     ("r1", "Sędzia I"),

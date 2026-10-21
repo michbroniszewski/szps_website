@@ -143,12 +143,15 @@ def _details(data, st, width):
         ("Data meczu", date.strftime("%d.%m.%Y") if date else "—"),
         ("Wynik", _text(data.get("result"))),
         ("Obserwator", _text(data.get("observer"))),
+        ("Szczebel centralny", "kandydat" if data.get("central_candidate") else "nie"),
     ]
+    if len(pairs) % 2:
+        pairs.append(("", ""))
     rows = []
     for i in range(0, len(pairs), 2):
         row = []
         for label, value in pairs[i:i + 2]:
-            row += [Paragraph(label, st["label"]), Paragraph(value or "—", st["base"])]
+            row += [Paragraph(label, st["label"]), Paragraph(value or ("—" if label else ""), st["base"])]
         rows.append(row)
     lw = 30 * mm
     vw = width / 2 - lw
@@ -277,6 +280,28 @@ def _description(data, st):
     return [Paragraph(_text(p), ParagraphStyle("p", parent=st["base"], spaceAfter=5)) for p in paragraphs]
 
 
+def _basic_assessment(data, st):
+    """Wariant uproszczony: mocne i słabe strony + rekomendacja."""
+    out = []
+    for title, key in (("Mocne strony", "strengths"), ("Słabe strony", "weaknesses")):
+        out.append(Paragraph(title, st["bold"]))
+        out += [
+            Paragraph(_text(p), ParagraphStyle("pb", parent=st["base"], spaceAfter=5))
+            for p in (data.get(key) or "—").split("\n\n") if p.strip()
+        ]
+    reco = sheet.choice_label(sheet.RECOMMENDATIONS, data.get("recommendation")) or "—"
+    box = Table([[Paragraph(f"Rekomendacja: <b>{escape(reco)}</b>", st["base"])]])
+    box.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), SOFT),
+        ("LINEBEFORE", (0, 0), (0, -1), 3, GOLD),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    out += [Spacer(1, 4), box]
+    return out
+
+
 def _footer(canvas, doc):
     canvas.saveState()
     canvas.setStrokeColor(LINE)
@@ -306,15 +331,18 @@ def build_pdf(data: dict) -> bytes:
         Paragraph("Arkusz oceny", st["title"]),
         Paragraph("1. Dane obserwacji", st["h2"]),
         _details(data, st, width),
-        Paragraph("2. Wyniki oceny", st["h2"]),
-        *_results(data, st, width),
     ]
-    sections = []
-    if _long_comments(data):
-        sections.append(("Komentarze szczegółowe", _detailed_comments(data, st)))
-    sections.append(("Podsumowanie", _summary(data, st)))
+    if data.get("central_candidate"):
+        story += [Paragraph("2. Wyniki oceny", st["h2"]), *_results(data, st, width)]
+        sections = []
+        if _long_comments(data):
+            sections.append(("Komentarze szczegółowe", _detailed_comments(data, st)))
+        sections.append(("Podsumowanie", _summary(data, st)))
+    else:
+        sections = [("Ocena sędziego", _basic_assessment(data, st))]
     sections.append(("Ocena opisowa", _description(data, st)))
-    for n, (title, body) in enumerate(sections, start=3):
+    start = 3 if data.get("central_candidate") else 2
+    for n, (title, body) in enumerate(sections, start=start):
         # Nagłówek nie zostaje sam na dole strony.
         story.append(KeepTogether([Paragraph(f"{n}. {title}", st["h2"]), body[0]]))
         story += body[1:]

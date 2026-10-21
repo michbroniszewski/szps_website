@@ -21,6 +21,7 @@ def valid_post(**overrides):
         "observer": "Jan Obserwator",
         "referee_name": "Anna Kowalska",
         "position": "r2",
+        "central_candidate": "on",
         "comment": "",
     }
     for key, _label, _info in sheet.ELEMENTS:
@@ -322,3 +323,67 @@ class SendProtectionTests(TestCase):
         from .ratelimit import client_ip
         request = RequestFactory().get("/", HTTP_X_FORWARDED_FOR="1.1.1.1, 198.51.100.9", REMOTE_ADDR="127.0.0.1")
         self.assertEqual(client_ip(request), "198.51.100.9")
+
+
+def basic_post(**overrides):
+    """Wariant uproszczony: sędzia nie jest kandydatem na szczebel centralny."""
+    data = valid_post(
+        strengths="Dobra komunikacja z zespołami.",
+        weaknesses="Spóźniona reakcja na opóźnianie gry.",
+        recommendation="bez_zmian",
+    )
+    data.pop("central_candidate")
+    for key, _label, _info in sheet.ELEMENTS:
+        data.pop(sheet.grade_field(key))
+        data.pop(sheet.comment_field(key))
+    data.update(overrides)
+    return data
+
+
+@override_settings(EVALUATION_ACCESS_CODE=ACCESS_CODE)
+class CentralCandidateTests(TestCase):
+    def setUp(self):
+        self.url = reverse("evaluation:form")
+        self.client.post(self.url, {"access_code": ACCESS_CODE})
+
+    def test_page_offers_both_variants(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, 'name="central_candidate"')
+        self.assertContains(response, "Mocne strony sędziego")
+        for _value, label in sheet.RECOMMENDATIONS:
+            self.assertContains(response, label)
+
+    def test_basic_variant_returns_pdf_without_grades(self):
+        response = self.client.post(self.url, basic_post())
+        self.assertEqual(response["Content-Type"], "application/pdf")
+
+    def test_basic_variant_requires_strengths_weaknesses_and_recommendation(self):
+        response = self.client.post(
+            self.url, basic_post(strengths="", weaknesses="", recommendation="")
+        )
+        form = response.context["form"]
+        for field in ("strengths", "weaknesses", "recommendation"):
+            self.assertTrue(form.has_error(field), field)
+
+    def test_basic_variant_ignores_hidden_grades(self):
+        # Oceny ukrytej sekcji (np. z wersji roboczej) nie blokują wysyłki.
+        response = self.client.post(self.url, basic_post(g_relacje="E"))
+        self.assertEqual(response["Content-Type"], "application/pdf")
+
+    def test_candidate_needs_grades_not_recommendation(self):
+        response = self.client.post(self.url, valid_post(g_technika=""))
+        self.assertTrue(response.context["form"].has_error("g_technika"))
+        self.assertFalse(response.context["form"].has_error("recommendation"))
+
+    @override_settings(EVALUATION_EMAIL_RECIPIENTS=["ws@example.com"])
+    def test_email_mentions_recommendation(self):
+        self.client.post(self.url, basic_post(action="email", recommendation="obnizenie"))
+        self.assertIn("Rekomendacja: Obniżenie uprawnień", mail.outbox[0].body)
+
+    def test_pdf_builds_for_both_variants(self):
+        from .forms import EvaluationForm
+        from .pdf import build_pdf
+        for post in (valid_post(), basic_post()):
+            form = EvaluationForm(post)
+            self.assertTrue(form.is_valid(), form.errors)
+            self.assertTrue(build_pdf(form.cleaned_data).startswith(b"%PDF"))
