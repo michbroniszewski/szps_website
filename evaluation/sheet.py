@@ -92,7 +92,7 @@ ELEMENTS = [
                 "Zebranie informacji od komisji sędziowskiej, kontakt wzrokowy",
             ]},
             {"title": "Współpraca z Sędzią II", "points": [
-                "Brak kontaktu wzrokowego iobserwacji ukrytej sygnalizacji Sędziego II",
+                "Brak kontaktu wzrokowego i obserwacji ukrytej sygnalizacji Sędziego II",
                 "Nieuwzględnienie prawidłowej decyzji Sędziego II lub/oraz zmiana tej decyzji przez Sędziego I na błędną",
                 _ZARZADZANIE,
             ]},

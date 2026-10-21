@@ -26,7 +26,7 @@ class EvaluationForm(forms.Form):
     teams = forms.CharField(
         label="Mecz",
         max_length=200,
-        widget=forms.TextInput(attrs={"placeholder": "np. KS Gwarek Zabrze – MKS Będzin"}),
+        widget=forms.TextInput(attrs={"placeholder": "np. GKS Katowice – MKS Będzin"}),
     )
     match_date = forms.DateField(
         label="Data",
