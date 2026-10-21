@@ -18,11 +18,11 @@ DIFFICULTY = [
 
 # Rodzaj rozgrywek — lista rozwijana w nagłówku arkusza.
 COMPETITIONS = [
-    ("mlodzicy", "młodziczki / młodzicy"),
-    ("juniorki_mlodsze", "juniorki młodsze"),
-    ("juniorzy_mlodsi", "juniorzy młodsi"),
-    ("juniorki", "juniorki"),
-    ("juniorzy", "juniorzy"),
+    ("mlodzicy", "Młodziczki / Młodzicy"),
+    ("juniorki_mlodsze", "Juniorki młodsze"),
+    ("juniorzy_mlodsi", "Juniorzy młodsi"),
+    ("juniorki", "Juniorki"),
+    ("juniorzy", "Juniorzy"),
     ("2ligak", "II Liga Śląska Kobiet"),
     ("1ligak", "I Liga Śląska Kobiet"),
     ("1ligam", "I Liga Śląska Mężczyzn"),
@@ -92,7 +92,7 @@ ELEMENTS = [
                 "Zebranie informacji od komisji sędziowskiej, kontakt wzrokowy",
             ]},
             {"title": "Współpraca z Sędzią II", "points": [
-                "Brak obserwacji ukrytej sygnalizacji Sędziego II",
+                "Brak kontaktu wzrokowego i obserwacji ukrytej sygnalizacji Sędziego II",
                 "Nieuwzględnienie prawidłowej decyzji Sędziego II lub/oraz zmiana tej decyzji przez Sędziego I na błędną",
                 _ZARZADZANIE,
             ]},
@@ -120,9 +120,9 @@ ELEMENTS = [
     ("przepisy", "Znajomość, stosowanie i interpretacja przepisów gry", {
         "r1": [
             {"points": [
-                "Ocena odbicia piłki: dokładność / stałość oceny, konsekwencja, poziom celownika, pierwsze a drugie odbicie, czystość ataku",
-                "Gra nad siatką: przestrzeń przejścia, sięganie / penetracja, dotknięcie siatki, dotknięcie piłki w bloku",
-                "Ocena innych sytuacji: zagrywka, błąd rotacji, zasłona, 4 odbicia, błędy ustawienia (w tym Libero), boisko, aut",
+                "Ocena odbicia piłki: dokładność / stałość oceny, konsekwencja, poziom celownika, pierwsze odbicie, ocena podwójnego odbicia w ataku, czystość ataku",
+                "Gra nad siatką: przestrzeń przejścia, sięganie, gra w przestrzeni przeciwnika, dotknięcie siatki, dotknięcie piłki w bloku",
+                "Ocena innych sytuacji: zagrywka, błąd rotacji, zasłona, 4 odbicia, boisko, aut",
                 f"Radzenie sobie w sytuacjach nietypowych. {_NIETYPOWE}",
             ]},
         ],
@@ -133,7 +133,7 @@ ELEMENTS = [
                 "Przerwy na odpoczynek, czas ich trwania, zgłaszanie wykorzystania 2 przerwy – przykładowo błędem jest przyznanie przerwy wyłącznie na podstawie prośby słownej lub zgłoszonej wyłącznie przy użyciu sygnalizatora dźwiękowego (bez sygnalizacji Trenera), albo przez nieuprawnioną do tego osobę",
                 "Zmiany zawodników, m.in.: procedura zmiany, strefa zmian, zgłaszanie wykorzystania 7 i 8 zmiany, dopuszczenie do zmiany z udziałem nieprzygotowanego do zmiany zawodnika",
                 "Prośba o zmianę nieregulaminową (próba zmiany nieregulaminowej)",
-                "Przerwy pomiędzy setami – w przypadku Sędziego II sprawdzenie tabliczek, dostarczenie kartek z ustawieniem zespołów",
+                "Przerwy pomiędzy setami – w przypadku Sędziego II dostarczenie kartek z ustawieniem zespołów",
             ]},
             {"title": "Radzenie sobie w sytuacjach nietypowych", "text": _NIETYPOWE},
         ],

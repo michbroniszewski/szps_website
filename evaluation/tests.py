@@ -83,7 +83,7 @@ class EvaluationPageTests(TestCase):
         response = self.client.get(self.url)
         # Wspólne (organizacja) i zależne od pozycji (technika I / II).
         self.assertContains(response, "Przybycie na obiekt na co najmniej godzinę przed meczem")
-        self.assertContains(response, "Brak obserwacji ukrytej sygnalizacji Sędziego II")
+        self.assertContains(response, "Brak kontaktu wzrokowego i obserwacji ukrytej sygnalizacji Sędziego II")
         self.assertContains(response, "Zajęcie przez Sędziego II optymalnej pozycji")
         self.assertContains(response, 'data-pos="r1"')
         self.assertContains(response, 'data-pos="r2"')
